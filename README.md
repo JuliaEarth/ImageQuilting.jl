@@ -36,4 +36,4 @@ julia example.jl
 REFERENCES
 ----------
 
-EFROS, A.; FREEMAN, W. T., 2001. Image Quilting for Texture Synthesis and Transfer. [DOWNLOAD](http://graphics.cs.cmu.edu/people/efros/research/quilting.html)
+Efros, A.; Freeman, W. T., 2001. Image Quilting for Texture Synthesis and Transfer. [[DOWNLOAD](http://graphics.cs.cmu.edu/people/efros/research/quilting.html)]
