@@ -18,12 +18,7 @@
 ## Created: 12 Aug 2014
 ## Author: Júlio Hoffimann Mendes
 
-module ImageQuilting
-
-export imquilt
-
 using Images, ImageView
-
 
 function imquilt(img::Image, args...; kargs...)
     X, props = data(img), properties(img)
@@ -176,6 +171,4 @@ function convdist(X::AbstractArray, mask::AbstractArray)
 
         D[ceil(m/2):end-m÷2,ceil(n/2):end-n÷2]
     end
-end
-
 end
