@@ -24,6 +24,7 @@ where:
 * `tilesize` is the tile size used to scan `img`
 * `n` is the number of tiles to stitch together in the output
 * `tol` is the tolerance used for finding best tiles
+* `show` tells whether to show the output image or not
 
 Example
 -------

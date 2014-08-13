@@ -43,10 +43,11 @@ end
 ##   sizeₜ - tile size
 ##   nₜ    - number of tiles to stitch together
 ##   tol   - tolerance used for finding best tiles
+##   show  - whether to show the output image or not
 ##
 ## EFROS, A.; FREEMAN, W. T., 2001. Image Quilting for
 ## Texture Synthesis and Transfer.
-function imquilt(img::AbstractArray, sizeₜ::Integer, nₜ::Integer; tol=1e-3)
+function imquilt(img::AbstractArray, sizeₜ::Integer, nₜ::Integer; tol=1e-3, show=false)
     ## Enforce the format to be:
     ##   Grayscale => size(X) = (m,n,1)
     ##   RGB       => size(X) = (m,n,3)
@@ -59,7 +60,7 @@ function imquilt(img::AbstractArray, sizeₜ::Integer, nₜ::Integer; tol=1e-3)
     npixels = nₜ * sizeₜ - (nₜ-1) * overlap
     Y = zeros(npixels, npixels, nlayers)
 
-    canvas, _ = view(uint8(Y), colordim=3)
+    show && ((canvas, _) = view(uint8(Y), colordim=3))
 
     # scan the output image tile by tile
     for i=1:nₜ, j=1:nₜ
@@ -109,7 +110,7 @@ function imquilt(img::AbstractArray, sizeₜ::Integer, nₜ::Integer; tol=1e-3)
         # paste contributions from Tᵧ and Tᵦ
         Y[iₛ:iₑ,jₛ:jₑ,:] = M.*Tᵧ + !M.*Tᵦ
 
-        view(canvas, uint8(Y), colordim=3)
+        show && view(canvas, uint8(Y), colordim=3)
     end
 
     # remove ghost dimension and permute back
