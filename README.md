@@ -3,11 +3,12 @@ ImageQuilting.jl
 
 Image quilting for texture synthesis in Julia.
 
-Dependencies
+Installation
 ------------
 
-* [Images](https://github.com/timholy/Images.jl)
-* [ImageView](https://github.com/timholy/ImageView.jl) (Optional)
+```julia
+Pkg.clone("https://github.com/juliohm/ImageQuilting.jl.git")
+```
 
 Usage
 -----
@@ -29,8 +30,8 @@ Example
 
 Reproduce some of the paper results with:
 
-```bash
-julia example.jl
+```julia
+ImageQuilting.example()
 ```
 
 REFERENCES
