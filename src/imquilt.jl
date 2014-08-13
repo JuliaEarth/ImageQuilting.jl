@@ -18,7 +18,15 @@
 ## Created: 12 Aug 2014
 ## Author: Júlio Hoffimann Mendes
 
-using Images, ImageView
+using Images
+try
+    require("ImageView") # throw an error if not available
+    global view = ImageView.view
+catch
+    # replace view() by nothing
+    global view(args...; kargs...) = (nothing, nothing)
+end
+
 
 function imquilt(img::Image, args...; kargs...)
     X, props = data(img), properties(img)
