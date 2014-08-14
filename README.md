@@ -14,8 +14,8 @@ Usage
 -----
 
 ```julia
-synthesis = imquilt(img::Image, tilesize, n; tol=1e-3)
-synthesis = imquilt(img::AbstractArray, tilesize, n; tol=1e-3)
+synthesis = imquilt(img::Image, tilesize, n; tol=1e-3, show=false)
+synthesis = imquilt(img::AbstractArray, tilesize, n; tol=1e-3, show=false)
 ```
 
 where:
