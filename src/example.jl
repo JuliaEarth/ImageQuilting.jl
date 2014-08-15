@@ -30,4 +30,6 @@ function example()
     imquilt(imread(joinpath(imagesdir,"brick.jpg"))   , 80, 5 , show=true)
     imquilt(imread(joinpath(imagesdir,"apples.gif"))  , 31, 15, show=true)
     imquilt(imread(joinpath(imagesdir,"btile.tif"))   , 16, 15, show=true)
+
+    return nothing
 end
