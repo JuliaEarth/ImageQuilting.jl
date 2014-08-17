@@ -174,9 +174,9 @@ function convdist(X::AbstractArray, mask::AbstractArray)
         B = mask[:,:,k]
 
         A² = imfilter_fft(A.^2, ones(m, n), "value")
-        AB = imfilter_fft(A, B, "value") * 2
+        AB = imfilter_fft(A, B, "value")
         B² = sum(B.^2)
-        D = A² - AB + B²
+        D = A² - 2AB + B²
 
         D[ceil(m/2):end-m÷2,ceil(n/2):end-n÷2]
     end
