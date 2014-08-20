@@ -21,7 +21,7 @@
 using Images
 try
     require("ImageView") # throw an error if not available
-    global view = ImageView.view
+    global view = Main.ImageView.view
 catch
     # replace view() by nothing
     global view(args...; kargs...) = (nothing, nothing)
