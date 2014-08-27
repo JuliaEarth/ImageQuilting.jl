@@ -7,7 +7,7 @@ Installation
 ------------
 
 ```julia
-Pkg.clone("https://github.com/juliohm/ImageQuilting.jl.git")
+Pkg.clone("ImageQuilting")
 ```
 
 Usage
