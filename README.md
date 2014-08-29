@@ -7,7 +7,7 @@ Installation
 ------------
 
 ```julia
-Pkg.clone("ImageQuilting")
+Pkg.add("ImageQuilting")
 ```
 
 Usage
