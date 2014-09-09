@@ -29,7 +29,8 @@ where:
 Example
 -------
 
-Reproduce some of the paper results with:
+Install [ImageView](https://github.com/timholy/ImageView.jl) and
+reproduce some of the paper results with:
 
 ```julia
 ImageQuilting.example()
