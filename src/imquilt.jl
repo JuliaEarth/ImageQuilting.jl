@@ -29,7 +29,8 @@ end
 
 
 function imquilt(img::Image, args...; kargs...)
-    X, props = data(img), properties(img)
+    simg = separate(img)
+    X, props = data(simg), properties(simg)
     return Image(imquilt(X, args...; kargs...), props)
 end
 
@@ -60,7 +61,7 @@ function imquilt(img::AbstractArray, sizeₜ::Integer, nₜ::Integer; tol=1e-3, 
     npixels = nₜ * sizeₜ - (nₜ-1) * overlap
     Y = zeros(npixels, npixels, nlayers)
 
-    show && ((canvas, _) = view(uint8(Y), colordim=3))
+    show && ((canvas, _) = view(colorim(Y)))
 
     # scan the output image tile by tile
     for i=1:nₜ, j=1:nₜ
@@ -110,7 +111,7 @@ function imquilt(img::AbstractArray, sizeₜ::Integer, nₜ::Integer; tol=1e-3, 
         # paste contributions from Tᵧ and Tᵦ
         Y[iₛ:iₑ,jₛ:jₑ,:] = M.*Tᵧ + !M.*Tᵦ
 
-        show && view(canvas, uint8(Y), colordim=3)
+        show && view(canvas, colorim(Y))
     end
 
     # remove ghost dimension and permute back
