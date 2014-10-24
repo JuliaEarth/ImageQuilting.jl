@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/juliohm/ImageQuilting.jl.png)](https://travis-ci.org/juliohm/ImageQuilting.jl)
+
 ImageQuilting.jl
 ================
 
