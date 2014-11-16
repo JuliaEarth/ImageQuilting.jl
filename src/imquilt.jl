@@ -49,6 +49,8 @@ end
 ## EFROS, A.; FREEMAN, W. T., 2001. Image Quilting for
 ## Texture Synthesis and Transfer.
 function imquilt(img::AbstractArray, sizeₜ::Integer, nₜ::Integer; tol=1e-3, show=false)
+    @assert sizeₜ ≥ 12 "tile size must be at least 12"
+
     ## Enforce the format to be:
     ##   Grayscale => size(X) = (m,n,1)
     ##   RGB       => size(X) = (m,n,3)
