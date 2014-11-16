@@ -7,10 +7,7 @@ env:
   matrix:
     - JULIAVERSION="julianightlies"
 before_install:
-  - sudo add-apt-repository ppa:staticfloat/julia-deps -y
-  - sudo add-apt-repository ppa:staticfloat/${JULIAVERSION} -y
-  - sudo apt-get update -qq -y
-  - sudo apt-get install libpcre3-dev julia -y
+  - curl http://julialang.org/install-julia.sh | sh -s $JULIAVERSION
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 script:
   - julia -e 'versioninfo(); Pkg.init(); Pkg.clone(pwd()); Pkg.test("ImageQuilting")'
