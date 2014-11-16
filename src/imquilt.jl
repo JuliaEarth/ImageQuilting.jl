@@ -93,7 +93,7 @@ function imquilt(img::AbstractArray, sizeₜ::Integer, nₜ::Integer; tol=1e-3, 
         distance = abs(distance) # amend floating point weirdness
 
         # pick a candidate at random from the bag of best tiles
-        bag = find(distance .<= (1+tol)minimum(distance))
+        bag = find(distance .≤ (1+tol)minimum(distance))
         idx = bag[rand(1:length(bag))]
         iᵦ, jᵦ = ind2sub(size(distance), idx)
 
@@ -139,7 +139,7 @@ end
 ## For a horizontal overlap, take the transpose of
 ## the input surface and output mask.
 function mincut(ev::Matrix)
-    E, M = ev, falses(size(ev))
+    E, M = copy(ev), falses(size(ev))
 
     # forward accumulation
     nrow, ncol = size(E)
