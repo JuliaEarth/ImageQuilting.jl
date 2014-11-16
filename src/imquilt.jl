@@ -158,7 +158,7 @@ function mincut(ev::Matrix)
         for j=1:ncol
             if idx < ncol && minimum(E[i,max(idx-1,1):idx+1]) == E[i,idx+1]
                 idx += 1
-            elseif idx > 1 && minimum(E[i,idx-1:min(idx+1,ncol)]) == E[i,idx-1]
+            elseif idx > 1 && E[i,idx-1] ≤ E[i,idx]
                 idx -= 1
             end
         end
