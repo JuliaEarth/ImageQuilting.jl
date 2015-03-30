@@ -1,16 +1,8 @@
-language: cpp
+language: julia
 os:
   - linux
   - osx
-compiler:
-  - gcc
+julia:
+  - nightly
 notifications:
   email: false
-env:
-  matrix:
-    - JULIAVERSION="julianightlies"
-before_install:
-  - curl http://julialang.org/install-julia.sh | sh -s $JULIAVERSION
-  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-script:
-  - julia -e 'versioninfo(); Pkg.init(); Pkg.clone(pwd()); Pkg.test("ImageQuilting")'
