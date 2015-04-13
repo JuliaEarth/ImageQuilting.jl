@@ -23,7 +23,7 @@ function iqsim(training_image::AbstractArray,
                tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
                gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
                overlapx=1/6, overlapy=1/6, overlapz=1/6,
-               seed=0, nreal=1, cutoff=1e-2, categorical=false,
+               seed=0, nreal=1, cutoff=.1, categorical=false,
                soft=nothing, debug=false)
 
   # sanity checks
@@ -38,6 +38,7 @@ function iqsim(training_image::AbstractArray,
     @assert isa(soft, SoftData)
     @assert ndims(soft.data) == 3 "soft data is not 3D (add ghost dimension for 2D)"
     @assert all([size(soft.data)...] .≥ [gridsizex, gridsizey, gridsizez]) "soft data size < grid size"
+    @assert 0 < cutoff ≤ 1 "cutoff must be in range (0,1] when soft data is available"
   end
 
   # calculate the overlap from given percentage
@@ -151,12 +152,20 @@ function iqsim(training_image::AbstractArray,
         softdev = softgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
         softdistance = convdist({softTI}, {softdev})
 
-        softcutoff = 1e-2
+        # candidates with good overlap
+        dbsize = ceil(Int, cutoff*length(distance))
+        idx1 = sortperm(distance[:])[1:dbsize]
+
+        softcutoff = .1
         while true
-          patterndb = find((distance .≤ (1+cutoff)minimum(distance)) &
-                       (softdistance .≤ (1+softcutoff)minimum(softdistance)))
+          # candidates in accordance with soft data
+          softdbsize = ceil(Int, softcutoff*length(softdistance))
+          idx2 = sortperm(softdistance[:])[1:softdbsize]
+
+          patterndb = intersect(idx1, idx2)
+
           !isempty(patterndb) && break
-          softcutoff *= 10
+          softcutoff += .1
         end
       else
         patterndb = find(distance .≤ (1+cutoff)minimum(distance))
