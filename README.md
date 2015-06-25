@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/juliohm/ImageQuilting.jl.svg?branch=master)](https://travis-ci.org/juliohm/ImageQuilting.jl)
 [![ImageQuilting](http://pkg.julialang.org/badges/ImageQuilting_nightly.svg)](http://pkg.julialang.org/?pkg=ImageQuilting&ver=nightly)
+[![Coverage Status](https://coveralls.io/repos/juliohm/ImageQuilting.jl/badge.svg?branch=master)](https://coveralls.io/r/juliohm/ImageQuilting.jl?branch=master)
 
 ImageQuilting.jl
 ================
