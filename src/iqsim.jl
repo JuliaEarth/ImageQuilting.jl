@@ -60,7 +60,7 @@ function iqsim(training_image::AbstractArray,
   TI = map(Float64, training_image)
 
   # perform simplex transform
-  simplexTI = {TI}; nvertices = 1
+  simplexTI = Any[TI]; nvertices = 1
   if categorical
     categories = Set(training_image)
     ncategories = nvertices = length(categories) - 1
@@ -124,21 +124,21 @@ function iqsim(training_image::AbstractArray,
       distance = zeros(mₜ-tplsizex+1, nₜ-tplsizey+1, pₜ-tplsizez+1)
       if i > 1 && overlapx > 1
         ovx = simdev[1:overlapx,:,:]
-        xsimplex = categorical ? simplex_transform(ovx, nvertices) : {ovx}
+        xsimplex = categorical ? simplex_transform(ovx, nvertices) : Any[ovx]
 
         D = convdist(simplexTI, xsimplex)
         distance += D[1:mₜ-tplsizex+1,:,:]
       end
       if j > 1 && overlapy > 1
         ovy = simdev[:,1:overlapy,:]
-        ysimplex = categorical ? simplex_transform(ovy, nvertices) : {ovy}
+        ysimplex = categorical ? simplex_transform(ovy, nvertices) : Any[ovy]
 
         D = convdist(simplexTI, ysimplex)
         distance += D[:,1:nₜ-tplsizey+1,:]
       end
       if k > 1 && overlapz > 1
         ovz = simdev[:,:,1:overlapz]
-        zsimplex = categorical ? simplex_transform(ovz, nvertices) : {ovz}
+        zsimplex = categorical ? simplex_transform(ovz, nvertices) : Any[ovz]
 
         D = convdist(simplexTI, zsimplex)
         distance += D[:,:,1:pₜ-tplsizez+1]
@@ -150,7 +150,7 @@ function iqsim(training_image::AbstractArray,
         # compute the distance between the soft dataevent and
         # all dataevents in the soft training image
         softdev = softgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-        softdistance = convdist({softTI}, {softdev})
+        softdistance = convdist(Any[softTI], Any[softdev])
 
         # candidates with good overlap
         dbsize = ceil(Int, cutoff*length(distance))
@@ -218,7 +218,7 @@ end
 
 function simplex_transform(img::AbstractArray, nvertices::Integer)
   # binary images are trivial
-  nvertices == 1 && return {img}
+  nvertices == 1 && return Any[img]
 
   ncoords = nvertices - 1
 
