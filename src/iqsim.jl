@@ -206,7 +206,7 @@ function iqsim(training_image::AbstractArray,
     # throw away voxels that are outside of the grid
     simgrid = simgrid[1:gridsizex,1:gridsizey,1:gridsizez]
 
-    push!(realizations, simgrid)
+    push!(realizations, categorical ? map(Int, simgrid) : simgrid)
 
     debug && push!(voxelreusage, sum(cutgrid)/overlap_volume)
     debug && (cutgrid = cutgrid[1:gridsizex,1:gridsizey,1:gridsizez])
