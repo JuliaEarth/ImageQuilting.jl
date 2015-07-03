@@ -16,6 +16,11 @@ module ImageQuilting
 
 include("iqsim.jl")
 
-export iqsim
+export
+  # functions
+  iqsim,
+
+  # types
+  SoftData
 
 end
