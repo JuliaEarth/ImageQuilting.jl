@@ -1,11 +1,19 @@
-[![Build Status](https://travis-ci.org/juliohm/ImageQuilting.jl.svg?branch=master)](https://travis-ci.org/juliohm/ImageQuilting.jl)
-[![ImageQuilting](http://pkg.julialang.org/badges/ImageQuilting_nightly.svg)](http://pkg.julialang.org/?pkg=ImageQuilting&ver=nightly)
-[![Coverage Status](https://coveralls.io/repos/juliohm/ImageQuilting.jl/badge.svg?branch=master)](https://coveralls.io/r/juliohm/ImageQuilting.jl?branch=master)
-
 ImageQuilting.jl
 ================
 
 3D image quilting simulation.
+
+[![Build Status](https://travis-ci.org/juliohm/ImageQuilting.jl.svg?branch=master)](https://travis-ci.org/juliohm/ImageQuilting.jl)
+[![ImageQuilting](http://pkg.julialang.org/badges/ImageQuilting_nightly.svg)](http://pkg.julialang.org/?pkg=ImageQuilting&ver=nightly)
+[![Coverage Status](https://coveralls.io/repos/juliohm/ImageQuilting.jl/badge.svg?branch=master)](https://coveralls.io/r/juliohm/ImageQuilting.jl?branch=master)
+
+Features
+--------
+
+* 3D image quilting
+* Soft data conditioning
+* Hard data conditioning
+* Regular and irregular grids
 
 Installation
 ------------
@@ -23,7 +31,7 @@ reals = iqsim(training_image::AbstractArray,
               gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
               overlapx=1/6, overlapy=1/6, overlapz=1/6,
               seed=0, nreal=1, cutoff=1e-2, categorical=false,
-              soft=nothing, debug=false)
+              soft=nothing, hard=nothing, debug=false)
 ```
 
 where:
@@ -42,6 +50,7 @@ where:
 * `cutoff` is the overlap cutoff
 * `categorical` informs whether the image is categorical or continuous
 * `soft` is an instance of `SoftData`
+* `hard` is an instance of `HardData`
 * `debug` tells whether to export or not the boundary cuts and voxel reusage
 
 The main output `reals` consists of a list of 3D realizations that can be indexed with
@@ -62,6 +71,19 @@ instance can be passed to `iqsim` for local relaxation:
 ```julia
 iqsim(..., soft=SoftData(seismic, blur))
 ```
+
+### Hard data
+
+Voxels can be assigned values that will be honored by the simulation. `HardData()` is a dictionary of locations and associated values specified by the user:
+
+```julia
+well = HardData([(i,j,k)=>value(i,j,k) for i=10, j=10, k=1:100])
+iqsim(..., hard=well)
+```
+
+### Irregular grids
+
+Irregular grids are a special case of hard data conditioning where inactive voxels are marked with the value `NaN`. The algorithm handles this hard data differently as it shouldn't be considered in the pattern similarity calculations.
 
 Example
 -------
@@ -85,3 +107,5 @@ REFERENCES
 Efros, A.; Freeman, W. T., 2001. Image Quilting for Texture Synthesis and Transfer. [[DOWNLOAD](http://graphics.cs.cmu.edu/people/efros/research/quilting.html)]
 
 Mahmud, K.; Mariethoz, G.; Caers, J.; Tahmasebi, P.; Baker, A., 2014. Simulation of Earth textures by conditional image quilting. [[DOWNLOAD](http://dx.doi.org/10.1002/2013WR015069)]
+
+Efros, A.; Leung, T., 1999. Texture Synthesis by Non-parametric Sampling. [[DOWNLOAD](http://graphics.cs.cmu.edu/people/efros/research/EfrosLeung.html)]
