@@ -12,19 +12,21 @@
 ## ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-using Images: imfilter_fft, padarray
+using Images: imfilter_fft, padarray, dilate
 
 immutable SoftData
   data::AbstractArray
   transform::Function
 end
 
+typealias HardData Dict{NTuple{3,Integer},Real}
+
 function iqsim(training_image::AbstractArray,
                tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
                gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
                overlapx=1/6, overlapy=1/6, overlapz=1/6,
                seed=0, nreal=1, cutoff=.1, categorical=false,
-               soft=nothing, debug=false)
+               soft=nothing, hard=nothing, debug=false)
 
   # sanity checks
   @assert ndims(training_image) == 3 "training image is not 3D (add ghost dimension for 2D)"
@@ -39,6 +41,14 @@ function iqsim(training_image::AbstractArray,
     @assert ndims(soft.data) == 3 "soft data is not 3D (add ghost dimension for 2D)"
     @assert all([size(soft.data)...] .≥ [gridsizex, gridsizey, gridsizez]) "soft data size < grid size"
     @assert 0 < cutoff ≤ 1 "cutoff must be in range (0,1] when soft data is available"
+  end
+
+  # hard data checks
+  if hard ≠ nothing
+    @assert isa(hard, HardData)
+    locations = Int[loc[i] for loc in keys(hard), i=1:3]
+    @assert all(maximum(locations, 1) .≤ [gridsizex gridsizey gridsizez]) "hard data locations outside of grid"
+    @assert all(minimum(locations, 1) .> 0) "hard data locations must be positive indexes"
   end
 
   # calculate the overlap from given percentage
@@ -91,6 +101,17 @@ function iqsim(training_image::AbstractArray,
     softTI = soft.transform(TI)
   end
 
+  # simulation grid irregularities
+  activated = []
+  if hard ≠ nothing
+    activated = trues(nx, ny, nz)
+    for loc in keys(hard)
+      if isnan(hard[loc])
+        activated[loc...] = false
+      end
+    end
+  end
+
   # main output is a vector of 3D grids
   realizations = []
 
@@ -105,6 +126,21 @@ function iqsim(training_image::AbstractArray,
     simgrid = zeros(nx, ny, nz)
     cutgrid = debug ? falses(nx, ny, nz) : []
 
+    # set hard data
+    simulated = []
+    if hard ≠ nothing
+      simulated = falses(nx, ny, nz)
+      for loc in keys(hard)
+        if !isnan(hard[loc])
+          simgrid[loc...] = hard[loc]
+          simulated[loc...] = true
+        end
+      end
+    end
+
+    # keep track of skipped tiles
+    skipped = Set{NTuple{3,Int}}()
+
     # loop simulation grid tile by tile
     for i=1:ntilex, j=1:ntiley, k=1:ntilez
       # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
@@ -115,6 +151,17 @@ function iqsim(training_image::AbstractArray,
       jₑ = jₛ + tplsizey - 1
       kₑ = kₛ + tplsizez - 1
 
+      # skip tile if it contains hard data
+      if hard ≠ nothing
+        for loc in keys(hard)
+          if all([iₛ,jₛ,kₛ] .≤ [loc...] .≤ [iₑ,jₑ,kₑ])
+            push!(skipped, (i,j,k))
+            break
+          end
+        end
+        (i,j,k) ∈ skipped && continue
+      end
+
       # current simulation dataevent
       simdev = simgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
 
@@ -122,21 +169,21 @@ function iqsim(training_image::AbstractArray,
       # and all patterns in the training image
       mₜ, nₜ, pₜ = size(TI)
       distance = zeros(mₜ-tplsizex+1, nₜ-tplsizey+1, pₜ-tplsizez+1)
-      if i > 1 && overlapx > 1
+      if i > 1 && overlapx > 1 && (i-1,j,k) ∉ skipped
         ovx = simdev[1:overlapx,:,:]
         xsimplex = categorical ? simplex_transform(ovx, nvertices) : Any[ovx]
 
         D = convdist(simplexTI, xsimplex)
         distance += D[1:mₜ-tplsizex+1,:,:]
       end
-      if j > 1 && overlapy > 1
+      if j > 1 && overlapy > 1 && (i,j-1,k) ∉ skipped
         ovy = simdev[:,1:overlapy,:]
         ysimplex = categorical ? simplex_transform(ovy, nvertices) : Any[ovy]
 
         D = convdist(simplexTI, ysimplex)
         distance += D[:,1:nₜ-tplsizey+1,:]
       end
-      if k > 1 && overlapz > 1
+      if k > 1 && overlapz > 1 && (i,j,k-1) ∉ skipped
         ovz = simdev[:,:,1:overlapz]
         zsimplex = categorical ? simplex_transform(ovz, nvertices) : Any[ovz]
 
@@ -180,17 +227,17 @@ function iqsim(training_image::AbstractArray,
 
       # minimum boundary cut mask
       M = falses(simdev)
-      if i > 1 && overlapx > 1
+      if i > 1 && overlapx > 1 && (i-1,j,k) ∉ skipped
         Bx = overlapdist(simdev[1:overlapx,:,:], TIdev[1:overlapx,:,:],
                          categorical ? nvertices : -1)
         M[1:overlapx,:,:] |= boundary_cut(Bx, :x)
       end
-      if j > 1 && overlapy > 1
+      if j > 1 && overlapy > 1 && (i,j-1,k) ∉ skipped
         By = overlapdist(simdev[:,1:overlapy,:], TIdev[:,1:overlapy,:],
                          categorical ? nvertices : -1)
         M[:,1:overlapy,:] |= boundary_cut(By, :y)
       end
-      if k > 1 && overlapz > 1
+      if k > 1 && overlapz > 1 && (i,j,k-1) ∉ skipped
         Bz = overlapdist(simdev[:,:,1:overlapz], TIdev[:,:,1:overlapz],
                          categorical ? nvertices : -1)
         M[:,:,1:overlapz] |= boundary_cut(Bz, :z)
@@ -199,12 +246,100 @@ function iqsim(training_image::AbstractArray,
       # paste contributions from simulation grid and training image
       simgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = M.*simdev + !M.*TIdev
 
+      # simulation progress
+      hard ≠ nothing && (simulated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = true)
+
       # save boundary cut
       debug && (cutgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = M)
     end
 
     # throw away voxels that are outside of the grid
     simgrid = simgrid[1:gridsizex,1:gridsizey,1:gridsizez]
+
+    #-----------------------------------------------------------------
+
+    # simulate remaining voxels skipped during raster path
+    if hard ≠ nothing
+      tplx, tply, tplz = tplsizex, tplsizey, tplsizez
+
+      # throw away voxels that are outside of the grid
+      simulated = simulated[1:gridsizex,1:gridsizey,1:gridsizez]
+      activated = activated[1:gridsizex,1:gridsizey,1:gridsizez]
+
+      # morphological dilation
+      dilated = dilate(simulated) & activated
+
+      while dilated ≠ simulated
+        visited = 0
+        for vox in find(dilated - simulated)
+          # tile center is given by (iᵥ,jᵥ,kᵥ)
+          iᵥ, jᵥ, kᵥ = ind2sub(size(simgrid), vox)
+
+          # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
+          iₛ = iᵥ - (tplx-1)÷2
+          jₛ = jᵥ - (tply-1)÷2
+          kₛ = kᵥ - (tplz-1)÷2
+          iₑ = iₛ + tplx - 1
+          jₑ = jₛ + tply - 1
+          kₑ = kₛ + tplz - 1
+
+          if all(0 .< [iₛ,jₛ,kₛ]) && all([iₑ,jₑ,kₑ] .≤ [size(simgrid)...]) && !simulated[vox]
+            # mark location as visited
+            visited += 1
+
+            # voxel-centered dataevent
+            simdev = simgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+            simplexdev = categorical ? simplex_transform(simdev, nvertices) : Any[simdev]
+
+            # on/off dataevent
+            booldev = simulated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+
+            # current pattern database
+            distance = convdist(simplexTI, simplexdev, weights=booldev, inner=false)
+            patterndb = find(distance .≤ (1+cutoff)minimum(distance))
+
+            # pick a pattern at random from the database
+            idx = patterndb[rand(1:length(patterndb))]
+            iᵦ, jᵦ, kᵦ = ind2sub(size(distance), idx)
+
+            # tile top left corner is given by (Is,Js,Ks)
+            Is = iᵦ - (tplx-1)÷2
+            Js = jᵦ - (tply-1)÷2
+            Ks = kᵦ - (tplz-1)÷2
+
+            # pad training image dataevent
+            TIdev = zeros(tplx, tply, tplz)
+            valid = falses(tplx, tply, tplz)
+            for δi=1:tplx, δj=1:tply, δk=1:tplz
+              i, j, k = Is+δi-1, Js+δj-1, Ks+δk-1
+              if all(0 .< [i,j,k] .≤ [size(TI)...])
+                TIdev[δi,δj,δk] = TI[i,j,k]
+                valid[δi,δj,δk] = true
+              end
+            end
+
+            # voxels to be simulated
+            M = valid & activated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] & !simulated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+
+            # paste highlighted portion onto simulation grid
+            simgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = M.*TIdev + !M.*simdev
+
+            # simulation progress
+            simulated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] |= M
+          end
+        end
+
+        if visited == 0
+          # reduce the template size and proceed
+          tplx, tply, tplz = max(tplx-1, 1), max(tply-1, 1), max(tplz-1, 1)
+        end
+
+        dilated = dilate(simulated) & activated
+      end
+
+      # arbitrarily shaped simulation grid
+      simgrid[!activated] = categorical ? 0 : NaN
+    end
 
     push!(realizations, categorical ? map(Int, simgrid) : simgrid)
 
@@ -241,12 +376,16 @@ function simplex_transform(img::AbstractArray, nvertices::Integer)
   result
 end
 
-function convdist(Xs::AbstractArray, masks::AbstractArray)
+function convdist(Xs::AbstractArray, masks::AbstractArray; weights=nothing, inner=true)
+  padding = inner == true ? "inner" : "symmetric"
+
   result = []
   for (X, mask) in zip(Xs, masks)
-    A² = imfilter_fft(X.^2, ones(mask), "inner")
-    AB = imfilter_fft(X, mask, "inner")
-    B² = sum(mask.^2)
+    weights = weights ≠ nothing ? weights : ones(mask)
+
+    A² = imfilter_fft(X.^2, weights.*ones(mask), padding)
+    AB = imfilter_fft(X, weights.*mask, padding)
+    B² = sum((weights.*mask).^2)
 
     push!(result, abs(A² - 2AB + B²))
   end

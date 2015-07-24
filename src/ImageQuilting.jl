@@ -21,6 +21,7 @@ export
   iqsim,
 
   # types
-  SoftData
+  SoftData,
+  HardData
 
 end
