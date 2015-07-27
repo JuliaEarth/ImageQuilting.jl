@@ -309,9 +309,36 @@ function iqsim(training_image::AbstractArray,
             # on/off dataevent
             booldev = simulated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
 
-            # current pattern database
+            # compute the distance between the simulation dataevent
+            # and all patterns in the training image
             distance = convdist(simplexTI, simplexdev, weights=booldev, inner=false)
-            patterndb = find(distance .≤ (1+cutoff)minimum(distance))
+
+            # current pattern database
+            patterndb = []
+            if soft ≠ nothing
+              # compute the distance between the soft dataevent and
+              # all dataevents in the soft training image
+              softdev = softgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+              softdistance = convdist(Any[softTI], Any[softdev], weights=booldev, inner=false)
+
+              # candidates with good overlap
+              dbsize = ceil(Int, cutoff*length(distance))
+              idx1 = sortperm(distance[:])[1:dbsize]
+
+              softcutoff = .1
+              while true
+                # candidates in accordance with soft data
+                softdbsize = ceil(Int, softcutoff*length(softdistance))
+                idx2 = sortperm(softdistance[:])[1:softdbsize]
+
+                patterndb = intersect(idx1, idx2)
+
+                !isempty(patterndb) && break
+                softcutoff += .1
+              end
+            else
+              patterndb = find(distance .≤ (1+cutoff)minimum(distance))
+            end
 
             # pick a pattern at random from the database
             idx = patterndb[rand(1:length(patterndb))]
