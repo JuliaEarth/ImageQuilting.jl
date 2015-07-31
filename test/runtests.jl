@@ -37,3 +37,13 @@ end
 reals = iqsim(TI, 10, 10, 10, size(TI)..., hard=shape)
 @test all(isnan(reals[1][!active]))
 @test all(!isnan(reals[1][active]))
+
+# irregular training images
+TI = ones(20,20,20)
+TI[:,5] = NaN
+reals = iqsim(TI, 10, 10, 10, size(TI)...)
+@test all(reals[1] .== 1)
+TI = ones(Int,20,20,20)
+TI[:,5] = typemin(Int); TI[1,5] = 0
+reals = iqsim(TI, 10, 10, 10, size(TI)..., categorical=true)
+@test all(reals[1] .== 1)
