@@ -40,10 +40,19 @@ reals = iqsim(TI, 10, 10, 10, size(TI)..., hard=shape)
 
 # irregular training images
 TI = ones(20,20,20)
-TI[:,5] = NaN
+TI[:,5,:] = NaN
 reals = iqsim(TI, 10, 10, 10, size(TI)...)
 @test all(reals[1] .== 1)
 TI = ones(Int,20,20,20)
-TI[:,5] = typemin(Int); TI[1,5] = 0
+TI[:,5,:] = typemin(Int); TI[1,5] = 0
 reals = iqsim(TI, 10, 10, 10, size(TI)..., categorical=true)
 @test all(reals[1] .== 1)
+
+# irregular training image and irregular grid
+TI = ones(20,20,20)
+TI[:,5,:] = NaN
+shape = HardData([(i,j,k)=>NaN for i=1:20, j=5, k=1:20])
+reals = iqsim(TI, 10, 10, 10, size(TI)..., hard=shape)
+@test all(isnan(reals[1][:,5,:]))
+@test all(reals[1][:,1:4,:] .== 1)
+@test all(reals[1][:,6:20,:] .== 1)
