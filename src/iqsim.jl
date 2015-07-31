@@ -69,6 +69,27 @@ function iqsim(training_image::AbstractArray,
   # always work with floating point
   TI = map(Float64, training_image)
 
+  # inactive voxels in the training image
+  NaNTI = categorical ? training_image .== typemin(Int) : isnan(training_image)
+  TI[NaNTI] = 0
+
+  # disable tiles in the training image if they contain inactive voxels
+  mₜ, nₜ, pₜ = size(TI)
+  disabled = falses(mₜ-tplsizex+1, nₜ-tplsizey+1, pₜ-tplsizez+1)
+  for nanidx in find(NaNTI)
+    iₙ, jₙ, kₙ = ind2sub(size(TI), nanidx)
+
+    # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
+    iₛ = max(iₙ-tplsizex+1, 1)
+    jₛ = max(jₙ-tplsizey+1, 1)
+    kₛ = max(kₙ-tplsizez+1, 1)
+    iₑ = min(iₙ, mₜ-tplsizex+1)
+    jₑ = min(jₙ, nₜ-tplsizey+1)
+    kₑ = min(kₙ, pₜ-tplsizez+1)
+
+    disabled[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = true
+  end
+
   # perform simplex transform
   simplexTI = Any[TI]; nvertices = 1
   if categorical
@@ -85,6 +106,17 @@ function iqsim(training_image::AbstractArray,
   ny = ntiley * (tplsizey - overlapy) + overlapy
   nz = ntilez * (tplsizez - overlapz) + overlapz
 
+  # simulation grid irregularities
+  activated = []
+  if hard ≠ nothing
+    activated = trues(nx, ny, nz)
+    for loc in keys(hard)
+      if isnan(hard[loc])
+        activated[loc...] = false
+      end
+    end
+  end
+
   # total overlap volume in simulation grid
   overlap_volume = nx*ny*nz - (nx - (ntilex-1)overlapx)*
                               (ny - (ntiley-1)overlapy)*
@@ -99,17 +131,6 @@ function iqsim(training_image::AbstractArray,
     softgrid = padarray(soft.data, [0,0,0], [nx-lx,ny-ly,nz-lz], "symmetric")
 
     softTI = soft.transform(TI)
-  end
-
-  # simulation grid irregularities
-  activated = []
-  if hard ≠ nothing
-    activated = trues(nx, ny, nz)
-    for loc in keys(hard)
-      if isnan(hard[loc])
-        activated[loc...] = false
-      end
-    end
   end
 
   # tiles that contain hard data are skipped during raster path
@@ -152,7 +173,7 @@ function iqsim(training_image::AbstractArray,
     simgrid = zeros(nx, ny, nz)
     cutgrid = debug ? falses(nx, ny, nz) : []
 
-    # set hard data
+    # set hard data for current simulation
     simulated = []
     if hard ≠ nothing
       simulated = falses(nx, ny, nz)
@@ -182,7 +203,6 @@ function iqsim(training_image::AbstractArray,
 
       # compute the distance between the simulation dataevent
       # and all patterns in the training image
-      mₜ, nₜ, pₜ = size(TI)
       distance = zeros(mₜ-tplsizex+1, nₜ-tplsizey+1, pₜ-tplsizez+1)
       if i > 1 && overlapx > 1 && (i-1,j,k) ∉ skipped
         ovx = simdev[1:overlapx,:,:]
@@ -206,6 +226,9 @@ function iqsim(training_image::AbstractArray,
         distance += D[:,:,1:pₜ-tplsizez+1]
       end
 
+      # disable dataevents that contain inactive voxels
+      distance[disabled] = Inf
+
       # current pattern database
       patterndb = []
       if soft ≠ nothing
@@ -213,6 +236,9 @@ function iqsim(training_image::AbstractArray,
         # all dataevents in the soft training image
         softdev = softgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
         softdistance = convdist(Any[softTI], Any[softdev])
+
+        # disable dataevents that contain inactive voxels
+        softdistance[disabled] = Inf
 
         # candidates with good overlap
         dbsize = ceil(Int, cutoff*length(distance))
@@ -286,6 +312,23 @@ function iqsim(training_image::AbstractArray,
 
       while dilated ≠ simulated
         visited = 0
+
+        # disable tiles in the training image if they contain inactive voxels
+        disabledₜ = falses(mₜ, nₜ, pₜ)
+        for nanidx in find(NaNTI)
+          iₙ, jₙ, kₙ = ind2sub(size(TI), nanidx)
+
+          # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
+          iₛ = max(iₙ - tplx÷2, 1)
+          jₛ = max(jₙ - tply÷2, 1)
+          kₛ = max(kₙ - tplz÷2, 1)
+          iₑ = min(iₛ + tplx - 1, mₜ)
+          jₑ = min(jₛ + tply - 1, nₜ)
+          kₑ = min(kₛ + tplz - 1, pₜ)
+
+          disabledₜ[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = true
+        end
+
         for vox in find(dilated - simulated)
           # tile center is given by (iᵥ,jᵥ,kᵥ)
           iᵥ, jᵥ, kᵥ = ind2sub(size(simgrid), vox)
@@ -313,6 +356,9 @@ function iqsim(training_image::AbstractArray,
             # and all patterns in the training image
             distance = convdist(simplexTI, simplexdev, weights=booldev, inner=false)
 
+            # disable dataevents that contain inactive voxels
+            distance[disabledₜ] = Inf
+
             # current pattern database
             patterndb = []
             if soft ≠ nothing
@@ -320,6 +366,9 @@ function iqsim(training_image::AbstractArray,
               # all dataevents in the soft training image
               softdev = softgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
               softdistance = convdist(Any[softTI], Any[softdev], weights=booldev, inner=false)
+
+              # disable dataevents that contain inactive voxels
+              softdistance[disabledₜ] = Inf
 
               # candidates with good overlap
               dbsize = ceil(Int, cutoff*length(distance))
@@ -380,7 +429,7 @@ function iqsim(training_image::AbstractArray,
       end
 
       # arbitrarily shaped simulation grid
-      simgrid[!activated] = categorical ? 0 : NaN
+      simgrid[!activated] = categorical ? typemin(Int) : NaN
     end
 
     push!(realizations, categorical ? map(Int, simgrid) : simgrid)
