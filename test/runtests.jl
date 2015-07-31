@@ -51,8 +51,13 @@ reals = iqsim(TI, 10, 10, 10, size(TI)..., categorical=true)
 # irregular training image and irregular grid
 TI = ones(20,20,20)
 TI[:,5,:] = NaN
+trend = SoftData(ones(TI), x -> ones(TI))
 shape = HardData([(i,j,k)=>NaN for i=1:20, j=5, k=1:20])
 reals = iqsim(TI, 10, 10, 10, size(TI)..., hard=shape)
+@test all(isnan(reals[1][:,5,:]))
+@test all(reals[1][:,1:4,:] .== 1)
+@test all(reals[1][:,6:20,:] .== 1)
+reals = iqsim(TI, 10, 10, 10, size(TI)..., hard=shape, soft=trend)
 @test all(isnan(reals[1][:,5,:]))
 @test all(reals[1][:,1:4,:] .== 1)
 @test all(reals[1][:,6:20,:] .== 1)
