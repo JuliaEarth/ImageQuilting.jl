@@ -85,6 +85,8 @@ iqsim(..., hard=well)
 
 Irregular grids are a special case of hard data conditioning where inactive voxels are marked with the value `NaN`. The algorithm handles this hard data differently as it shouldn't be considered in the pattern similarity calculations.
 
+`training_image` can also have inactive voxels marked with a special value. For continuous variables the special value is `NaN`, for categorical variables, the value is `typemin(Int)`. The convolution is only performed in active regions.
+
 Example
 -------
 
