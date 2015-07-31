@@ -93,7 +93,7 @@ function iqsim(training_image::AbstractArray,
   # perform simplex transform
   simplexTI = Any[TI]; nvertices = 1
   if categorical
-    categories = Set(training_image)
+    categories = Set(training_image[!NaNTI])
     ncategories = nvertices = length(categories) - 1
 
     @assert categories == Set(0:ncategories) "Categories should be labeled 1, 2, 3,..."
