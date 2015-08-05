@@ -168,7 +168,7 @@ function iqsim(training_image::AbstractArray,
   for real=1:nreal
     # allocate memory for current simulation
     simgrid = zeros(nx, ny, nz)
-    cutgrid = debug ? falses(nx, ny, nz) : []
+    cutgrid = debug ? zeros(nx, ny, nz) : []
 
     # set hard data for current simulation
     simulated = []
@@ -293,6 +293,10 @@ function iqsim(training_image::AbstractArray,
 
     # throw away voxels that are outside of the grid
     simgrid = simgrid[1:gridsizex,1:gridsizey,1:gridsizez]
+
+    # do the same for boundary cut, but only after saving voxel reusage
+    debug && push!(voxelreusage, sum(cutgrid)/overlap_volume)
+    debug && (cutgrid = cutgrid[1:gridsizex,1:gridsizey,1:gridsizez])
 
     #-----------------------------------------------------------------
 
@@ -427,12 +431,10 @@ function iqsim(training_image::AbstractArray,
 
       # arbitrarily shaped simulation grid
       simgrid[!activated] = categorical ? typemin(Int) : NaN
+      debug && (cutgrid[!activated] = NaN)
     end
 
     push!(realizations, categorical ? map(Int, simgrid) : simgrid)
-
-    debug && push!(voxelreusage, sum(cutgrid)/overlap_volume)
-    debug && (cutgrid = cutgrid[1:gridsizex,1:gridsizey,1:gridsizez])
     debug && push!(boundarycuts, cutgrid)
   end
 
