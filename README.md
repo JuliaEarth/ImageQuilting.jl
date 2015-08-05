@@ -30,7 +30,7 @@ reals = iqsim(training_image::AbstractArray,
               tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
               gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
               overlapx=1/6, overlapy=1/6, overlapz=1/6,
-              seed=0, nreal=1, cutoff=1e-2, categorical=false,
+              seed=0, nreal=1, cutoff=.1, categorical=false,
               soft=nothing, hard=nothing, debug=false)
 ```
 
