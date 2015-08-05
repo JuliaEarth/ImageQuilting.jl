@@ -67,7 +67,7 @@ function iqsim(training_image::AbstractArray,
   TI = map(Float64, training_image)
 
   # inactive voxels in the training image
-  NaNTI = categorical ? training_image .== typemin(Int) : isnan(training_image)
+  NaNTI = isnan(training_image)
   TI[NaNTI] = 0
 
   # disable tiles in the training image if they contain inactive voxels
@@ -430,11 +430,11 @@ function iqsim(training_image::AbstractArray,
       end
 
       # arbitrarily shaped simulation grid
-      simgrid[!activated] = categorical ? typemin(Int) : NaN
+      simgrid[!activated] = NaN
       debug && (cutgrid[!activated] = NaN)
     end
 
-    push!(realizations, categorical ? map(Int, simgrid) : simgrid)
+    push!(realizations, simgrid)
     debug && push!(boundarycuts, cutgrid)
   end
 

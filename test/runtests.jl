@@ -43,8 +43,7 @@ TI = ones(20,20,20)
 TI[:,5,:] = NaN
 reals = iqsim(TI, 10, 10, 10, size(TI)...)
 @test all(reals[1] .== 1)
-TI = ones(Int,20,20,20)
-TI[:,5,:] = typemin(Int); TI[1,5] = 0
+TI[1,5] = 0
 reals = iqsim(TI, 10, 10, 10, size(TI)..., categorical=true)
 @test all(reals[1] .== 1)
 
