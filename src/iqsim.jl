@@ -67,8 +67,7 @@ function iqsim(training_image::AbstractArray,
   TI = map(Float64, training_image)
 
   # inactive voxels in the training image
-  NaNTI = isnan(training_image)
-  TI[NaNTI] = 0
+  NaNTI = isnan(training_image); TI[NaNTI] = 0
 
   # disable tiles in the training image if they contain inactive voxels
   mₜ, nₜ, pₜ = size(TI)
@@ -127,7 +126,7 @@ function iqsim(training_image::AbstractArray,
 
     softgrid = padarray(soft.data, [0,0,0], [nx-lx,ny-ly,nz-lz], "symmetric")
 
-    softTI = soft.transform(TI)
+    softTI = soft.transform(TI); softTI[NaNTI] = 0
   end
 
   # tiles that contain hard data are skipped during raster path
