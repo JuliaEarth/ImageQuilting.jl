@@ -34,9 +34,16 @@ function iqsim(training_image::AbstractArray,
 
   # soft data checks
   if soft ≠ nothing
-    @assert isa(soft, SoftData)
-    @assert ndims(soft.data) == 3 "soft data is not 3D (add ghost dimension for 2D)"
-    @assert all([size(soft.data)...] .≥ [gridsizex, gridsizey, gridsizez]) "soft data size < grid size"
+    @assert isa(soft, SoftData) || isa(soft, AbstractArray{SoftData})
+
+    # encapsulate single auxiliary variable in an array
+    isa(soft, SoftData) && (soft = [soft])
+
+    for aux in soft
+      @assert ndims(aux.data) == 3 "soft data is not 3D (add ghost dimension for 2D)"
+      @assert all([size(aux.data)...] .≥ [gridsizex, gridsizey, gridsizez]) "soft data size < grid size"
+    end
+
     @assert 0 < cutoff ≤ 1 "cutoff must be in range (0,1] when soft data is available"
   end
 
@@ -119,14 +126,23 @@ function iqsim(training_image::AbstractArray,
                               (nz - (ntilez-1)overlapz)
 
   # pad soft data and soft transform training image
-  softgrid = softTI = []
+  softgrid = []; softTI = []
   if soft ≠ nothing
-    mx, my, mz = size(soft.data)
-    lx = min(mx,nx); ly = min(my,ny); lz = min(mz,nz)
+    for aux in soft
+      mx, my, mz = size(aux.data)
+      lx = min(mx,nx); ly = min(my,ny); lz = min(mz,nz)
 
-    softgrid = padarray(soft.data, [0,0,0], [nx-lx,ny-ly,nz-lz], "symmetric")
+      push!(softgrid, padarray(aux.data, [0,0,0], [nx-lx,ny-ly,nz-lz], "symmetric"))
 
-    softTI = soft.transform(TI); softTI[NaNTI] = 0
+      auxTI = aux.transform(TI)
+
+      @assert size(auxTI) == size(TI) "auxiliary TI must have the same size as TI"
+
+      # inactive voxels in the auxiliary training image
+      auxTI[NaNTI] = 0
+
+      push!(softTI, auxTI)
+    end
   end
 
   # tiles that contain hard data are skipped during raster path
@@ -228,25 +244,35 @@ function iqsim(training_image::AbstractArray,
       # current pattern database
       patterndb = []
       if soft ≠ nothing
-        # compute the distance between the soft dataevent and
-        # all dataevents in the soft training image
-        softdev = softgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-        softdistance = convdist(Any[softTI], Any[softdev])
+        softdistance = []
+        for n=1:length(soft)
+          # compute the distance between the soft dataevent and
+          # all dataevents in the soft training image
+          softdev = softgrid[n][iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+          D = convdist(Any[softTI[n]], Any[softdev])
 
-        # disable dataevents that contain inactive voxels
-        softdistance[disabled] = Inf
+          # disable dataevents that contain inactive voxels
+          D[disabled] = Inf
+
+          push!(softdistance, D)
+        end
 
         # candidates with good overlap
         dbsize = ceil(Int, cutoff*length(distance))
-        idx1 = sortperm(distance[:])[1:dbsize]
+        overlapdb = sortperm(distance[:])[1:dbsize]
 
         softcutoff = .1
         while true
           # candidates in accordance with soft data
-          softdbsize = ceil(Int, softcutoff*length(softdistance))
-          idx2 = sortperm(softdistance[:])[1:softdbsize]
+          softdbsize = ceil(Int, softcutoff*length(distance))
 
-          patterndb = intersect(idx1, idx2)
+          patterndb = overlapdb
+          for n=1:length(soft)
+            softdb = sortperm(softdistance[n][:])[1:softdbsize]
+            patterndb = intersect(patterndb, softdb)
+
+            isempty(patterndb) && break
+          end
 
           !isempty(patterndb) && break
           softcutoff += .1
@@ -362,25 +388,35 @@ function iqsim(training_image::AbstractArray,
             # current pattern database
             patterndb = []
             if soft ≠ nothing
-              # compute the distance between the soft dataevent and
-              # all dataevents in the soft training image
-              softdev = softgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-              softdistance = convdist(Any[softTI], Any[softdev], weights=booldev, inner=false)
+              softdistance = []
+              for n=1:length(soft)
+                # compute the distance between the soft dataevent and
+                # all dataevents in the soft training image
+                softdev = softgrid[n][iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+                D = convdist(Any[softTI[n]], Any[softdev], weights=booldev, inner=false)
 
-              # disable dataevents that contain inactive voxels
-              softdistance[disabledₜ] = Inf
+                # disable dataevents that contain inactive voxels
+                D[disabledₜ] = Inf
+
+                push!(softdistance, D)
+              end
 
               # candidates with good overlap
               dbsize = ceil(Int, cutoff*length(distance))
-              idx1 = sortperm(distance[:])[1:dbsize]
+              overlapdb = sortperm(distance[:])[1:dbsize]
 
               softcutoff = .1
               while true
                 # candidates in accordance with soft data
-                softdbsize = ceil(Int, softcutoff*length(softdistance))
-                idx2 = sortperm(softdistance[:])[1:softdbsize]
+                softdbsize = ceil(Int, softcutoff*length(distance))
 
-                patterndb = intersect(idx1, idx2)
+                patterndb = overlapdb
+                for n=1:length(soft)
+                  softdb = sortperm(softdistance[n][:])[1:softdbsize]
+                  patterndb = intersect(patterndb, softdb)
+
+                  isempty(patterndb) && break
+                end
 
                 !isempty(patterndb) && break
                 softcutoff += .1
