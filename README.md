@@ -49,7 +49,7 @@ where:
 * `nreal` is the number of realizations
 * `cutoff` is the overlap cutoff
 * `categorical` informs whether the image is categorical or continuous
-* `soft` is an instance of `SoftData`
+* `soft` is an instance of `SoftData` or an array of such instances
 * `hard` is an instance of `HardData`
 * `debug` tells whether to export or not the boundary cuts and voxel reusage
 
