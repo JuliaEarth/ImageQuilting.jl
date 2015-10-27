@@ -52,7 +52,7 @@ function boundary_cut(overlap::AbstractArray, dir::Symbol)
   end
 
   # backward search along last slice
-  _, idx = findmin(zslice[:,my])
+  idx = indmin(zslice[:,my])
   mslice = slice(M,:,:,mz)
   mslice[1:idx,my] = trues(idx)
   idxvec = zeros(Int, my); idxvec[my] = idx # keep track of indexes
