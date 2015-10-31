@@ -134,7 +134,7 @@ function iqsim(training_image::AbstractArray,
 
       push!(softgrid, padarray(aux.data, [0,0,0], [nx-lx,ny-ly,nz-lz], "symmetric"))
 
-      auxTI = aux.transform(TI)
+      auxTI = copy(aux.transform(TI))
 
       @assert size(auxTI) == size(TI) "auxiliary TI must have the same size as TI"
 

@@ -4,7 +4,7 @@ using Base.Test
 # the output of a homogeneous image is also homogeneous
 TI = ones(20,20,20)
 reals = iqsim(TI, 10, 10, 10, size(TI)...)
-@test all(reals[1] .== 1)
+@test reals[1] == ones(TI)
 
 # categories are obtained from training image only
 ncateg = 3; TI = rand(RandomDevice(), 0:ncateg, 20, 20, 20)
@@ -22,7 +22,7 @@ TI = ones(20,20,20)
 obs = rand(size(TI))
 data = HardData([(i,j,k)=>obs[i,j,k] for i=1:20, j=1:20, k=1:20])
 reals = iqsim(TI, 10, 10, 10, size(TI)..., hard=data)
-@test all(reals[1] .== obs)
+@test reals[1] == obs
 
 # irregular grids via hard data conditioning
 TI = ones(20,20,20)
@@ -42,10 +42,10 @@ reals = iqsim(TI, 10, 10, 10, size(TI)..., hard=shape)
 TI = ones(20,20,20)
 TI[:,5,:] = NaN
 reals = iqsim(TI, 10, 10, 10, size(TI)...)
-@test all(reals[1] .== 1)
+@test reals[1] == ones(TI)
 TI[1,5] = 0
 reals = iqsim(TI, 10, 10, 10, size(TI)..., categorical=true)
-@test all(reals[1] .== 1)
+@test reals[1] == ones(TI)
 
 # irregular training image and irregular grid
 TI = ones(20,20,20)
@@ -60,3 +60,11 @@ reals = iqsim(TI, 10, 10, 10, size(TI)..., hard=shape, soft=trend)
 @test all(isnan(reals[1][:,5,:]))
 @test all(reals[1][:,1:4,:] .== 1)
 @test all(reals[1][:,6:20,:] .== 1)
+
+# no side effects with soft data
+TI = ones(20,20,20)
+TI[:,5,:] = NaN
+aux = ones(TI)
+trend = SoftData(aux, x -> aux)
+iqsim(TI, 10, 10, 10, size(TI)..., soft=trend)
+@test aux == ones(TI)
