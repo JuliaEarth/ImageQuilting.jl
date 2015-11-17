@@ -171,6 +171,19 @@ function iqsim(training_image::AbstractArray,
     end
   end
 
+  # hard data (NaN excluded) in grid format
+  hardgrid = []; preset = []
+  if hard ≠ nothing
+    hardgrid = zeros(nx, ny, nz)
+    preset = falses(nx, ny, nz)
+    for loc in keys(hard)
+      if !isnan(hard[loc])
+        hardgrid[loc...] = hard[loc]
+        preset[loc...] = true
+      end
+    end
+  end
+
   # main output is a vector of 3D grids
   realizations = []
 
@@ -178,24 +191,16 @@ function iqsim(training_image::AbstractArray,
   boundarycuts = [] # boundary cut
   voxelreusage = [] # voxel reusage
 
+  # set seed and start
   srand(seed)
 
   for real=1:nreal
-    # allocate memory for current simulation
-    simgrid = zeros(nx, ny, nz)
+    # initialize grids
+    simgrid = hard ≠ nothing ? copy(hardgrid) : zeros(nx, ny, nz)
     cutgrid = debug ? zeros(nx, ny, nz) : []
 
-    # set hard data for current simulation
-    simulated = []
-    if hard ≠ nothing
-      simulated = falses(nx, ny, nz)
-      for loc in keys(hard)
-        if !isnan(hard[loc])
-          simgrid[loc...] = hard[loc]
-          simulated[loc...] = true
-        end
-      end
-    end
+    # highlight hard data locations
+    simulated = copy(preset)
 
     # loop simulation grid tile by tile
     for i=1:ntilex, j=1:ntiley, k=1:ntilez
