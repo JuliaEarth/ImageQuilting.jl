@@ -195,11 +195,12 @@ function iqsim(training_image::AbstractArray,
   srand(seed)
 
   for real=1:nreal
-    # initialize grids
-    simgrid = hard ≠ nothing ? copy(hardgrid) : zeros(nx, ny, nz)
+    # allocate memory for current simulation
+    simgrid = zeros(nx, ny, nz)
     cutgrid = debug ? zeros(nx, ny, nz) : []
 
-    # highlight hard data locations
+    # preset hard data
+    simgrid[preset] = hardgrid[preset]
     simulated = copy(preset)
 
     # loop simulation grid tile by tile
