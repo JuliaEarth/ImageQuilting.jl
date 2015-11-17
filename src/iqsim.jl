@@ -14,6 +14,10 @@
 
 using Images: imfilter_fft, padarray, dilate
 
+if VERSION >= v"0.5-"
+  using Combinatorics: combinations
+end
+
 include("datatypes.jl")
 include("boundary_cut.jl")
 include("simplex_transform.jl")
