@@ -350,12 +350,12 @@ function iqsim(training_image::AbstractArray,
       if !any(simulated)
         real == 1 && warn("Raster path skipped all tiles. Consider reducing the template size.")
 
-        # pick an active cell at random
-        bag = find(activated)
-        idx = bag[rand(1:length(bag))]
+        # pick an active voxel at random
+        voxbag = find(activated)
+        idx = voxbag[rand(1:length(voxbag))]
 
         # draw a value from the training image
-        simgrid[idx] = TI[rand(1:length(TI))]
+        simgrid[idx] = rand(TI[!NaNTI])
         simulated[idx] = true
       end
 
@@ -377,104 +377,130 @@ function iqsim(training_image::AbstractArray,
           disabledₜ = dilate(disabledₜ, [3])
         end
 
-        for vox in find(dilated - simulated)
-          # tile center is given by (iᵥ,jᵥ,kᵥ)
-          iᵥ, jᵥ, kᵥ = ind2sub(size(simgrid), vox)
+        if any([tplx,tply,tplz] .> 1)
+          for vox in find(dilated - simulated)
+            # tile center is given by (iᵥ,jᵥ,kᵥ)
+            iᵥ, jᵥ, kᵥ = ind2sub(size(simgrid), vox)
 
-          # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
-          iₛ = iᵥ - (tplx-1)÷2
-          jₛ = jᵥ - (tply-1)÷2
-          kₛ = kᵥ - (tplz-1)÷2
-          iₑ = iₛ + tplx - 1
-          jₑ = jₛ + tply - 1
-          kₑ = kₛ + tplz - 1
+            # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
+            iₛ = iᵥ - (tplx-1)÷2
+            jₛ = jᵥ - (tply-1)÷2
+            kₛ = kᵥ - (tplz-1)÷2
+            iₑ = iₛ + tplx - 1
+            jₑ = jₛ + tply - 1
+            kₑ = kₛ + tplz - 1
 
-          if all(0 .< [iₛ,jₛ,kₛ]) && all([iₑ,jₑ,kₑ] .≤ [size(simgrid)...]) && !simulated[vox]
-            # mark location as visited
+            if all(0 .< [iₛ,jₛ,kₛ]) && all([iₑ,jₑ,kₑ] .≤ [size(simgrid)...]) && !simulated[vox]
+              # mark location as visited
+              visited += 1
+
+              # voxel-centered dataevent
+              simdev = simgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+              simplexdev = categorical ? simplex_transform(simdev, nvertices) : Any[simdev]
+
+              # on/off dataevent
+              booldev = simulated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+
+              # compute the distance between the simulation dataevent
+              # and all patterns in the training image
+              distance = convdist(simplexTI, simplexdev, weights=booldev, inner=false)
+
+              # disable dataevents that contain inactive voxels
+              distance[disabledₜ] = Inf
+
+              # current pattern database
+              patterndb = []
+              if soft ≠ nothing
+                softdistance = []
+                for n=1:length(soft)
+                  # compute the distance between the soft dataevent and
+                  # all dataevents in the soft training image
+                  softdev = softgrid[n][iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+                  D = convdist(Any[softTI[n]], Any[softdev], weights=booldev, inner=false)
+
+                  # disable dataevents that contain inactive voxels
+                  D[disabledₜ] = Inf
+
+                  push!(softdistance, D)
+                end
+
+                # candidates with good overlap
+                dbsize = ceil(Int, cutoff*length(distance))
+                overlapdb = sortperm(distance[:])[1:dbsize]
+
+                softcutoff = .1
+                while true
+                  # candidates in accordance with soft data
+                  softdbsize = ceil(Int, softcutoff*length(distance))
+
+                  patterndb = overlapdb
+                  for n=1:length(soft)
+                    softdb = sortperm(softdistance[n][:])[1:softdbsize]
+                    patterndb = intersect(patterndb, softdb)
+
+                    isempty(patterndb) && break
+                  end
+
+                  !isempty(patterndb) && break
+                  softcutoff += .1
+                end
+              else
+                patterndb = find(distance .≤ (1+cutoff)minimum(distance))
+              end
+
+              # pick a pattern at random from the database
+              idx = patterndb[rand(1:length(patterndb))]
+              iᵦ, jᵦ, kᵦ = ind2sub(size(distance), idx)
+
+              # tile top left corner is given by (Is,Js,Ks)
+              Is = iᵦ - (tplx-1)÷2
+              Js = jᵦ - (tply-1)÷2
+              Ks = kᵦ - (tplz-1)÷2
+
+              # pad training image dataevent
+              TIdev = zeros(tplx, tply, tplz)
+              valid = falses(tplx, tply, tplz)
+              for δi=1:tplx, δj=1:tply, δk=1:tplz
+                i, j, k = Is+δi-1, Js+δj-1, Ks+δk-1
+                if all(0 .< [i,j,k] .≤ [size(TI)...]) && !NaNTI[i,j,k]
+                  TIdev[δi,δj,δk] = TI[i,j,k]
+                  valid[δi,δj,δk] = true
+                end
+              end
+
+              # voxels to be simulated
+              M = valid & activated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] & !simulated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+
+              # paste highlighted portion onto simulation grid
+              simgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = M.*TIdev + !M.*simdev
+
+              # simulation progress
+              simulated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] |= M
+            end
+          end
+        else
+          # perform last pass copying nearest neighbors
+          for vox in find(dilated - simulated)
+            # tile center is given by (iᵥ,jᵥ,kᵥ)
+            iᵥ, jᵥ, kᵥ = ind2sub(size(simgrid), vox)
+
+            # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
+            iₛ, jₛ, kₛ = max(iᵥ-1, 1), max(jᵥ-1, 1), max(kᵥ-1, 1)
+            iₑ, jₑ, kₑ = min(iᵥ+1, gridsizex), min(jᵥ+1, gridsizey), min(kᵥ+1, gridsizez)
+
+            # visit voxel
             visited += 1
 
             # voxel-centered dataevent
             simdev = simgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-            simplexdev = categorical ? simplex_transform(simdev, nvertices) : Any[simdev]
 
-            # on/off dataevent
-            booldev = simulated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+            # pick a voxel in the simulated neighborhood at random
+            neighborhood = find(activated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] & simulated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
+            idx = neighborhood[rand(1:length(neighborhood))]
 
-            # compute the distance between the simulation dataevent
-            # and all patterns in the training image
-            distance = convdist(simplexTI, simplexdev, weights=booldev, inner=false)
-
-            # disable dataevents that contain inactive voxels
-            distance[disabledₜ] = Inf
-
-            # current pattern database
-            patterndb = []
-            if soft ≠ nothing
-              softdistance = []
-              for n=1:length(soft)
-                # compute the distance between the soft dataevent and
-                # all dataevents in the soft training image
-                softdev = softgrid[n][iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-                D = convdist(Any[softTI[n]], Any[softdev], weights=booldev, inner=false)
-
-                # disable dataevents that contain inactive voxels
-                D[disabledₜ] = Inf
-
-                push!(softdistance, D)
-              end
-
-              # candidates with good overlap
-              dbsize = ceil(Int, cutoff*length(distance))
-              overlapdb = sortperm(distance[:])[1:dbsize]
-
-              softcutoff = .1
-              while true
-                # candidates in accordance with soft data
-                softdbsize = ceil(Int, softcutoff*length(distance))
-
-                patterndb = overlapdb
-                for n=1:length(soft)
-                  softdb = sortperm(softdistance[n][:])[1:softdbsize]
-                  patterndb = intersect(patterndb, softdb)
-
-                  isempty(patterndb) && break
-                end
-
-                !isempty(patterndb) && break
-                softcutoff += .1
-              end
-            else
-              patterndb = find(distance .≤ (1+cutoff)minimum(distance))
-            end
-
-            # pick a pattern at random from the database
-            idx = patterndb[rand(1:length(patterndb))]
-            iᵦ, jᵦ, kᵦ = ind2sub(size(distance), idx)
-
-            # tile top left corner is given by (Is,Js,Ks)
-            Is = iᵦ - (tplx-1)÷2
-            Js = jᵦ - (tply-1)÷2
-            Ks = kᵦ - (tplz-1)÷2
-
-            # pad training image dataevent
-            TIdev = zeros(tplx, tply, tplz)
-            valid = falses(tplx, tply, tplz)
-            for δi=1:tplx, δj=1:tply, δk=1:tplz
-              i, j, k = Is+δi-1, Js+δj-1, Ks+δk-1
-              if all(0 .< [i,j,k] .≤ [size(TI)...])
-                TIdev[δi,δj,δk] = TI[i,j,k]
-                valid[δi,δj,δk] = true
-              end
-            end
-
-            # voxels to be simulated
-            M = valid & activated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] & !simulated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-
-            # paste highlighted portion onto simulation grid
-            simgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = M.*TIdev + !M.*simdev
-
-            # simulation progress
-            simulated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] |= M
+            # copy it
+            simgrid[iᵥ,jᵥ,kᵥ] = simdev[idx]
+            simulated[iᵥ,jᵥ,kᵥ] = true
           end
         end
 
