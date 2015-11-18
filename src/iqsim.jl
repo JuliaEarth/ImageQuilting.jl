@@ -103,7 +103,7 @@ function iqsim(training_image::AbstractArray,
     categories = Set(training_image[!NaNTI])
     ncategories = nvertices = length(categories) - 1
 
-    @assert categories == Set(0:ncategories) "Categories should be labeled 1, 2, 3,..."
+    @assert categories == Set(0:ncategories) "categories should be labeled 1, 2, 3,..."
 
     simplexTI = simplex_transform(TI, nvertices)
   end
@@ -122,6 +122,8 @@ function iqsim(training_image::AbstractArray,
         activated[loc...] = false
       end
     end
+
+    @assert any(activated[1:gridsizex,1:gridsizey,1:gridsizez]) "simulation grid has no active cell"
   end
 
   # total overlap volume in simulation grid
@@ -342,6 +344,20 @@ function iqsim(training_image::AbstractArray,
       # throw away voxels that are outside of the grid
       simulated = simulated[1:gridsizex,1:gridsizey,1:gridsizez]
       activated = activated[1:gridsizex,1:gridsizey,1:gridsizez]
+
+      # draw a value at random from the training image if all tiles
+      # were skipped by the raster path and hard data is not available
+      if !any(simulated)
+        real == 1 && warn("Raster path skipped all tiles. Consider reducing the template size.")
+
+        # pick an active cell at random
+        bag = find(activated)
+        idx = bag[rand(1:length(bag))]
+
+        # draw a value from the training image
+        simgrid[idx] = TI[rand(1:length(TI))]
+        simulated[idx] = true
+      end
 
       # morphological dilation
       dilated = dilate(simulated) & activated
