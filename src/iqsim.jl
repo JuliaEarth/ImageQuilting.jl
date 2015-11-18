@@ -366,19 +366,15 @@ function iqsim(training_image::AbstractArray,
         visited = 0
 
         # disable tiles in the training image if they contain inactive voxels
-        disabledₜ = falses(mₜ, nₜ, pₜ)
-        for nanidx in find(NaNTI)
-          iₙ, jₙ, kₙ = ind2sub(size(TI), nanidx)
-
-          # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
-          iₛ = max(iₙ - tplx÷2, 1)
-          jₛ = max(jₙ - tply÷2, 1)
-          kₛ = max(kₙ - tplz÷2, 1)
-          iₑ = min(iₛ + tplx - 1, mₜ)
-          jₑ = min(jₛ + tply - 1, nₜ)
-          kₑ = min(kₛ + tplz - 1, pₜ)
-
-          disabledₜ[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = true
+        disabledₜ = copy(NaNTI)
+        for i=1:tplx-1
+          disabledₜ = dilate(disabledₜ, [1])
+        end
+        for j=1:tply-1
+          disabledₜ = dilate(disabledₜ, [2])
+        end
+        for k=1:tplz-1
+          disabledₜ = dilate(disabledₜ, [3])
         end
 
         for vox in find(dilated - simulated)
