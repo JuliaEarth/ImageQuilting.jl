@@ -74,82 +74,10 @@ function iqsim(training_image::AbstractArray,
   ntiley = ceil(Int, gridsizey / max(spacingy, 1))
   ntilez = ceil(Int, gridsizez / max(spacingz, 1))
 
-  # always work with floating point
-  TI = map(Float64, training_image)
-
-  # inactive voxels in the training image
-  NaNTI = isnan(training_image); TI[NaNTI] = 0
-
-  # disable tiles in the training image if they contain inactive voxels
-  mₜ, nₜ, pₜ = size(TI)
-  disabled = falses(mₜ-tplsizex+1, nₜ-tplsizey+1, pₜ-tplsizez+1)
-  for nanidx in find(NaNTI)
-    iₙ, jₙ, kₙ = ind2sub(size(TI), nanidx)
-
-    # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
-    iₛ = max(iₙ-tplsizex+1, 1)
-    jₛ = max(jₙ-tplsizey+1, 1)
-    kₛ = max(kₙ-tplsizez+1, 1)
-    iₑ = min(iₙ, mₜ-tplsizex+1)
-    jₑ = min(jₙ, nₜ-tplsizey+1)
-    kₑ = min(kₙ, pₜ-tplsizez+1)
-
-    disabled[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = true
-  end
-
-  # perform simplex transform
-  simplexTI = Any[TI]; nvertices = 1
-  if categorical
-    categories = Set(training_image[!NaNTI])
-    ncategories = nvertices = length(categories) - 1
-
-    @assert categories == Set(0:ncategories) "categories should be labeled 1, 2, 3,..."
-
-    simplexTI = simplex_transform(TI, nvertices)
-  end
-
   # simulation grid dimensions
   nx = ntilex * (tplsizex - overlapx) + overlapx
   ny = ntiley * (tplsizey - overlapy) + overlapy
   nz = ntilez * (tplsizez - overlapz) + overlapz
-
-  # simulation grid irregularities
-  activated = []
-  if hard ≠ nothing
-    activated = trues(nx, ny, nz)
-    for loc in keys(hard)
-      if isnan(hard[loc])
-        activated[loc...] = false
-      end
-    end
-
-    @assert any(activated[1:gridsizex,1:gridsizey,1:gridsizez]) "simulation grid has no active cell"
-  end
-
-  # total overlap volume in simulation grid
-  overlap_volume = nx*ny*nz - (nx - (ntilex-1)overlapx)*
-                              (ny - (ntiley-1)overlapy)*
-                              (nz - (ntilez-1)overlapz)
-
-  # pad soft data and soft transform training image
-  softgrid = []; softTI = []
-  if soft ≠ nothing
-    for aux in soft
-      mx, my, mz = size(aux.data)
-      lx = min(mx,nx); ly = min(my,ny); lz = min(mz,nz)
-
-      push!(softgrid, padarray(aux.data, [0,0,0], [nx-lx,ny-ly,nz-lz], "symmetric"))
-
-      auxTI = copy(aux.transform(TI))
-
-      @assert size(auxTI) == size(TI) "auxiliary TI must have the same size as TI"
-
-      # inactive voxels in the auxiliary training image
-      auxTI[NaNTI] = 0
-
-      push!(softTI, auxTI)
-    end
-  end
 
   # tiles that contain hard data are skipped during raster path
   skipped = Set()
@@ -177,17 +105,77 @@ function iqsim(training_image::AbstractArray,
     end
   end
 
-  # hard data (NaN excluded) in grid format
-  hardgrid = []; preset = []
+  # always work with floating point
+  TI = map(Float64, training_image)
+
+  # inactive voxels in the training image
+  NaNTI = isnan(training_image); TI[NaNTI] = 0
+
+  # perform simplex transform
+  simplexTI = Any[TI]; nvertices = 1
+  if categorical
+    categories = Set(training_image[!NaNTI])
+    ncategories = nvertices = length(categories) - 1
+
+    @assert categories == Set(0:ncategories) "categories should be labeled 1, 2, 3,..."
+
+    simplexTI = simplex_transform(TI, nvertices)
+  end
+
+  # pad soft data and soft transform training image
+  softgrid = []; softTI = []
+  if soft ≠ nothing
+    for aux in soft
+      mx, my, mz = size(aux.data)
+      lx = min(mx,nx); ly = min(my,ny); lz = min(mz,nz)
+
+      push!(softgrid, padarray(aux.data, [0,0,0], [nx-lx,ny-ly,nz-lz], "symmetric"))
+
+      auxTI = copy(aux.transform(TI))
+
+      @assert size(auxTI) == size(TI) "auxiliary TI must have the same size as TI"
+
+      # inactive voxels in the auxiliary training image
+      auxTI[NaNTI] = 0
+
+      push!(softTI, auxTI)
+    end
+  end
+
+  # disable tiles in the training image if they contain inactive voxels
+  mₜ, nₜ, pₜ = size(TI)
+  disabled = falses(mₜ-tplsizex+1, nₜ-tplsizey+1, pₜ-tplsizez+1)
+  for nanidx in find(NaNTI)
+    iₙ, jₙ, kₙ = ind2sub(size(TI), nanidx)
+
+    # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
+    iₛ = max(iₙ-tplsizex+1, 1)
+    jₛ = max(jₙ-tplsizey+1, 1)
+    kₛ = max(kₙ-tplsizez+1, 1)
+    iₑ = min(iₙ, mₜ-tplsizex+1)
+    jₑ = min(jₙ, nₜ-tplsizey+1)
+    kₑ = min(kₙ, pₜ-tplsizez+1)
+
+    disabled[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = true
+  end
+
+  # hard data in grid format
+  hardgrid = []; preset = []; activated = []
   if hard ≠ nothing
     hardgrid = zeros(nx, ny, nz)
     preset = falses(nx, ny, nz)
+    activated = trues(nx, ny, nz)
+
     for loc in keys(hard)
-      if !isnan(hard[loc])
+      if isnan(hard[loc])
+        activated[loc...] = false
+      else
         hardgrid[loc...] = hard[loc]
         preset[loc...] = true
       end
     end
+
+    @assert any(activated[1:gridsizex,1:gridsizey,1:gridsizez]) "simulation grid has no active cell"
   end
 
   # last check before simulation
@@ -198,6 +186,11 @@ function iqsim(training_image::AbstractArray,
     condition = nskip < ntile || any(preset)
     @assert condition "raster path must visit at least one tile in the absence of data"
   end
+
+  # total overlap volume in simulation grid
+  overlap_volume = nx*ny*nz - (nx - (ntilex-1)overlapx)*
+                              (ny - (ntiley-1)overlapy)*
+                              (nz - (ntilez-1)overlapz)
 
   # main output is a vector of 3D grids
   realizations = []
