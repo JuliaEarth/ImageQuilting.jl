@@ -501,7 +501,10 @@ function iqsim(training_image::AbstractArray,
 
         if visited == 0
           # reduce the template size and proceed
-          tplx, tply, tplz = max(tplx-1, 1), max(tply-1, 1), max(tplz-1, 1)
+          idx = indmax([tplz,tply,tplx])
+          idx == 3 && (tplx = max(tplx-1,1))
+          idx == 2 && (tply = max(tply-1,1))
+          idx == 1 && (tplz = max(tplz-1,1))
         end
 
         dilated = dilate(simulated) & activated
