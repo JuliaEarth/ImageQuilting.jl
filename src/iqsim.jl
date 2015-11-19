@@ -190,6 +190,15 @@ function iqsim(training_image::AbstractArray,
     end
   end
 
+  # last check before simulation
+  if hard ≠ nothing
+    ntile = ntilex*ntiley*ntilez
+    nskip = length(skipped)
+
+    condition = nskip < ntile || any(preset)
+    @assert condition "raster path must visit at least one tile in the absence of data"
+  end
+
   # main output is a vector of 3D grids
   realizations = []
 
@@ -344,20 +353,6 @@ function iqsim(training_image::AbstractArray,
       # throw away voxels that are outside of the grid
       simulated = simulated[1:gridsizex,1:gridsizey,1:gridsizez]
       activated = activated[1:gridsizex,1:gridsizey,1:gridsizez]
-
-      # draw a value at random from the training image if all tiles
-      # were skipped by the raster path and hard data is not available
-      if !any(simulated)
-        real == 1 && warn("Raster path skipped all tiles. Consider reducing the template size.")
-
-        # pick an active voxel at random
-        voxbag = find(activated)
-        idx = voxbag[rand(1:length(voxbag))]
-
-        # draw a value from the training image
-        simgrid[idx] = rand(TI[!NaNTI])
-        simulated[idx] = true
-      end
 
       # morphological dilation
       dilated = dilate(simulated) & activated
