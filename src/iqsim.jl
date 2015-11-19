@@ -105,6 +105,25 @@ function iqsim(training_image::AbstractArray,
     end
   end
 
+  # precompute voxels covered by raster path
+  rastered = []
+  if hard ≠ nothing
+    rastered = falses(nx, ny, nz)
+    for i=1:ntilex, j=1:ntiley, k=1:ntilez
+      if (i,j,k) ∉ skipped
+        # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
+        iₛ = (i-1)spacingx + 1
+        jₛ = (j-1)spacingy + 1
+        kₛ = (k-1)spacingz + 1
+        iₑ = iₛ + tplsizex - 1
+        jₑ = jₛ + tplsizey - 1
+        kₑ = kₛ + tplsizez - 1
+
+        rastered[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = true
+      end
+    end
+  end
+
   # always work with floating point
   TI = map(Float64, training_image)
 
@@ -174,17 +193,15 @@ function iqsim(training_image::AbstractArray,
         preset[loc...] = true
       end
     end
-
-    @assert any(activated[1:gridsizex,1:gridsizey,1:gridsizez]) "simulation grid has no active cell"
   end
 
   # last check before simulation
   if hard ≠ nothing
-    ntile = ntilex*ntiley*ntilez
-    nskip = length(skipped)
-
-    condition = nskip < ntile || any(preset)
-    @assert condition "raster path must visit at least one tile in the absence of data"
+    simulated = preset | rastered
+    any_activated = any(activated[1:gridsizex,1:gridsizey,1:gridsizez])
+    any_simulated = any(simulated[1:gridsizex,1:gridsizey,1:gridsizez])
+    @assert any_activated "simulation grid has no active voxel"
+    @assert any_simulated "raster path must visit at least one tile in the absence of data"
   end
 
   # total overlap volume in simulation grid
@@ -209,10 +226,12 @@ function iqsim(training_image::AbstractArray,
 
     # preset hard data
     simgrid[preset] = hardgrid[preset]
-    simulated = copy(preset)
 
     # loop simulation grid tile by tile
     for i=1:ntilex, j=1:ntiley, k=1:ntilez
+      # skip tile if it contains hard data
+      (i,j,k) ∈ skipped && continue
+
       # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
       iₛ = (i-1)spacingx + 1
       jₛ = (j-1)spacingy + 1
@@ -220,9 +239,6 @@ function iqsim(training_image::AbstractArray,
       iₑ = iₛ + tplsizex - 1
       jₑ = jₛ + tplsizey - 1
       kₑ = kₛ + tplsizez - 1
-
-      # skip tile if it contains hard data
-      (i,j,k) ∈ skipped && continue
 
       # current simulation dataevent
       simdev = simgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
@@ -323,9 +339,6 @@ function iqsim(training_image::AbstractArray,
       # paste contributions from simulation grid and training image
       simgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = M.*simdev + !M.*TIdev
 
-      # simulation progress
-      hard ≠ nothing && (simulated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = true)
-
       # save boundary cut
       debug && (cutgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = M)
     end
@@ -342,6 +355,8 @@ function iqsim(training_image::AbstractArray,
     # simulate remaining voxels skipped during raster path
     if hard ≠ nothing
       tplx, tply, tplz = tplsizex, tplsizey, tplsizez
+
+      simulated = preset | rastered
 
       # throw away voxels that are outside of the grid
       simulated = simulated[1:gridsizex,1:gridsizey,1:gridsizez]
