@@ -79,6 +79,11 @@ function iqsim(training_image::AbstractArray,
   ny = ntiley * (tplsizey - overlapy) + overlapy
   nz = ntilez * (tplsizez - overlapz) + overlapz
 
+  # total overlap volume in simulation grid
+  overlap_volume = nx*ny*nz - (nx - (ntilex-1)overlapx)*
+                              (ny - (ntiley-1)overlapy)*
+                              (nz - (ntilez-1)overlapz)
+
   # tiles that contain hard data are skipped during raster path
   skipped = Set()
   if hard ≠ nothing
@@ -105,6 +110,23 @@ function iqsim(training_image::AbstractArray,
     end
   end
 
+  # hard data in grid format
+  hardgrid = []; preset = []; activated = []
+  if hard ≠ nothing
+    hardgrid = zeros(nx, ny, nz)
+    preset = falses(nx, ny, nz)
+    activated = trues(nx, ny, nz)
+
+    for loc in keys(hard)
+      if isnan(hard[loc])
+        activated[loc...] = false
+      else
+        hardgrid[loc...] = hard[loc]
+        preset[loc...] = true
+      end
+    end
+  end
+
   # precompute voxels covered by raster path
   rastered = []
   if hard ≠ nothing
@@ -122,6 +144,15 @@ function iqsim(training_image::AbstractArray,
         rastered[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = true
       end
     end
+  end
+
+  # raster path must be non-empty or data must be available
+  if hard ≠ nothing
+    simulated = preset | rastered
+    any_activated = any(activated[1:gridsizex,1:gridsizey,1:gridsizez])
+    any_simulated = any(simulated[1:gridsizex,1:gridsizey,1:gridsizez])
+    @assert any_activated "simulation grid has no active voxel"
+    @assert any_simulated "raster path must visit at least one tile in the absence of data"
   end
 
   # always work with floating point
@@ -177,37 +208,6 @@ function iqsim(training_image::AbstractArray,
 
     disabled[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = true
   end
-
-  # hard data in grid format
-  hardgrid = []; preset = []; activated = []
-  if hard ≠ nothing
-    hardgrid = zeros(nx, ny, nz)
-    preset = falses(nx, ny, nz)
-    activated = trues(nx, ny, nz)
-
-    for loc in keys(hard)
-      if isnan(hard[loc])
-        activated[loc...] = false
-      else
-        hardgrid[loc...] = hard[loc]
-        preset[loc...] = true
-      end
-    end
-  end
-
-  # last check before simulation
-  if hard ≠ nothing
-    simulated = preset | rastered
-    any_activated = any(activated[1:gridsizex,1:gridsizey,1:gridsizez])
-    any_simulated = any(simulated[1:gridsizex,1:gridsizey,1:gridsizez])
-    @assert any_activated "simulation grid has no active voxel"
-    @assert any_simulated "raster path must visit at least one tile in the absence of data"
-  end
-
-  # total overlap volume in simulation grid
-  overlap_volume = nx*ny*nz - (nx - (ntilex-1)overlapx)*
-                              (ny - (ntiley-1)overlapy)*
-                              (nz - (ntilez-1)overlapz)
 
   # main output is a vector of 3D grids
   realizations = []
@@ -381,6 +381,7 @@ function iqsim(training_image::AbstractArray,
         end
 
         if any([tplx,tply,tplz] .> 1)
+          # scan training image
           for vox in find(dilated - simulated)
             # tile center is given by (iᵥ,jᵥ,kᵥ)
             iᵥ, jᵥ, kᵥ = ind2sub(size(simgrid), vox)
@@ -482,7 +483,7 @@ function iqsim(training_image::AbstractArray,
             end
           end
         else
-          # perform last pass copying nearest neighbors
+          # copy a neighbor voxel from simulation grid
           for vox in find(dilated - simulated)
             # tile center is given by (iᵥ,jᵥ,kᵥ)
             iᵥ, jᵥ, kᵥ = ind2sub(size(simgrid), vox)
