@@ -84,32 +84,6 @@ function iqsim(training_image::AbstractArray,
                               (ny - (ntiley-1)overlapy)*
                               (nz - (ntilez-1)overlapz)
 
-  # tiles that contain hard data are skipped during raster path
-  skipped = Set()
-  if hard ≠ nothing
-    for (x,y,z) in keys(hard)
-      i = spacingx > 0 ? min((x-1)÷spacingx+1, ntilex) : 1
-      j = spacingy > 0 ? min((y-1)÷spacingy+1, ntiley) : 1
-      k = spacingz > 0 ? min((z-1)÷spacingz+1, ntilez) : 1
-
-      push!(skipped, (i,j,k))
-
-      inoverlap = falses(3)
-      i > 1 && x ≤ ntilex*spacingx && (x-1-overlapx)÷spacingx+1 < i && (inoverlap[1] = true)
-      j > 1 && y ≤ ntiley*spacingy && (y-1-overlapy)÷spacingy+1 < j && (inoverlap[2] = true)
-      k > 1 && z ≤ ntilez*spacingz && (z-1-overlapz)÷spacingz+1 < k && (inoverlap[3] = true)
-
-      for n=1:3
-        for c in combinations(1:3, n)
-          if all(inoverlap[c])
-            idx = [i,j,k]; idx[c] -= 1
-            push!(skipped, (idx...))
-          end
-        end
-      end
-    end
-  end
-
   # hard data in grid format
   hardgrid = []; preset = []; activated = []
   if hard ≠ nothing
@@ -127,23 +101,26 @@ function iqsim(training_image::AbstractArray,
     end
   end
 
-  # precompute voxels covered by raster path
-  rastered = []
+  # tiles that contain hard data are skipped during raster path
+  skipped = Set(); rastered = []
   if hard ≠ nothing
     rastered = falses(nx, ny, nz)
     for i=1:ntilex, j=1:ntiley, k=1:ntilez
-      if (i,j,k) ∉ skipped
-        # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
-        iₛ = (i-1)spacingx + 1
-        jₛ = (j-1)spacingy + 1
-        kₛ = (k-1)spacingz + 1
-        iₑ = iₛ + tplsizex - 1
-        jₑ = jₛ + tplsizey - 1
-        kₑ = kₛ + tplsizez - 1
+      # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
+      iₛ = (i-1)spacingx + 1
+      jₛ = (j-1)spacingy + 1
+      kₛ = (k-1)spacingz + 1
+      iₑ = iₛ + tplsizex - 1
+      jₑ = jₛ + tplsizey - 1
+      kₑ = kₛ + tplsizez - 1
 
+      if any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]) || all(!activated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
+        push!(skipped, (i,j,k))
+      else
         rastered[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = true
       end
     end
+    rastered[!activated] = false
   end
 
   # raster path must be non-empty or data must be available
@@ -485,15 +462,15 @@ function iqsim(training_image::AbstractArray,
         else
           # copy a neighbor voxel from simulation grid
           for vox in find(dilated - simulated)
+            # mark location as visited
+            visited += 1
+
             # tile center is given by (iᵥ,jᵥ,kᵥ)
             iᵥ, jᵥ, kᵥ = ind2sub(size(simgrid), vox)
 
             # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
             iₛ, jₛ, kₛ = max(iᵥ-1, 1), max(jᵥ-1, 1), max(kᵥ-1, 1)
             iₑ, jₑ, kₑ = min(iᵥ+1, gridsizex), min(jᵥ+1, gridsizey), min(kᵥ+1, gridsizez)
-
-            # visit voxel
-            visited += 1
 
             # voxel-centered dataevent
             simdev = simgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
