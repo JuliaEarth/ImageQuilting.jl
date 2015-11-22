@@ -14,7 +14,7 @@
 
 using Images: imfilter_fft, padarray, dilate
 
-if VERSION > v"0.5-dev+1158"
+if VERSION > v"0.5-"
   using Combinatorics: combinations
 end
 
