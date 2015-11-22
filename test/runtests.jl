@@ -92,3 +92,8 @@ end
 reals = iqsim(TI, 10, 10, 1, size(TI)..., hard=data)
 @test reals[1][20,20,1] == 10
 @test reals[1][20,19,1] == 10
+
+# boundary cut in 3D
+TI = ones(20,20,20)
+_, _, voxs = iqsim(TI, 10, 10, 10, size(TI)..., overlapx=1/3, overlapy=1/3, overlapz=1/3, debug=true)
+@test 0 ≤ voxs[1] ≤ 1
