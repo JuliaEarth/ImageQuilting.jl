@@ -72,6 +72,7 @@ iqsim(TI, 10, 10, 10, size(TI)..., soft=trend)
 # raster path and dilation both take effect
 TI = ones(20,20,20)
 data = HardData((1,1,1)=>10)
-reals = iqsim(TI, 10, 10, 10, size(TI)..., hard=data)
+trend = SoftData(aux, x -> aux)
+reals = iqsim(TI, 10, 10, 10, size(TI)..., hard=data, soft=trend)
 @test reals[1][1,1,1] == 10
 @test all(reals[1][2:end] .== 1)
