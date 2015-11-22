@@ -15,7 +15,7 @@ Features
 * 3D image quilting
 * Soft data conditioning
 * Hard data conditioning
-* Regular and irregular grids
+* Masked grids
 
 Installation
 ------------
@@ -83,9 +83,9 @@ well = HardData([(i,j,k)=>value(i,j,k) for i=10, j=10, k=1:100])
 iqsim(..., hard=well)
 ```
 
-### Irregular grids
+### Masked grids
 
-Irregular grids are a special case of hard data conditioning where inactive voxels are marked with the value `NaN`. The algorithm handles this hard data differently as it shouldn't be considered in the pattern similarity calculations.
+Masked grids are a special case of hard data conditioning where inactive voxels are marked with the value `NaN`. The algorithm handles this hard data differently as it shouldn't be considered in the pattern similarity calculations.
 
 `training_image` can also have inactive voxels marked with `NaN`. Convolution results are only looked up in active regions.
 
