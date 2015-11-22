@@ -98,6 +98,9 @@ function iqsim(training_image::AbstractArray,
         preset[loc...] = true
       end
     end
+    activated[gridsizex+1:nx,:,:] = false
+    activated[:,gridsizey+1:ny,:] = false
+    activated[:,:,gridsizez+1:nz] = false
   end
 
   # tiles that contain hard data are skipped during raster path
