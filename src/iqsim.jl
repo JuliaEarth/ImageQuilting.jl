@@ -90,7 +90,6 @@ function iqsim(training_image::AbstractArray,
     hardgrid = zeros(nx, ny, nz)
     preset = falses(nx, ny, nz)
     activated = trues(nx, ny, nz)
-
     for loc in keys(hard)
       if isnan(hard[loc])
         activated[loc...] = false
@@ -105,7 +104,7 @@ function iqsim(training_image::AbstractArray,
   skipped = Set(); rastered = []
   if hard ≠ nothing
     rastered = falses(nx, ny, nz)
-    for i=1:ntilex, j=1:ntiley, k=1:ntilez
+    for k=1:ntilez, j=1:ntiley, i=1:ntilex
       # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
       iₛ = (i-1)spacingx + 1
       jₛ = (j-1)spacingy + 1
@@ -205,7 +204,7 @@ function iqsim(training_image::AbstractArray,
     simgrid[preset] = hardgrid[preset]
 
     # loop simulation grid tile by tile
-    for i=1:ntilex, j=1:ntiley, k=1:ntilez
+    for k=1:ntilez, j=1:ntiley, i=1:ntilex
       # skip tile if it contains hard data
       (i,j,k) ∈ skipped && continue
 
