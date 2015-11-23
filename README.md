@@ -38,13 +38,13 @@ reals = iqsim(training_image::AbstractArray,
 
 where:
 
-[required]
+#### required
 
 * `training_image` can be any 3D array (add ghost dimension for 2D)
 * `tplsizex`,`tplsizey`,`tplsizez` is the template size
 * `gridsizex`,`gridsizey`,`gridsizez` is the simulation size
 
-[optional]
+#### optional
 
 * `overlapx`,`overlapy`,`overlapz` is the percentage of overlap
 * `seed` is the random seed
