@@ -30,7 +30,7 @@ function boundary_cut(overlap::AbstractArray, dir::Symbol)
   E = zeros(B); M = falses(B)
 
   # pad accumulation cube with +inf
-  Epad = (i,j,k) -> all(0 .< [i,j,k] .≤ [mx,my,mz]) ? E[i,j,k] : Inf
+  Epad(i,j,k) = all(0 .< [i,j,k] .≤ [mx,my,mz]) ? E[i,j,k] : Inf
 
   # forward accumulation along 3D cube
   E[:,:,1] = B[:,:,1]
