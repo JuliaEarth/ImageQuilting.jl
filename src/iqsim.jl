@@ -198,6 +198,9 @@ function iqsim(training_image::AbstractArray,
   # set seed and start
   srand(seed)
 
+  # use all CPU cores in FFT
+  FFTW.set_num_threads(CPU_CORES)
+
   for real=1:nreal
     # allocate memory for current simulation
     simgrid = zeros(nx, ny, nz)
