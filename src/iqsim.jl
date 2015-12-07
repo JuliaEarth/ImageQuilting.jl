@@ -273,14 +273,16 @@ function iqsim(training_image::AbstractArray,
         dbsize = ceil(Int, cutoff*length(distance))
         overlapdb = sortperm(distance[:])[1:dbsize]
 
+        # candidates in accordance with soft data
+        allsoftdb = [sortperm(softdistance[n][:]) for n=1:length(soft)]
+
         softcutoff = .1
         while true
-          # candidates in accordance with soft data
           softdbsize = ceil(Int, softcutoff*length(distance))
 
           patterndb = overlapdb
           for n=1:length(soft)
-            softdb = sortperm(softdistance[n][:])[1:softdbsize]
+            softdb = allsoftdb[n][1:softdbsize]
             patterndb = intersect(patterndb, softdb)
 
             isempty(patterndb) && break
@@ -414,14 +416,16 @@ function iqsim(training_image::AbstractArray,
                 dbsize = ceil(Int, cutoff*length(distance))
                 overlapdb = sortperm(distance[:])[1:dbsize]
 
+                # candidates in accordance with soft data
+                allsoftdb = [sortperm(softdistance[n][:]) for n=1:length(soft)]
+
                 softcutoff = .1
                 while true
-                  # candidates in accordance with soft data
                   softdbsize = ceil(Int, softcutoff*length(distance))
 
                   patterndb = overlapdb
                   for n=1:length(soft)
-                    softdb = sortperm(softdistance[n][:])[1:softdbsize]
+                    softdb = allsoftdb[n][1:softdbsize]
                     patterndb = intersect(patterndb, softdb)
 
                     isempty(patterndb) && break
