@@ -26,8 +26,8 @@ function iqsim(training_image::AbstractArray,
                tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
                gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
                overlapx=1/6, overlapy=1/6, overlapz=1/6,
-               seed=0, nreal=1, cutoff=.1, categorical=false,
-               soft=nothing, hard=nothing, debug=false)
+               soft=nothing, hard=nothing, cutoff=.1, softcutoff=.1,
+               seed=0, nreal=1, categorical=false, debug=false)
 
   # sanity checks
   @assert ndims(training_image) == 3 "training image is not 3D (add ghost dimension for 2D)"
@@ -49,6 +49,7 @@ function iqsim(training_image::AbstractArray,
     end
 
     @assert 0 < cutoff ≤ 1 "cutoff must be in range (0,1] when soft data is available"
+    @assert 0 < softcutoff ≤ 1 "softcutoff must be in range (0,1]"
   end
 
   # hard data checks
@@ -277,9 +278,9 @@ function iqsim(training_image::AbstractArray,
         # candidates in accordance with soft data
         allsoftdb = [sortperm(softdistance[n][:]) for n=1:length(soft)]
 
-        softcutoff = .1
+        cutoffₛ = softcutoff
         while true
-          softdbsize = ceil(Int, softcutoff*length(distance))
+          softdbsize = ceil(Int, cutoffₛ*length(distance))
 
           patterndb = overlapdb
           for n=1:length(soft)
@@ -290,7 +291,7 @@ function iqsim(training_image::AbstractArray,
           end
 
           !isempty(patterndb) && break
-          softcutoff += .1
+          cutoffₛ = min(cutoffₛ + .1, 1)
         end
       else
         patterndb = find(distance .≤ (1+cutoff)minimum(distance))
@@ -420,9 +421,9 @@ function iqsim(training_image::AbstractArray,
                 # candidates in accordance with soft data
                 allsoftdb = [sortperm(softdistance[n][:]) for n=1:length(soft)]
 
-                softcutoff = .1
+                cutoffₛ = softcutoff
                 while true
-                  softdbsize = ceil(Int, softcutoff*length(distance))
+                  softdbsize = ceil(Int, cutoffₛ*length(distance))
 
                   patterndb = overlapdb
                   for n=1:length(soft)
@@ -433,7 +434,7 @@ function iqsim(training_image::AbstractArray,
                   end
 
                   !isempty(patterndb) && break
-                  softcutoff += .1
+                  cutoffₛ = min(cutoffₛ + .1, 1)
                 end
               else
                 patterndb = find(distance .≤ (1+cutoff)minimum(distance))

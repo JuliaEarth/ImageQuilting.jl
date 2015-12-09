@@ -32,8 +32,8 @@ reals = iqsim(training_image::AbstractArray,
               tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
               gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
               overlapx=1/6, overlapy=1/6, overlapz=1/6,
-              seed=0, nreal=1, cutoff=.1, categorical=false,
-              soft=nothing, hard=nothing, debug=false)
+              soft=nothing, hard=nothing, cutoff=.1, softcutoff=.1,
+              seed=0, nreal=1, categorical=false, debug=false)
 ```
 
 where:
@@ -47,12 +47,13 @@ where:
 #### optional
 
 * `overlapx`,`overlapy`,`overlapz` is the percentage of overlap
-* `seed` is the random seed
-* `nreal` is the number of realizations
-* `cutoff` is the overlap cutoff
-* `categorical` informs whether the image is categorical or continuous
 * `soft` is an instance of `SoftData` or an array of such instances
 * `hard` is an instance of `HardData`
+* `cutoff` is the overlap cutoff
+* `softcutoff` is the soft cutoff
+* `seed` is the random seed
+* `nreal` is the number of realizations
+* `categorical` informs whether the image is categorical or continuous
 * `debug` tells whether to export or not the boundary cuts and voxel reusage
 
 The main output `reals` consists of a list of 3D realizations that can be indexed with
