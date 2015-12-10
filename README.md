@@ -54,7 +54,7 @@ where:
 * `seed` is the random seed
 * `nreal` is the number of realizations
 * `categorical` informs whether the image is categorical or continuous
-* `debug` tells whether to export or not the boundary cuts and voxel reusage
+* `debug` tells whether to export or not the boundary cuts and voxel reuse
 
 The main output `reals` consists of a list of 3D realizations that can be indexed with
 `reals[1], reals[2], ..., reals[nreal]`. If `debug=true`, additional output is generated:
@@ -63,7 +63,7 @@ The main output `reals` consists of a list of 3D realizations that can be indexe
 reals, cuts, voxs = iqsim(..., debug=true)
 ```
 
-`cuts[i]` is the boundary cut for `reals[i]` and `voxs[i]` is the associated voxel reusage.
+`cuts[i]` is the boundary cut for `reals[i]` and `voxs[i]` is the associated voxel reuse.
 
 ### Soft data
 

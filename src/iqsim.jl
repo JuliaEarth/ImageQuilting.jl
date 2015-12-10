@@ -194,7 +194,7 @@ function iqsim(training_image::AbstractArray,
 
   # for each realization we have:
   boundarycuts = [] # boundary cut
-  voxelreusage = [] # voxel reusage
+  voxelreuse = [] # voxel reuse
 
   # set seed and start
   srand(seed)
@@ -332,8 +332,8 @@ function iqsim(training_image::AbstractArray,
     # throw away voxels that are outside of the grid
     simgrid = simgrid[1:gridsizex,1:gridsizey,1:gridsizez]
 
-    # do the same for boundary cut, but only after saving voxel reusage
-    debug && push!(voxelreusage, sum(cutgrid)/overlap_volume)
+    # do the same for boundary cut, but only after saving voxel reuse
+    debug && push!(voxelreuse, sum(cutgrid)/overlap_volume)
     debug && (cutgrid = cutgrid[1:gridsizex,1:gridsizey,1:gridsizez])
 
     #-----------------------------------------------------------------
@@ -516,7 +516,7 @@ function iqsim(training_image::AbstractArray,
     debug && push!(boundarycuts, cutgrid)
   end
 
-  debug ? (realizations, boundarycuts, voxelreusage) : realizations
+  debug ? (realizations, boundarycuts, voxelreuse) : realizations
 end
 
 function convdist(Xs::AbstractArray, masks::AbstractArray; weights=nothing, inner=true)
