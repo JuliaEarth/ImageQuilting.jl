@@ -97,3 +97,7 @@ reals = iqsim(TI, 10, 10, 1, size(TI)..., hard=data)
 TI = ones(20,20,20)
 _, _, voxs = iqsim(TI, 10, 10, 10, size(TI)..., overlapx=1/3, overlapy=1/3, overlapz=1/3, debug=true)
 @test 0 ≤ voxs[1] ≤ 1
+
+# mean voxel reuse is in range [0,1]
+TI = rand(20,20,20)
+@test 0 ≤ meanvoxreuse(TI, 10, 10, 10, nreal=1) ≤ 1

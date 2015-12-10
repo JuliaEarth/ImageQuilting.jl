@@ -15,10 +15,12 @@
 module ImageQuilting
 
 include("iqsim.jl")
+include("mean_voxel_reuse.jl")
 
 export
   # functions
   iqsim,
+  meanvoxreuse,
 
   # types
   SoftData,
