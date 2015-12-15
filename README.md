@@ -64,6 +64,7 @@ reals, cuts, voxs = iqsim(..., debug=true)
 ```
 
 `cuts[i]` is the boundary cut for `reals[i]` and `voxs[i]` is the associated voxel reuse.
+
 A helper function is also provided for the fast approximation of the *mean voxel reuse*:
 
 ```julia
