@@ -64,6 +64,16 @@ reals, cuts, voxs = iqsim(..., debug=true)
 ```
 
 `cuts[i]` is the boundary cut for `reals[i]` and `voxs[i]` is the associated voxel reuse.
+A helper function is also provided for the fast approximation of the *mean voxel reuse*:
+
+```julia
+mvr = meanvoxreuse(training_image::AbstractArray,
+                   tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
+                   overlapx=1/6, overlapy=1/6, overlapz=1/6,
+                   nreal=10, categorical=false)
+```
+
+with `mvr` in the interval [0,1]. The approximation gets better as `nreal` is made larger.
 
 ### Soft data
 
