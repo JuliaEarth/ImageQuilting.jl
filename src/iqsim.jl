@@ -159,7 +159,10 @@ function iqsim(training_image::AbstractArray,
       mx, my, mz = size(aux.data)
       lx = min(mx,nx); ly = min(my,ny); lz = min(mz,nz)
 
-      push!(softgrid, padarray(aux.data, [0,0,0], [nx-lx,ny-ly,nz-lz], "symmetric"))
+      auxpad = padarray(aux.data, [0,0,0], [nx-lx,ny-ly,nz-lz], "symmetric")
+      auxpad[isnan(auxpad)] = 0
+
+      push!(softgrid, auxpad)
 
       auxTI = copy(aux.transform(TI))
 
