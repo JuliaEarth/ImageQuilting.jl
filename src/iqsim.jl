@@ -285,7 +285,7 @@ function iqsim(training_image::AbstractArray,
           patterndb = overlapdb
           for n=1:length(soft)
             softdb = allsoftdb[n][1:softdbsize]
-            patterndb = intersect(patterndb, softdb)
+            patterndb = quick_intersect(patterndb, softdb, length(distance))
 
             isempty(patterndb) && break
           end
@@ -428,7 +428,7 @@ function iqsim(training_image::AbstractArray,
                   patterndb = overlapdb
                   for n=1:length(soft)
                     softdb = allsoftdb[n][1:softdbsize]
-                    patterndb = intersect(patterndb, softdb)
+                    patterndb = quick_intersect(patterndb, softdb, length(distance))
 
                     isempty(patterndb) && break
                   end
@@ -549,4 +549,13 @@ function overlapdist(X₁::AbstractArray, X₂::AbstractArray, nvertices::Intege
   end
 
   sum(result)
+end
+
+function quick_intersect(A::Vector{Int}, B::Vector{Int}, nbits::Integer)
+  bitsA = falses(nbits)
+  bitsB = falses(nbits)
+  bitsA[A] = true
+  bitsB[B] = true
+
+  find(bitsA & bitsB)
 end
