@@ -279,23 +279,9 @@ function iqsim(training_image::AbstractArray,
                                              sortperm(distance[:])[1:dbsize]
 
         # candidates in accordance with soft data
-        allsoftdb = [sortperm(softdistance[n][:]) for n=1:length(soft)]
+        softdbs = [sortperm(softdistance[n][:]) for n=1:length(soft)]
 
-        cutoffₛ = softcutoff
-        while true
-          softdbsize = ceil(Int, cutoffₛ*length(distance))
-
-          patterndb = overlapdb
-          for n=1:length(soft)
-            softdb = allsoftdb[n][1:softdbsize]
-            patterndb = quick_intersect(patterndb, softdb, length(distance))
-
-            isempty(patterndb) && break
-          end
-
-          !isempty(patterndb) && break
-          cutoffₛ = min(cutoffₛ + .1, 1)
-        end
+        patterndb = relaxation(overlapdb, softdbs, softcutoff, length(distance))
       else
         patterndb = find(distance .≤ (1+cutoff)minimum(distance))
       end
@@ -422,23 +408,9 @@ function iqsim(training_image::AbstractArray,
                 overlapdb = sortperm(distance[:])[1:dbsize]
 
                 # candidates in accordance with soft data
-                allsoftdb = [sortperm(softdistance[n][:]) for n=1:length(soft)]
+                softdbs = [sortperm(softdistance[n][:]) for n=1:length(soft)]
 
-                cutoffₛ = softcutoff
-                while true
-                  softdbsize = ceil(Int, cutoffₛ*length(distance))
-
-                  patterndb = overlapdb
-                  for n=1:length(soft)
-                    softdb = allsoftdb[n][1:softdbsize]
-                    patterndb = quick_intersect(patterndb, softdb, length(distance))
-
-                    isempty(patterndb) && break
-                  end
-
-                  !isempty(patterndb) && break
-                  cutoffₛ = min(cutoffₛ + .1, 1)
-                end
+                patterndb = relaxation(overlapdb, softdbs, softcutoff, length(distance))
               else
                 patterndb = find(distance .≤ (1+cutoff)minimum(distance))
               end
@@ -561,4 +533,26 @@ function quick_intersect(A::Vector{Int}, B::Vector{Int}, nbits::Integer)
   bitsB[B] = true
 
   find(bitsA & bitsB)
+end
+
+function relaxation(overlapdb::AbstractVector, softdbs::AbstractVector,
+                    initcutoff::Real, npatterns::Integer)
+  τₛ = initcutoff
+  patterndb = []
+  while true
+    softdbsize = ceil(Int, τₛ*npatterns)
+
+    patterndb = overlapdb
+    for n=1:length(softdbs)
+      softdb = softdbs[n][1:softdbsize]
+      patterndb = quick_intersect(patterndb, softdb, npatterns)
+
+      isempty(patterndb) && break
+    end
+
+    !isempty(patterndb) && break
+    τₛ = min(τₛ + .1, 1)
+  end
+
+  patterndb
 end
