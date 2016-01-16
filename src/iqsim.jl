@@ -19,6 +19,7 @@ if VERSION > v"0.5-"
 end
 
 include("datatypes.jl")
+include("relaxation.jl")
 include("boundary_cut.jl")
 include("simplex_transform.jl")
 
@@ -533,26 +534,4 @@ function quick_intersect(A::Vector{Int}, B::Vector{Int}, nbits::Integer)
   bitsB[B] = true
 
   find(bitsA & bitsB)
-end
-
-function relaxation(overlapdb::AbstractVector, softdbs::AbstractVector,
-                    initcutoff::Real, npatterns::Integer)
-  τₛ = initcutoff
-  patterndb = []
-  while true
-    softdbsize = ceil(Int, τₛ*npatterns)
-
-    patterndb = overlapdb
-    for n=1:length(softdbs)
-      softdb = softdbs[n][1:softdbsize]
-      patterndb = quick_intersect(patterndb, softdb, npatterns)
-
-      isempty(patterndb) && break
-    end
-
-    !isempty(patterndb) && break
-    τₛ = min(τₛ + .1, 1)
-  end
-
-  patterndb
 end
