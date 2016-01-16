@@ -13,6 +13,7 @@
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 using Images: imfilter_fft, padarray, dilate
+using StatsBase: sample, weights
 
 if VERSION > v"0.5-"
   using Combinatorics: combinations
@@ -20,6 +21,7 @@ end
 
 include("datatypes.jl")
 include("relaxation.jl")
+include("tau_model.jl")
 include("boundary_cut.jl")
 include("simplex_transform.jl")
 
@@ -27,7 +29,7 @@ function iqsim(training_image::AbstractArray,
                tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
                gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
                overlapx=1/6, overlapy=1/6, overlapz=1/6,
-               soft=nothing, hard=nothing, cutoff=.1, softcutoff=.1,
+               soft=nothing, hard=nothing, cutoff=.1, softcutoff=.01,
                seed=0, nreal=1, categorical=false, debug=false)
 
   # sanity checks
@@ -260,6 +262,7 @@ function iqsim(training_image::AbstractArray,
 
       # current pattern database
       patterndb = []
+      patternprobs = []
       if soft ≠ nothing
         softdistance = []
         for n=1:length(soft)
@@ -283,12 +286,14 @@ function iqsim(training_image::AbstractArray,
         softdbs = [sortperm(softdistance[n][:]) for n=1:length(soft)]
 
         patterndb = relaxation(overlapdb, softdbs, softcutoff, length(distance))
+        patternprobs = tau_model(patterndb, distance, softdistance)
       else
         patterndb = find(distance .≤ (1+cutoff)minimum(distance))
+        N = length(patterndb); patternprobs = fill(1/N, N)
       end
 
       # pick a pattern at random from the database
-      idx = patterndb[rand(1:length(patterndb))]
+      idx = sample(patterndb, weights(patternprobs))
       iᵦ, jᵦ, kᵦ = ind2sub(size(distance), idx)
 
       # selected training image dataevent
@@ -390,6 +395,7 @@ function iqsim(training_image::AbstractArray,
 
               # current pattern database
               patterndb = []
+              patternprobs = []
               if soft ≠ nothing
                 softdistance = []
                 for n=1:length(soft)
@@ -412,12 +418,14 @@ function iqsim(training_image::AbstractArray,
                 softdbs = [sortperm(softdistance[n][:]) for n=1:length(soft)]
 
                 patterndb = relaxation(overlapdb, softdbs, softcutoff, length(distance))
+                patternprobs = tau_model(patterndb, distance, softdistance)
               else
                 patterndb = find(distance .≤ (1+cutoff)minimum(distance))
+                N = length(patterndb); patternprobs = fill(1/N, N)
               end
 
               # pick a pattern at random from the database
-              idx = patterndb[rand(1:length(patterndb))]
+              idx = sample(patterndb, weights(patternprobs))
               iᵦ, jᵦ, kᵦ = ind2sub(size(distance), idx)
 
               # tile top left corner is given by (Is,Js,Ks)
@@ -527,7 +535,7 @@ function overlapdist(X₁::AbstractArray, X₂::AbstractArray, nvertices::Intege
   sum(result)
 end
 
-function quick_intersect(A::Vector{Int}, B::Vector{Int}, nbits::Integer)
+function quick_intersect(A::AbstractVector{Int}, B::AbstractVector{Int}, nbits::Integer)
   bitsA = falses(nbits)
   bitsB = falses(nbits)
   bitsA[A] = true
