@@ -287,10 +287,6 @@ function iqsim(training_image::AbstractArray,
 
         patterndb = relaxation(overlapdb, softdbs, softcutoff, length(distance))
         patternprobs = tau_model(patterndb, distance, softdistance)
-        if (i == 1 && j == 1 && k == 1)
-          @show size(patterndb)
-          @show size(patternprobs)
-        end
       else
         patterndb = find(distance .≤ (1+cutoff)minimum(distance))
         N = length(patterndb); patternprobs = fill(1/N, N)
