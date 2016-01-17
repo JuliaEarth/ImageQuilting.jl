@@ -167,7 +167,7 @@ function iqsim(training_image::AbstractArray,
 
       push!(softgrid, auxpad)
 
-      auxTI = copy(aux.transform(TI))
+      auxTI = copy(aux.transform(training_image))
 
       @assert size(auxTI) == size(TI) "auxiliary TI must have the same size as TI"
 
