@@ -21,13 +21,12 @@ function tau_model(events::AbstractVector{Int}, D₁::AbstractArray, Dₙ::Abstr
   # sources of information: primary + auxiliary₁ + auxiliary₂ + ...
   nsources = 1 + length(Dₙ)
 
-  # normalized distance matrix
+  # distance matrix
   D = zeros(nevents, nsources)
   D[:,1] = D₁[events]
   for j=2:nsources
     D[:,j] = Dₙ[j-1][events]
   end
-  D = broadcast(/, D, maximum(D, 1))
 
   # conditional probabilities
   P = exp(-D)
