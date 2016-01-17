@@ -33,3 +33,13 @@ function relaxation(overlapdb::AbstractVector, softdbs::AbstractVector,
 
   patterndb
 end
+
+function quick_intersect(A::AbstractVector{Int}, B::AbstractVector{Int},
+                         nbits::Integer)
+  bitsA = falses(nbits)
+  bitsB = falses(nbits)
+  bitsA[A] = true
+  bitsB[B] = true
+
+  find(bitsA & bitsB)
+end

@@ -287,6 +287,10 @@ function iqsim(training_image::AbstractArray,
 
         patterndb = relaxation(overlapdb, softdbs, softcutoff, length(distance))
         patternprobs = tau_model(patterndb, distance, softdistance)
+        if (i == 1 && j == 1 && k == 1)
+          @show size(patterndb)
+          @show size(patternprobs)
+        end
       else
         patterndb = find(distance .≤ (1+cutoff)minimum(distance))
         N = length(patterndb); patternprobs = fill(1/N, N)
@@ -533,13 +537,4 @@ function overlapdist(X₁::AbstractArray, X₂::AbstractArray, nvertices::Intege
   end
 
   sum(result)
-end
-
-function quick_intersect(A::AbstractVector{Int}, B::AbstractVector{Int}, nbits::Integer)
-  bitsA = falses(nbits)
-  bitsB = falses(nbits)
-  bitsA[A] = true
-  bitsB[B] = true
-
-  find(bitsA & bitsB)
 end
