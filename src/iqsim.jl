@@ -283,7 +283,7 @@ function iqsim(training_image::AbstractArray,
                                              sortperm(distance[:])[1:dbsize]
 
         # candidates in accordance with soft data
-        softdbs = [sortperm(softdistance[n][:]) for n=1:length(soft)]
+        softdbs = map(d -> sortperm(d[:]), softdistance)
 
         patterndb = relaxation(overlapdb, softdbs, softcutoff, length(distance))
         patternprobs = tau_model(patterndb, distance, softdistance)
@@ -415,7 +415,7 @@ function iqsim(training_image::AbstractArray,
                 overlapdb = sortperm(distance[:])[1:dbsize]
 
                 # candidates in accordance with soft data
-                softdbs = [sortperm(softdistance[n][:]) for n=1:length(soft)]
+                softdbs = map(d -> sortperm(d[:]), softdistance)
 
                 patterndb = relaxation(overlapdb, softdbs, softcutoff, length(distance))
                 patternprobs = tau_model(patterndb, distance, softdistance)
