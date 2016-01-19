@@ -28,6 +28,17 @@ function tau_model(events::AbstractVector{Int}, D₁::AbstractArray, Dₙ::Abstr
     D[:,j] = Dₙ[j-1][events]
   end
 
+  # convert distances to ranks
+  idx = mapslices(sortperm, D, 1)
+  for j=1:nsources
+    c = 0; prevdist = -Inf
+    for i in slice(idx,:,j)
+      D[i,j] > prevdist && (c += 1)
+      prevdist = D[i,j]
+      D[i,j] = c
+    end
+  end
+
   # conditional probabilities
   P = exp(-D)
   P = broadcast(/, P, sum(P, 1))
