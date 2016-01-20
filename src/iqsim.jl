@@ -279,8 +279,8 @@ function iqsim(training_image::AbstractArray,
 
         # candidates with good overlap
         dbsize = ceil(Int, cutoff*length(distance))
-        overlapdb = (i==1 && j==1 && k==1) ? collect(1:length(distance)) :
-                                             sortperm(distance[:])[1:dbsize]
+        overlapdb = all(distance .== 0) ? collect(1:length(distance)) :
+                                          sortperm(distance[:])[1:dbsize]
 
         # candidates in accordance with soft data
         softdbs = map(d -> sortperm(d[:]), softdistance)
