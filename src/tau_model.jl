@@ -31,16 +31,16 @@ function tau_model(events::AbstractVector{Int}, D₁::AbstractArray, Dₙ::Abstr
   # convert distances to ranks
   idx = mapslices(sortperm, D, 1)
   for j=1:nsources
-    c = 0; prevdist = -Inf
+    r = 0; prevdist = -Inf
     for i in slice(idx,:,j)
-      D[i,j] > prevdist && (c += 1)
+      D[i,j] > prevdist && (r += 1)
       prevdist = D[i,j]
-      D[i,j] = c
+      D[i,j] = r
     end
   end
 
   # conditional probabilities
-  P = exp(-D)
+  P = nevents - D + 1
   P = broadcast(/, P, sum(P, 1))
 
   # prior to data all events are equally probable
