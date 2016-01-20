@@ -12,9 +12,20 @@
 ## ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-function relaxation(overlapdb::AbstractVector, softdbs::AbstractVector,
-                    initcutoff::Real, npatterns::Integer)
-  τₛ = initcutoff
+function relaxation(distance::AbstractArray, softdistance::AbstractArray,
+                    cutoff::Real, softcutoff::Real)
+  npatterns = length(distance)
+
+  # candidates with good overlap
+  dbsize = ceil(Int, cutoff*npatterns)
+  overlapdb = all(distance .== 0) ? collect(1:npatterns) :
+                                    sortperm(distance[:])[1:dbsize]
+
+  # candidates in accordance with soft data
+  softdbs = map(d -> all(d .== 0) ? collect(1:npatterns) :
+                                    sortperm(d[:]), softdistance)
+
+  τₛ = softcutoff
   patterndb = []
   while true
     softdbsize = ceil(Int, τₛ*npatterns)
