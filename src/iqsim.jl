@@ -29,7 +29,7 @@ function iqsim(training_image::AbstractArray,
                tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
                gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
                overlapx=1/6, overlapy=1/6, overlapz=1/6,
-               soft=nothing, hard=nothing, cutoff=.1, softcutoff=.01,
+               soft=nothing, hard=nothing, cutoff=.1, softcutoff=.1,
                seed=0, nreal=1, categorical=false, debug=false)
 
   # sanity checks
