@@ -14,16 +14,17 @@
 
 function relaxation(distance::AbstractArray, softdistance::AbstractArray,
                     cutoff::Real, softcutoff::Real)
-  npatterns = length(distance)
+  # patterns enabled in the training image
+  enabled = !isinf(distance); npatterns = sum(enabled)
 
   # candidates with good overlap
-  dbsize = all(distance .== 0) ? npatterns : ceil(Int, cutoff*npatterns)
+  dbsize = all(distance[enabled] .== 0) ? npatterns : ceil(Int, cutoff*npatterns)
   overlapdb = sortperm(distance[:])[1:dbsize]
 
   # candidates in accordance with soft data
   softdbs = map(d -> sortperm(d[:]), softdistance)
 
-  τₛ = softcutoff
+  τₛ = softcutoff * (dbsize / npatterns)
   patterndb = []
   while true
     softdbsize = ceil(Int, τₛ*npatterns)
@@ -31,7 +32,7 @@ function relaxation(distance::AbstractArray, softdistance::AbstractArray,
     patterndb = overlapdb
     for n=1:length(softdbs)
       softdb = softdbs[n][1:softdbsize]
-      patterndb = quick_intersect(patterndb, softdb, npatterns)
+      patterndb = quick_intersect(patterndb, softdb, length(distance))
 
       isempty(patterndb) && break
     end
