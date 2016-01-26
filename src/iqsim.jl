@@ -120,18 +120,17 @@ function iqsim(training_image::AbstractArray,
       jₑ = jₛ + tplsizey - 1
       kₑ = kₛ + tplsizez - 1
 
-      if any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]) || all(!activated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
+      if all(!activated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
         push!(skipped, (i,j,k))
-      else
+      elseif all(!preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
         rastered[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = true
       end
     end
     rastered[!activated] = false
-  end
 
-  # raster path must be non-empty or data must be available
-  if hard ≠ nothing
     simulated = preset | rastered
+
+    # raster path must be non-empty or data must be available
     any_activated = any(activated[1:gridsizex,1:gridsizey,1:gridsizez])
     any_simulated = any(simulated[1:gridsizex,1:gridsizey,1:gridsizez])
     @assert any_activated "simulation grid has no active voxel"
@@ -153,6 +152,23 @@ function iqsim(training_image::AbstractArray,
     @assert categories == Set(0:ncategories) "categories should be labeled 1, 2, 3,..."
 
     simplexTI = simplex_transform(TI, nvertices)
+  end
+
+  # disable tiles in the training image if they contain inactive voxels
+  mₜ, nₜ, pₜ = size(TI)
+  disabled = falses(mₜ-tplsizex+1, nₜ-tplsizey+1, pₜ-tplsizez+1)
+  for nanidx in find(NaNTI)
+    iₙ, jₙ, kₙ = ind2sub(size(TI), nanidx)
+
+    # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
+    iₛ = max(iₙ-tplsizex+1, 1)
+    jₛ = max(jₙ-tplsizey+1, 1)
+    kₛ = max(kₙ-tplsizez+1, 1)
+    iₑ = min(iₙ, mₜ-tplsizex+1)
+    jₑ = min(jₙ, nₜ-tplsizey+1)
+    kₑ = min(kₙ, pₜ-tplsizez+1)
+
+    disabled[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = true
   end
 
   # pad soft data and soft transform training image
@@ -178,23 +194,6 @@ function iqsim(training_image::AbstractArray,
     end
   end
 
-  # disable tiles in the training image if they contain inactive voxels
-  mₜ, nₜ, pₜ = size(TI)
-  disabled = falses(mₜ-tplsizex+1, nₜ-tplsizey+1, pₜ-tplsizez+1)
-  for nanidx in find(NaNTI)
-    iₙ, jₙ, kₙ = ind2sub(size(TI), nanidx)
-
-    # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
-    iₛ = max(iₙ-tplsizex+1, 1)
-    jₛ = max(jₙ-tplsizey+1, 1)
-    kₛ = max(kₙ-tplsizez+1, 1)
-    iₑ = min(iₙ, mₜ-tplsizex+1)
-    jₑ = min(jₙ, nₜ-tplsizey+1)
-    kₑ = min(kₙ, pₜ-tplsizez+1)
-
-    disabled[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = true
-  end
-
   # main output is a vector of 3D grids
   realizations = []
 
@@ -213,12 +212,9 @@ function iqsim(training_image::AbstractArray,
     simgrid = zeros(nx, ny, nz)
     cutgrid = debug ? zeros(nx, ny, nz) : []
 
-    # preset hard data
-    simgrid[preset] = hardgrid[preset]
-
     # loop simulation grid tile by tile
     for k=1:ntilez, j=1:ntiley, i=1:ntilex
-      # skip tile if it contains hard data
+      # skip tile if all voxels are inactive
       (i,j,k) ∈ skipped && continue
 
       # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
@@ -316,6 +312,12 @@ function iqsim(training_image::AbstractArray,
       debug && (cutgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = M)
     end
 
+    # prepare tiles with hard data for dilation
+    if hard ≠ nothing
+      simgrid[!rastered] = 0
+      simgrid[preset] = hardgrid[preset]
+    end
+
     # throw away voxels that are outside of the grid
     simgrid = simgrid[1:gridsizex,1:gridsizey,1:gridsizez]
 
@@ -325,7 +327,7 @@ function iqsim(training_image::AbstractArray,
 
     #-----------------------------------------------------------------
 
-    # simulate remaining voxels skipped during raster path
+    # simulate remaining voxels
     if hard ≠ nothing
       tplx, tply, tplz = tplsizex, tplsizey, tplsizez
 
