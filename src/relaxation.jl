@@ -19,7 +19,7 @@ function relaxation(distance::AbstractArray, softdistance::AbstractArray,
 
   # candidates with good overlap
   dbsize = all(distance[enabled] .== 0) ? npatterns : ceil(Int, cutoff*npatterns)
-  overlapdb = sortperm(distance[:])[1:dbsize]
+  overlapdb = selectperm(distance[:], 1:dbsize)
 
   # candidates in accordance with soft data
   softdbs = map(d -> sortperm(d[:]), softdistance)
