@@ -12,8 +12,6 @@
 ## ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-include("iqsim.jl")
-
 function meanvoxreuse(training_image::AbstractArray,
                       tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
                       overlapx=1/6, overlapy=1/6, overlapz=1/6,
