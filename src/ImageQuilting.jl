@@ -14,8 +14,20 @@
 
 module ImageQuilting
 
-include("iqsim.jl")
+using Images: imfilter_fft, padarray, dilate
+using StatsBase: sample, weights
+
+if VERSION > v"0.5-"
+  using Combinatorics: combinations
+end
+
+include("datatypes.jl")
+include("relaxation.jl")
+include("tau_model.jl")
+include("boundary_cut.jl")
+include("simplex_transform.jl")
 include("mean_voxel_reuse.jl")
+include("iqsim.jl")
 
 export
   # functions

@@ -12,19 +12,6 @@
 ## ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-using Images: imfilter_fft, padarray, dilate
-using StatsBase: sample, weights
-
-if VERSION > v"0.5-"
-  using Combinatorics: combinations
-end
-
-include("datatypes.jl")
-include("relaxation.jl")
-include("tau_model.jl")
-include("boundary_cut.jl")
-include("simplex_transform.jl")
-
 function iqsim(training_image::AbstractArray,
                tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
                gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
