@@ -16,7 +16,7 @@ function iqsim(training_image::AbstractArray,
                tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
                gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
                overlapx=1/6, overlapy=1/6, overlapz=1/6,
-               soft=nothing, hard=nothing, cutoff=.1, softcutoff=.1,
+               soft=nothing, hard=nothing, cutoff=.1,
                seed=0, nreal=1, categorical=false, debug=false)
 
   # sanity checks
@@ -39,7 +39,6 @@ function iqsim(training_image::AbstractArray,
     end
 
     @assert 0 < cutoff ≤ 1 "cutoff must be in range (0,1] when soft data is available"
-    @assert 0 < softcutoff ≤ 1 "softcutoff must be in range (0,1]"
   end
 
   # hard data checks
@@ -260,7 +259,7 @@ function iqsim(training_image::AbstractArray,
           push!(softdistance, D)
         end
 
-        patterndb = relaxation(distance, softdistance, cutoff, softcutoff)
+        patterndb = relaxation(distance, softdistance, cutoff)
         patternprobs = tau_model(patterndb, distance, softdistance)
       else
         patterndb = find(distance .≤ (1+cutoff)minimum(distance))
@@ -391,7 +390,7 @@ function iqsim(training_image::AbstractArray,
                   push!(softdistance, D)
                 end
 
-                patterndb = relaxation(distance, softdistance, cutoff, softcutoff)
+                patterndb = relaxation(distance, softdistance, cutoff)
                 patternprobs = tau_model(patterndb, distance, softdistance)
               else
                 patterndb = find(distance .≤ (1+cutoff)minimum(distance))

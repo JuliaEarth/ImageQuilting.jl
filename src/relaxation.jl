@@ -12,8 +12,7 @@
 ## ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-function relaxation(distance::AbstractArray, softdistance::AbstractArray,
-                    cutoff::Real, softcutoff::Real)
+function relaxation(distance::AbstractArray, softdistance::AbstractArray, cutoff::Real)
   # patterns enabled in the training image
   enabled = !isinf(distance); npatterns = sum(enabled)
 
@@ -24,7 +23,7 @@ function relaxation(distance::AbstractArray, softdistance::AbstractArray,
   # candidates in accordance with soft data
   softdbs = map(d -> sortperm(d[:]), softdistance)
 
-  τₛ = softcutoff * (dbsize / npatterns)
+  τₛ = .1 * (dbsize / npatterns)
   patterndb = []
   while true
     softdbsize = ceil(Int, τₛ*npatterns)

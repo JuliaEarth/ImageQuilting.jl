@@ -32,7 +32,7 @@ reals = iqsim(training_image::AbstractArray,
               tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
               gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
               overlapx=1/6, overlapy=1/6, overlapz=1/6,
-              soft=nothing, hard=nothing, cutoff=.1, softcutoff=.1,
+              soft=nothing, hard=nothing, cutoff=.1,
               seed=0, nreal=1, categorical=false, debug=false)
 ```
 
@@ -50,7 +50,6 @@ where:
 * `soft` is an instance of `SoftData` or an array of such instances
 * `hard` is an instance of `HardData`
 * `cutoff` is the overlap cutoff
-* `softcutoff` is the soft cutoff
 * `seed` is the random seed
 * `nreal` is the number of realizations
 * `categorical` informs whether the image is categorical or continuous
