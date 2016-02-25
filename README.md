@@ -19,6 +19,8 @@ Features
 Installation
 ------------
 
+For the latest stable release:
+
 ```julia
 Pkg.add("ImageQuilting")
 ```
