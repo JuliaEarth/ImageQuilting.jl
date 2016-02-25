@@ -1,7 +1,7 @@
 ImageQuilting.jl
 ================
 
-3D image quilting simulation.
+Fast 3D image quilting simulation.
 
 [![Build Status](https://travis-ci.org/juliohm/ImageQuilting.jl.svg?branch=master)](https://travis-ci.org/juliohm/ImageQuilting.jl)
 [![ImageQuilting](http://pkg.julialang.org/badges/ImageQuilting_0.4.svg)](http://pkg.julialang.org/?pkg=ImageQuilting&ver=0.4)
@@ -12,7 +12,6 @@ ImageQuilting.jl
 Features
 --------
 
-* 3D image quilting
 * Soft data conditioning
 * Hard data conditioning
 * Masked grids
