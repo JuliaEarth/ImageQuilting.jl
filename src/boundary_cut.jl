@@ -56,8 +56,9 @@ function boundary_cut(overlap::AbstractArray, dir::Symbol)
   mslice = slice(M,:,:,mz)
   mslice[1:idx,my] = trues(idx)
   idxvec = zeros(Int, my); idxvec[my] = idx # keep track of indexes
+  width = isodd(mx) ? mx+1 : mx # avoid zig-zag artifact
   for j=my-1:-1:1
-    for i=1:mx
+    for i=1:width
       if idx < mx && minimum(zslice[max(idx-1,1):idx+1,j]) == zslice[idx+1,j]
         idx += 1
       elseif idx > 1 && zslice[idx-1,j] ≤ zslice[idx,j]
@@ -73,7 +74,7 @@ function boundary_cut(overlap::AbstractArray, dir::Symbol)
     yslice = slice(E,:,j,:)
     idx = idxvec[j]
     for k=mz-1:-1:1
-      for i=1:mx
+      for i=1:width
         if idx < mx && minimum(yslice[max(idx-1,1):idx+1,k]) == yslice[idx+1,k]
           idx += 1
         elseif idx > 1 && yslice[idx-1,k] ≤ yslice[idx,k]
