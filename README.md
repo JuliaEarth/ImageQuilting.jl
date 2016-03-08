@@ -111,10 +111,10 @@ using ImageQuilting
 using GeoStatsImages
 
 TI = training_image("Strebelle")
-reals = @time iqsim(TI, 62, 62, 1, size(TI)..., nreal=3)
+reals = iqsim(TI, 62, 62, 1, size(TI)..., nreal=3)
 
 TI = training_image("StoneWall")
-reals, cuts, voxs = @time iqsim(TI, 13, 13, 1, size(TI)..., nreal=3, debug=true)
+reals, cuts, voxs = iqsim(TI, 13, 13, 1, size(TI)..., nreal=3, debug=true)
 ```
 
 REFERENCES
