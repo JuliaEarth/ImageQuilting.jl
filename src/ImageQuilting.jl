@@ -16,6 +16,7 @@ module ImageQuilting
 
 using Images: imfilter_fft, padarray, dilate
 using StatsBase: sample, weights
+using LightGraphs
 
 if VERSION > v"0.5-"
   using Combinatorics: combinations

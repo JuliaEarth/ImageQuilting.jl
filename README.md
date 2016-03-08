@@ -122,6 +122,6 @@ REFERENCES
 
 Efros, A.; Freeman, W. T., 2001. Image Quilting for Texture Synthesis and Transfer. [[DOWNLOAD](http://graphics.cs.cmu.edu/people/efros/research/quilting.html)]
 
-Mahmud, K.; Mariethoz, G.; Caers, J.; Tahmasebi, P.; Baker, A., 2014. Simulation of Earth textures by conditional image quilting. [[DOWNLOAD](http://dx.doi.org/10.1002/2013WR015069)]
+Kwatra, V.; Schodl, A.; Essa, I.; Turk, G.; Bobick, A., 2003. Graphcut Textures: Image and Video Synthesis using Graph Cuts. [[DOWNLOAD](http://www.cc.gatech.edu/~turk/my_papers/graph_cuts.pdf)]
 
 Efros, A.; Leung, T., 1999. Texture Synthesis by Non-parametric Sampling. [[DOWNLOAD](http://graphics.cs.cmu.edu/people/efros/research/EfrosLeung.html)]
