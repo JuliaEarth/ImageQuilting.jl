@@ -12,19 +12,19 @@
 ## ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-function boundary_cut(overlap::AbstractArray, dir::Symbol)
+function boundary_cut(A::AbstractArray, B::AbstractArray, dir::Symbol)
   # permute overlap cube dimensions so that the algorithm
   # is the same for cuts in x, y and z directions.
-  B = []
+  E = abs(A - B)
   if dir == :x
-    B = permutedims(overlap, [1,2,3])
+    E = permutedims(E, [1,2,3])
   elseif dir == :y
-    B = permutedims(overlap, [2,1,3])
+    E = permutedims(E, [2,1,3])
   elseif dir == :z
-    B = permutedims(overlap, [3,2,1])
+    E = permutedims(E, [3,2,1])
   end
 
-  mx, my, mz = size(B)
+  mx, my, mz = size(E)
   nvox = mx*my*mz
 
   # add source and sink terminals
@@ -38,21 +38,21 @@ function boundary_cut(overlap::AbstractArray, dir::Symbol)
     d = sub2ind((mx,my,mz), i+1, j, k)
     add_edge!(G, c, d)
     add_edge!(G, d, c)
-    C[c,d] = C[d,c] = B[c] + B[d]
+    C[c,d] = C[d,c] = E[c] + E[d]
   end
   for k=1:mz, j=1:my-1, i=1:mx
     c = sub2ind((mx,my,mz), i, j, k)
     r = sub2ind((mx,my,mz), i, j+1, k)
     add_edge!(G, c, r)
     add_edge!(G, r, c)
-    C[c,r] = C[r,c] = B[c] + B[r]
+    C[c,r] = C[r,c] = E[c] + E[r]
   end
   for k=1:mz-1, j=1:my, i=1:mx
     c = sub2ind((mx,my,mz), i, j, k)
     o = sub2ind((mx,my,mz), i, j, k+1)
     add_edge!(G, c, o)
     add_edge!(G, o, c)
-    C[c,o] = C[o,c] = B[c] + B[o]
+    C[c,o] = C[o,c] = E[c] + E[o]
   end
   for k=1:mz, j=1:my
     u = sub2ind((mx,my,mz), 1, j, k)
@@ -69,7 +69,7 @@ function boundary_cut(overlap::AbstractArray, dir::Symbol)
   labels = labels[1:end-2]
 
   # cut mask
-  M = falses(B)
+  M = falses(E)
   M[labels .== 1] = true
   M[labels .== 0] = true
 

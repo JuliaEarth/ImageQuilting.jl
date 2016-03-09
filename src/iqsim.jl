@@ -276,19 +276,13 @@ function iqsim(training_image::AbstractArray,
       # minimum boundary cut mask
       M = falses(simdev)
       if i > 1 && overlapx > 1 && (i-1,j,k) ∉ skipped
-        Bx = overlapdist(simdev[1:overlapx,:,:], TIdev[1:overlapx,:,:],
-                         categorical ? nvertices : -1)
-        M[1:overlapx,:,:] |= boundary_cut(Bx, :x)
+        M[1:overlapx,:,:] |= boundary_cut(simdev[1:overlapx,:,:], TIdev[1:overlapx,:,:], :x)
       end
       if j > 1 && overlapy > 1 && (i,j-1,k) ∉ skipped
-        By = overlapdist(simdev[:,1:overlapy,:], TIdev[:,1:overlapy,:],
-                         categorical ? nvertices : -1)
-        M[:,1:overlapy,:] |= boundary_cut(By, :y)
+        M[:,1:overlapy,:] |= boundary_cut(simdev[:,1:overlapy,:], TIdev[:,1:overlapy,:], :y)
       end
       if k > 1 && overlapz > 1 && (i,j,k-1) ∉ skipped
-        Bz = overlapdist(simdev[:,:,1:overlapz], TIdev[:,:,1:overlapz],
-                         categorical ? nvertices : -1)
-        M[:,:,1:overlapz] |= boundary_cut(Bz, :z)
+        M[:,:,1:overlapz] |= boundary_cut(simdev[:,:,1:overlapz], TIdev[:,:,1:overlapz], :z)
       end
 
       # paste contributions from simulation grid and training image
@@ -488,21 +482,6 @@ function convdist(Xs::AbstractArray, masks::AbstractArray; weights=nothing, inne
     B² = sum((weights.*mask).^2)
 
     push!(result, abs(A² - 2AB + B²))
-  end
-
-  sum(result)
-end
-
-function overlapdist(X₁::AbstractArray, X₂::AbstractArray, nvertices::Integer)
-  # if not categorical, return Euclidean distance
-  nvertices == -1 && return (X₁ - X₂).^2
-
-  simplex₁ = simplex_transform(X₁, nvertices)
-  simplex₂ = simplex_transform(X₂, nvertices)
-
-  result = []
-  for (X, Y) in zip(simplex₁, simplex₂)
-    push!(result, (X - Y).^2)
   end
 
   sum(result)
