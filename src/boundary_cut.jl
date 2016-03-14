@@ -38,21 +38,21 @@ function boundary_cut(A::AbstractArray, B::AbstractArray, dir::Symbol)
     d = sub2ind((mx,my,mz), i+1, j, k)
     add_edge!(G, c, d)
     add_edge!(G, d, c)
-    C[c,d] = C[d,c] = E[c] + E[d] + 1
+    C[c,d] = C[d,c] = E[c] + E[d]
   end
   for k=1:mz, j=1:my-1, i=1:mx
     c = sub2ind((mx,my,mz), i, j, k)
     r = sub2ind((mx,my,mz), i, j+1, k)
     add_edge!(G, c, r)
     add_edge!(G, r, c)
-    C[c,r] = C[r,c] = E[c] + E[r] + 1
+    C[c,r] = C[r,c] = E[c] + E[r]
   end
   for k=1:mz-1, j=1:my, i=1:mx
     c = sub2ind((mx,my,mz), i, j, k)
     o = sub2ind((mx,my,mz), i, j, k+1)
     add_edge!(G, c, o)
     add_edge!(G, o, c)
-    C[c,o] = C[o,c] = E[c] + E[o] + 1
+    C[c,o] = C[o,c] = E[c] + E[o]
   end
   for k=1:mz, j=1:my
     u = sub2ind((mx,my,mz), 1, j, k)
