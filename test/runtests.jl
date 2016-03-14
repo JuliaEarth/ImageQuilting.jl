@@ -95,7 +95,9 @@ reals = iqsim(TI, 10, 10, 1, size(TI)..., hard=data)
 
 # boundary cut in 3D
 TI = ones(20,20,20)
-_, _, voxs = iqsim(TI, 10, 10, 10, size(TI)..., overlapx=1/3, overlapy=1/3, overlapz=1/3, debug=true)
+_, _, voxs = iqsim(TI, 10, 10, 10, size(TI)..., overlapx=1/3, overlapy=1/3, overlapz=1/3, cut=:dijkstra, debug=true)
+@test 0 ≤ voxs[1] ≤ 1
+_, _, voxs = iqsim(TI, 10, 10, 10, size(TI)..., overlapx=1/3, overlapy=1/3, overlapz=1/3, cut=:boykov, debug=true)
 @test 0 ≤ voxs[1] ≤ 1
 
 # mean voxel reuse is in range [0,1]
