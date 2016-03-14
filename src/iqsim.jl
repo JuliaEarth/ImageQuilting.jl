@@ -17,7 +17,7 @@ function iqsim(training_image::AbstractArray,
                gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
                overlapx=1/6, overlapy=1/6, overlapz=1/6,
                soft=nothing, hard=nothing, cutoff=.1,
-               seed=0, nreal=1, categorical=false, debug=false)
+               seed=0, nreal=1, cut=:dijkstra, categorical=false, debug=false)
 
   # sanity checks
   @assert ndims(training_image) == 3 "training image is not 3D (add ghost dimension for 2D)"
@@ -25,6 +25,7 @@ function iqsim(training_image::AbstractArray,
   @assert all([gridsizex, gridsizey, gridsizez] .≥ [tplsizex, tplsizey, tplsizez]) "invalid grid size"
   @assert all(0 .< [overlapx, overlapy, overlapz] .< 1) "overlaps must be in range (0,1)"
   @assert cutoff > 0 "cutoff must be positive"
+  @assert cut ∈ [:dijkstra,:boykov] "cut algorithm can be either :dijkstra or :boykov"
 
   # soft data checks
   if soft ≠ nothing
@@ -179,6 +180,9 @@ function iqsim(training_image::AbstractArray,
       push!(softTI, auxTI)
     end
   end
+
+  # select cut algorithm
+  boundary_cut = cut == :dijkstra ? dijkstra_cut : boykov_kolmogorov_cut
 
   # main output is a vector of 3D grids
   realizations = []

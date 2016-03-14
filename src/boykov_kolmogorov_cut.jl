@@ -12,7 +12,7 @@
 ## ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-function boundary_cut(A::AbstractArray, B::AbstractArray, dir::Symbol)
+function boykov_kolmogorov_cut(A::AbstractArray, B::AbstractArray, dir::Symbol)
   # permute dimensions so that the algorithm is
   # the same for cuts in x, y and z directions
   E = abs(A - B)
