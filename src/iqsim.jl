@@ -124,6 +124,17 @@ function iqsim(training_image::AbstractArray,
     @assert any_simulated "raster path must visit at least one tile in the absence of data"
   end
 
+  # skip enclosing tiles
+  for k=1:ntilez, j=1:ntiley
+    push!(skipped, (0,j,k), (ntilex+1,j,k))
+  end
+  for k=1:ntilez, i=1:ntilex
+    push!(skipped, (i,0,k), (i,ntiley+1,k))
+  end
+  for j=1:ntiley, i=1:ntilex
+    push!(skipped, (i,j,0), (i,j,ntilez+1))
+  end
+
   # always work with floating point
   TI = map(Float64, training_image)
 
@@ -184,6 +195,9 @@ function iqsim(training_image::AbstractArray,
   # select cut algorithm
   boundary_cut = cut == :dijkstra ? dijkstra_cut : boykov_kolmogorov_cut
 
+  # use all CPU cores in FFT
+  FFTW.set_num_threads(CPU_CORES)
+
   # main output is a vector of 3D grids
   realizations = []
 
@@ -193,9 +207,6 @@ function iqsim(training_image::AbstractArray,
 
   # set seed and start
   srand(seed)
-
-  # use all CPU cores in FFT
-  FFTW.set_num_threads(CPU_CORES)
 
   for real=1:nreal
     # allocate memory for current simulation
@@ -220,21 +231,21 @@ function iqsim(training_image::AbstractArray,
 
       # compute overlap distance
       distance = zeros(mₜ-tplsizex+1, nₜ-tplsizey+1, pₜ-tplsizez+1)
-      if i > 1 && overlapx > 1 && (i-1,j,k) ∉ skipped
+      if overlapx > 1 && (i-1,j,k) ∉ skipped
         ovx = simdev[1:overlapx,:,:]
         xsimplex = categorical ? simplex_transform(ovx, nvertices) : Any[ovx]
 
         D = convdist(simplexTI, xsimplex)
         distance += D[1:mₜ-tplsizex+1,:,:]
       end
-      if j > 1 && overlapy > 1 && (i,j-1,k) ∉ skipped
+      if overlapy > 1 && (i,j-1,k) ∉ skipped
         ovy = simdev[:,1:overlapy,:]
         ysimplex = categorical ? simplex_transform(ovy, nvertices) : Any[ovy]
 
         D = convdist(simplexTI, ysimplex)
         distance += D[:,1:nₜ-tplsizey+1,:]
       end
-      if k > 1 && overlapz > 1 && (i,j,k-1) ∉ skipped
+      if overlapz > 1 && (i,j,k-1) ∉ skipped
         ovz = simdev[:,:,1:overlapz]
         zsimplex = categorical ? simplex_transform(ovz, nvertices) : Any[ovz]
 
@@ -271,13 +282,13 @@ function iqsim(training_image::AbstractArray,
 
       # minimum boundary cut mask
       M = falses(simdev)
-      if i > 1 && overlapx > 1 && (i-1,j,k) ∉ skipped
+      if overlapx > 1 && (i-1,j,k) ∉ skipped
         M[1:overlapx,:,:] |= boundary_cut(simdev[1:overlapx,:,:], TIdev[1:overlapx,:,:], :x)
       end
-      if j > 1 && overlapy > 1 && (i,j-1,k) ∉ skipped
+      if overlapy > 1 && (i,j-1,k) ∉ skipped
         M[:,1:overlapy,:] |= boundary_cut(simdev[:,1:overlapy,:], TIdev[:,1:overlapy,:], :y)
       end
-      if k > 1 && overlapz > 1 && (i,j,k-1) ∉ skipped
+      if overlapz > 1 && (i,j,k-1) ∉ skipped
         M[:,:,1:overlapz] |= boundary_cut(simdev[:,:,1:overlapz], TIdev[:,:,1:overlapz], :z)
       end
 
