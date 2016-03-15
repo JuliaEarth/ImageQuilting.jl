@@ -218,8 +218,7 @@ function iqsim(training_image::AbstractArray,
       # current simulation dataevent
       simdev = simgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
 
-      # compute the distance between the simulation dataevent
-      # and all patterns in the training image
+      # compute overlap distance
       distance = zeros(mₜ-tplsizex+1, nₜ-tplsizey+1, pₜ-tplsizez+1)
       if i > 1 && overlapx > 1 && (i-1,j,k) ∉ skipped
         ovx = simdev[1:overlapx,:,:]
@@ -246,29 +245,22 @@ function iqsim(training_image::AbstractArray,
       # disable dataevents that contain inactive voxels
       distance[disabled] = Inf
 
-      # current pattern database
-      patterndb = []
-      patternprobs = []
-      if soft ≠ nothing
-        softdistance = []
-        for n=1:length(soft)
-          # compute the distance between the soft dataevent and
-          # all dataevents in the soft training image
-          softdev = softgrid[n][iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-          D = convdist(Any[softTI[n]], Any[softdev])
+      # compute soft distance
+      softdistance = []
+      for n=1:length(softTI)
+        softdev = softgrid[n][iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+        D = convdist(Any[softTI[n]], Any[softdev])
 
-          # disable dataevents that contain inactive voxels
-          D[disabled] = Inf
+        # disable dataevents that contain inactive voxels
+        D[disabled] = Inf
 
-          push!(softdistance, D)
-        end
-
-        patterndb = relaxation(distance, softdistance, cutoff)
-        patternprobs = tau_model(patterndb, distance, softdistance)
-      else
-        patterndb = find(distance .≤ (1+cutoff)minimum(distance))
-        N = length(patterndb); patternprobs = fill(1/N, N)
+        push!(softdistance, D)
       end
+
+      # current pattern database
+      patterndb = soft ≠ nothing ? relaxation(distance, softdistance, cutoff) :
+                                   find(distance .≤ (1+cutoff)minimum(distance))
+      patternprobs = tau_model(patterndb, distance, softdistance)
 
       # pick a pattern at random from the database
       idx = sample(patterndb, weights(patternprobs))
@@ -371,29 +363,22 @@ function iqsim(training_image::AbstractArray,
               # disable dataevents that contain inactive voxels
               distance[disabledₜ] = Inf
 
-              # current pattern database
-              patterndb = []
-              patternprobs = []
-              if soft ≠ nothing
-                softdistance = []
-                for n=1:length(soft)
-                  # compute the distance between the soft dataevent and
-                  # all dataevents in the soft training image
-                  softdev = softgrid[n][iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-                  D = convdist(Any[softTI[n]], Any[softdev], weights=booldev, inner=false)
+              # compute soft distance
+              softdistance = []
+              for n=1:length(softTI)
+                softdev = softgrid[n][iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+                D = convdist(Any[softTI[n]], Any[softdev], weights=booldev, inner=false)
 
-                  # disable dataevents that contain inactive voxels
-                  D[disabledₜ] = Inf
+                # disable dataevents that contain inactive voxels
+                D[disabledₜ] = Inf
 
-                  push!(softdistance, D)
-                end
-
-                patterndb = relaxation(distance, softdistance, cutoff)
-                patternprobs = tau_model(patterndb, distance, softdistance)
-              else
-                patterndb = find(distance .≤ (1+cutoff)minimum(distance))
-                N = length(patterndb); patternprobs = fill(1/N, N)
+                push!(softdistance, D)
               end
+
+              # current pattern database
+              patterndb = soft ≠ nothing ? relaxation(distance, softdistance, cutoff) :
+                                           find(distance .≤ (1+cutoff)minimum(distance))
+              patternprobs = tau_model(patterndb, distance, softdistance)
 
               # pick a pattern at random from the database
               idx = sample(patterndb, weights(patternprobs))
