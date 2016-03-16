@@ -34,7 +34,8 @@ reals = iqsim(training_image::AbstractArray,
               gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
               overlapx=1/6, overlapy=1/6, overlapz=1/6,
               soft=nothing, hard=nothing, cutoff=.1,
-              seed=0, nreal=1, cut=:dijkstra, categorical=false, debug=false)
+              cut=:dijkstra, path=:raster, categorical=false,
+              seed=0, nreal=1, debug=false)
 ```
 
 where:
@@ -54,6 +55,7 @@ where:
 * `seed` is the random seed
 * `nreal` is the number of realizations
 * `cut` is the cut algorithm (:dijkstra or :boykov)
+* `path` is the simulation path (:raster, :random or :dilation)
 * `categorical` informs whether the image is categorical or continuous
 * `debug` tells whether to export or not the boundary cuts and voxel reuse
 
