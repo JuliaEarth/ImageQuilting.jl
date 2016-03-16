@@ -19,7 +19,7 @@ using StatsBase: sample, weights
 using LightGraphs
 
 if VERSION > v"0.5-"
-  using Combinatorics: combinations
+  using Combinatorics: nthperm!
 end
 
 include("datatypes.jl")

@@ -17,7 +17,8 @@ function iqsim(training_image::AbstractArray,
                gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
                overlapx=1/6, overlapy=1/6, overlapz=1/6,
                soft=nothing, hard=nothing, cutoff=.1,
-               seed=0, nreal=1, cut=:dijkstra, categorical=false, debug=false)
+               cut=:dijkstra, path=:raster, categorical=false,
+               seed=0, nreal=1, debug=false)
 
   # sanity checks
   @assert ndims(training_image) == 3 "training image is not 3D (add ghost dimension for 2D)"
@@ -26,6 +27,7 @@ function iqsim(training_image::AbstractArray,
   @assert all(0 .< [overlapx, overlapy, overlapz] .< 1) "overlaps must be in range (0,1)"
   @assert cutoff > 0 "cutoff must be positive"
   @assert cut ∈ [:dijkstra,:boykov] "cut algorithm can be either :dijkstra or :boykov"
+  @assert path ∈ [:raster,:random,:dilation]
 
   # soft data checks
   if soft ≠ nothing
@@ -124,17 +126,6 @@ function iqsim(training_image::AbstractArray,
     @assert any_simulated "raster path must visit at least one tile in the absence of data"
   end
 
-  # skip enclosing tiles
-  for k=1:ntilez, j=1:ntiley
-    push!(skipped, (0,j,k), (ntilex+1,j,k))
-  end
-  for k=1:ntilez, i=1:ntilex
-    push!(skipped, (i,0,k), (i,ntiley+1,k))
-  end
-  for j=1:ntiley, i=1:ntilex
-    push!(skipped, (i,j,0), (i,j,ntilez+1))
-  end
-
   # always work with floating point
   TI = map(Float64, training_image)
 
@@ -213,10 +204,21 @@ function iqsim(training_image::AbstractArray,
     simgrid = zeros(nx, ny, nz)
     cutgrid = debug ? zeros(nx, ny, nz) : []
 
+    # keep track of pasted tiles
+    pasted = Set()
+
+    # construct simulation path
+    simpath = genpath((ntilex,ntiley,ntilez), path)
+
     # loop simulation grid tile by tile
-    for k=1:ntilez, j=1:ntiley, i=1:ntilex
+    for pathidx in simpath
+      i,j,k = ind2sub((ntilex,ntiley,ntilez), pathidx)
+
       # skip tile if all voxels are inactive
       (i,j,k) ∈ skipped && continue
+
+      # if not skipped, proceed and paste tile
+      push!(pasted, (i,j,k))
 
       # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
       iₛ = (i-1)spacingx + 1
@@ -231,26 +233,47 @@ function iqsim(training_image::AbstractArray,
 
       # compute overlap distance
       distance = zeros(mₜ-tplsizex+1, nₜ-tplsizey+1, pₜ-tplsizez+1)
-      if overlapx > 1 && (i-1,j,k) ∉ skipped
+      if overlapx > 1 && (i-1,j,k) ∈ pasted
         ovx = simdev[1:overlapx,:,:]
         xsimplex = categorical ? simplex_transform(ovx, nvertices) : Any[ovx]
 
         D = convdist(simplexTI, xsimplex)
         distance += D[1:mₜ-tplsizex+1,:,:]
       end
-      if overlapy > 1 && (i,j-1,k) ∉ skipped
+      if overlapx > 1 && (i+1,j,k) ∈ pasted
+        ovx = simdev[spacingx+1:end,:,:]
+        xsimplex = categorical ? simplex_transform(ovx, nvertices) : Any[ovx]
+
+        D = convdist(simplexTI, xsimplex)
+        distance += D[spacingx+1:end,:,:]
+      end
+      if overlapy > 1 && (i,j-1,k) ∈ pasted
         ovy = simdev[:,1:overlapy,:]
         ysimplex = categorical ? simplex_transform(ovy, nvertices) : Any[ovy]
 
         D = convdist(simplexTI, ysimplex)
         distance += D[:,1:nₜ-tplsizey+1,:]
       end
-      if overlapz > 1 && (i,j,k-1) ∉ skipped
+      if overlapy > 1 && (i,j+1,k) ∈ pasted
+        ovy = simdev[:,spacingy+1:end,:]
+        ysimplex = categorical ? simplex_transform(ovy, nvertices) : Any[ovy]
+
+        D = convdist(simplexTI, ysimplex)
+        distance += D[:,spacingy+1:end,:]
+      end
+      if overlapz > 1 && (i,j,k-1) ∈ pasted
         ovz = simdev[:,:,1:overlapz]
         zsimplex = categorical ? simplex_transform(ovz, nvertices) : Any[ovz]
 
         D = convdist(simplexTI, zsimplex)
         distance += D[:,:,1:pₜ-tplsizez+1]
+      end
+      if overlapz > 1 && (i,j,k+1) ∈ pasted
+        ovz = simdev[:,:,spacingz+1:end]
+        zsimplex = categorical ? simplex_transform(ovz, nvertices) : Any[ovz]
+
+        D = convdist(simplexTI, zsimplex)
+        distance += D[:,:,spacingz+1:end]
       end
 
       # disable dataevents that contain inactive voxels
@@ -280,16 +303,25 @@ function iqsim(training_image::AbstractArray,
       # selected training image dataevent
       TIdev = TI[iᵦ:iᵦ+tplsizex-1,jᵦ:jᵦ+tplsizey-1,kᵦ:kᵦ+tplsizez-1]
 
-      # minimum boundary cut mask
+      # boundary cut mask
       M = falses(simdev)
-      if overlapx > 1 && (i-1,j,k) ∉ skipped
+      if overlapx > 1 && (i-1,j,k) ∈ pasted
         M[1:overlapx,:,:] |= boundary_cut(simdev[1:overlapx,:,:], TIdev[1:overlapx,:,:], :x)
       end
-      if overlapy > 1 && (i,j-1,k) ∉ skipped
+      if overlapx > 1 && (i+1,j,k) ∈ pasted
+        M[spacingx+1:end,:,:] |= !boundary_cut(simdev[spacingx+1:end,:,:], TIdev[spacingx+1:end,:,:], :x)
+      end
+      if overlapy > 1 && (i,j-1,k) ∈ pasted
         M[:,1:overlapy,:] |= boundary_cut(simdev[:,1:overlapy,:], TIdev[:,1:overlapy,:], :y)
       end
-      if overlapz > 1 && (i,j,k-1) ∉ skipped
+      if overlapy > 1 && (i,j+1,k) ∈ pasted
+        M[:,spacingy+1:end,:] |= !boundary_cut(simdev[:,spacingy+1:end,:], TIdev[:,spacingy+1:end,:], :y)
+      end
+      if overlapz > 1 && (i,j,k-1) ∈ pasted
         M[:,:,1:overlapz] |= boundary_cut(simdev[:,:,1:overlapz], TIdev[:,:,1:overlapz], :z)
+      end
+      if overlapz > 1 && (i,j,k+1) ∈ pasted
+        M[:,:,spacingz+1:end] |= !boundary_cut(simdev[:,:,spacingz+1:end], TIdev[:,:,spacingz+1:end], :z)
       end
 
       # paste contributions from simulation grid and training image
@@ -485,4 +517,36 @@ function convdist(Xs::AbstractArray, masks::AbstractArray; weights=nothing, inne
   end
 
   sum(result)
+end
+
+function genpath(extent::NTuple{3,Integer}, kind::Symbol)
+  path = Int[]
+
+  if kind == :raster
+    for k=1:extent[3], j=1:extent[2], i=1:extent[1]
+      push!(path, sub2ind(extent, i,j,k))
+    end
+  end
+
+  if kind == :random
+    nelm = prod(extent)
+    path = nthperm!(collect(1:nelm), rand(1:factorial(big(nelm))))
+  end
+
+  if kind == :dilation
+    nelm = prod(extent)
+    pivot = rand(1:nelm)
+
+    grid = falses(extent)
+    grid[pivot] = true
+    push!(path, pivot)
+
+    while !all(grid)
+      dilated = dilate(grid)
+      append!(path, find(dilated - grid))
+      grid = dilated
+    end
+  end
+
+  path
 end
