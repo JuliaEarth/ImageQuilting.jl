@@ -375,8 +375,29 @@ function iqsim(training_image::AbstractArray,
         end
 
         if any([tplx,tply,tplz] .> 1)
+          # data-driven visiting order
+          frontier = find(dilated - simulated)
+          ndata = zeros(frontier)
+          for (idx, vox) in enumerate(frontier)
+            # tile center is given by (iᵥ,jᵥ,kᵥ)
+            iᵥ, jᵥ, kᵥ = ind2sub(size(simgrid), vox)
+
+            # tile top left corner is given by (Is,Js,Ks)
+            Is = iᵥ - (tplx-1)÷2
+            Js = jᵥ - (tply-1)÷2
+            Ks = kᵥ - (tplz-1)÷2
+
+            for δi=1:tplx, δj=1:tply, δk=1:tplz
+              i, j, k = Is+δi-1, Js+δj-1, Ks+δk-1
+              if all(0 .< [i,j,k] .≤ [size(simgrid)...]) && simulated[i,j,k]
+                ndata[idx] += 1
+              end
+            end
+          end
+          frontier = frontier[sortperm(ndata, rev=true)]
+
           # scan training image
-          for vox in find(dilated - simulated)
+          for vox in frontier
             # tile center is given by (iᵥ,jᵥ,kᵥ)
             iᵥ, jᵥ, kᵥ = ind2sub(size(simgrid), vox)
 

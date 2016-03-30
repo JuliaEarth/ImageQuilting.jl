@@ -127,4 +127,4 @@ Efros, A.; Freeman, W. T., 2001. Image Quilting for Texture Synthesis and Transf
 
 Kwatra, V.; Schodl, A.; Essa, I.; Turk, G.; Bobick, A., 2003. Graphcut Textures: Image and Video Synthesis using Graph Cuts. [[DOWNLOAD](http://www.cc.gatech.edu/~turk/my_papers/graph_cuts.pdf)]
 
-Efros, A.; Leung, T., 1999. Texture Synthesis by Non-parametric Sampling. [[DOWNLOAD](http://graphics.cs.cmu.edu/people/efros/research/EfrosLeung.html)]
+Crimisini, P. P. A; Toyama, K., 2003. Object Removal by Exemplar-Based Inpainting. [[DOWNLOAD](http://research.microsoft.com/pubs/67273/criminisi_cvpr2003.pdf)]
