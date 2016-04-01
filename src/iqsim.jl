@@ -355,15 +355,14 @@ function iqsim(training_image::AbstractArray,
       # throw away voxels that are outside of the grid
       simulated = simulated[1:gridsizex,1:gridsizey,1:gridsizez]
       activated = activated[1:gridsizex,1:gridsizey,1:gridsizez]
-      preset = preset[1:gridsizex,1:gridsizey,1:gridsizez]
 
       # simulation frontier
       dilated = dilate(simulated) & activated
       frontier = find(dilated - simulated)
 
       # hard frontier
-      dilatedₕ = dilate(preset) & activated
-      frontierₕ = find(dilatedₕ - preset)
+      dilatedₕ = dilate(preset[1:gridsizex,1:gridsizey,1:gridsizez]) & activated
+      frontierₕ = find(dilatedₕ - preset[1:gridsizex,1:gridsizey,1:gridsizez])
 
       while !isempty(frontier)
         visited = 0
