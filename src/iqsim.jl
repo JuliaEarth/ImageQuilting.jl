@@ -555,7 +555,7 @@ function genpath(extent::NTuple{3,Integer}, kind::Symbol)
   path = Int[]
 
   if kind == :raster
-    for k=1:extent[3], j=1:extent[2], i=1:extent[1]
+    for k=extent[3]:-1:1, j=1:extent[2], i=1:extent[1]
       push!(path, sub2ind(extent, i,j,k))
     end
   end
