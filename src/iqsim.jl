@@ -212,7 +212,7 @@ function iqsim(training_image::AbstractArray,
 
     # loop simulation grid tile by tile
     for pathidx in simpath
-      i,j,k = ind2sub((ntilex,ntiley,ntilez), pathidx)
+      i, j, k = ind2sub((ntilex,ntiley,ntilez), pathidx)
 
       # skip tile if all voxels are inactive
       (i,j,k) ∈ skipped && continue
@@ -385,17 +385,15 @@ function iqsim(training_image::AbstractArray,
           # tile center is given by (iᵥ,jᵥ,kᵥ)
           iᵥ, jᵥ, kᵥ = ind2sub(size(simgrid), vox)
 
-          # tile top left corner is given by (Is,Js,Ks)
-          Is = iᵥ - (tplx-1)÷2
-          Js = jᵥ - (tply-1)÷2
-          Ks = kᵥ - (tplz-1)÷2
+          # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
+          iₛ = max(iᵥ - (tplx-1)÷2, 1)
+          jₛ = max(jᵥ - (tply-1)÷2, 1)
+          kₛ = max(kᵥ - (tplz-1)÷2, 1)
+          iₑ = min(iᵥ + tplx÷2, gridsizex)
+          jₑ = min(jᵥ + tply÷2, gridsizey)
+          kₑ = min(kᵥ + tplz÷2, gridsizez)
 
-          for δi=1:tplx, δj=1:tply, δk=1:tplz
-            i, j, k = Is+δi-1, Js+δj-1, Ks+δk-1
-            if all(0 .< [i,j,k] .≤ [size(simgrid)...]) && simulated[i,j,k]
-              ndata[vox] += 1
-            end
-          end
+          ndata[vox] = sum(simulated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
         end
 
         # start inpainting nearby hard data if possible
