@@ -293,7 +293,7 @@ function iqsim(training_image::AbstractArray,
       if hard ≠ nothing && any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
         harddev = hardgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
         hsimplex = categorical ? simplex_transform(harddev, nvertices) : Any[harddev]
-        D = convdist(simplexTI, hsimplex)
+        D = convdist(simplexTI, hsimplex, weights=preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
 
         # disable dataevents that contain inactive voxels
         D[disabled] = Inf
@@ -459,7 +459,7 @@ function iqsim(training_image::AbstractArray,
               if hard ≠ nothing && any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
                 harddev = hardgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
                 hsimplex = categorical ? simplex_transform(harddev, nvertices) : Any[harddev]
-                D = convdist(simplexTI, hsimplex, inner=false)
+                D = convdist(simplexTI, hsimplex, weights=preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ], inner=false)
 
                 # disable dataevents that contain inactive voxels
                 D[disabledₜ] = Inf
