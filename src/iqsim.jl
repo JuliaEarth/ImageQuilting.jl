@@ -279,8 +279,8 @@ function iqsim(training_image::AbstractArray,
       # disable dataevents that contain inactive voxels
       distance[disabled] = Inf
 
-      # compute soft distance
-      softdistance = []
+      # compute soft and hard distances
+      auxdistances = []
       for n=1:length(softTI)
         softdev = softgrid[n][iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
         D = convdist(Any[softTI[n]], Any[softdev])
@@ -288,13 +288,23 @@ function iqsim(training_image::AbstractArray,
         # disable dataevents that contain inactive voxels
         D[disabled] = Inf
 
-        push!(softdistance, D)
+        push!(auxdistances, D)
+      end
+      if hard ≠ nothing && any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
+        harddev = hardgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+        hsimplex = categorical ? simplex_transform(harddev, nvertices) : Any[harddev]
+        D = convdist(simplexTI, hsimplex)
+
+        # disable dataevents that contain inactive voxels
+        D[disabled] = Inf
+
+        push!(auxdistances, D)
       end
 
       # current pattern database
-      patterndb = soft ≠ nothing ? relaxation(distance, softdistance, cutoff) :
-                                   find(distance .≤ (1+cutoff)minimum(distance))
-      patternprobs = tau_model(patterndb, distance, softdistance)
+      patterndb = isempty(auxdistances) ? find(distance .≤ (1+cutoff)minimum(distance)) :
+                                          relaxation(distance, auxdistances, cutoff)
+      patternprobs = tau_model(patterndb, distance, auxdistances)
 
       # pick a pattern at random from the database
       idx = sample(patterndb, weights(patternprobs))
@@ -435,8 +445,8 @@ function iqsim(training_image::AbstractArray,
               # disable dataevents that contain inactive voxels
               distance[disabledₜ] = Inf
 
-              # compute soft distance
-              softdistance = []
+              # compute soft and hard distances
+              auxdistances = []
               for n=1:length(softTI)
                 softdev = softgrid[n][iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
                 D = convdist(Any[softTI[n]], Any[softdev], weights=booldev, inner=false)
@@ -444,13 +454,23 @@ function iqsim(training_image::AbstractArray,
                 # disable dataevents that contain inactive voxels
                 D[disabledₜ] = Inf
 
-                push!(softdistance, D)
+                push!(auxdistances, D)
+              end
+              if hard ≠ nothing && any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
+                harddev = hardgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+                hsimplex = categorical ? simplex_transform(harddev, nvertices) : Any[harddev]
+                D = convdist(simplexTI, hsimplex, inner=false)
+
+                # disable dataevents that contain inactive voxels
+                D[disabledₜ] = Inf
+
+                push!(auxdistances, D)
               end
 
               # current pattern database
-              patterndb = soft ≠ nothing ? relaxation(distance, softdistance, cutoff) :
-                                           find(distance .≤ (1+cutoff)minimum(distance))
-              patternprobs = tau_model(patterndb, distance, softdistance)
+              patterndb = isempty(auxdistances) ? find(distance .≤ (1+cutoff)minimum(distance)) :
+                                                  relaxation(distance, auxdistances, cutoff)
+              patternprobs = tau_model(patterndb, distance, auxdistances)
 
               # pick a pattern at random from the database
               idx = sample(patterndb, weights(patternprobs))
