@@ -27,7 +27,7 @@ function iqsim(training_image::AbstractArray,
   @assert all(0 .< [overlapx, overlapy, overlapz] .< 1) "overlaps must be in range (0,1)"
   @assert cutoff > 0 "cutoff must be positive"
   @assert cut ∈ [:dijkstra,:boykov] "invalid cut algorithm (:dijkstra or :boykov)"
-  @assert path ∈ [:raster,:random,:dilation] "invalid simulation path (:raster, :random or :dilation)"
+  @assert path ∈ [:raster,:random,:dilation,:datum] "invalid simulation path (:raster, :random, :dilation or :datum)"
 
   # soft data checks
   if soft ≠ nothing
@@ -97,7 +97,7 @@ function iqsim(training_image::AbstractArray,
   end
 
   # tiles that contain hard data are skipped during raster path
-  skipped = Set(); rastered = []
+  skipped = Set(); datum = Set(); rastered = []
   if hard ≠ nothing
     rastered = falses(nx, ny, nz)
     for k=1:ntilez, j=1:ntiley, i=1:ntilex
@@ -113,6 +113,8 @@ function iqsim(training_image::AbstractArray,
         push!(skipped, (i,j,k))
       elseif all(!preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
         rastered[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = true
+      else
+        push!(datum, (i,j,k))
       end
     end
     rastered[!activated] = false
@@ -208,7 +210,7 @@ function iqsim(training_image::AbstractArray,
     pasted = Set()
 
     # construct simulation path
-    simpath = genpath((ntilex,ntiley,ntilez), path)
+    simpath = genpath((ntilex,ntiley,ntilez), path, datum)
 
     # loop simulation grid tile by tile
     for pathidx in simpath
@@ -569,7 +571,7 @@ function convdist(Xs::AbstractArray, masks::AbstractArray; weights=nothing, inne
   sum(result)
 end
 
-function genpath(extent::NTuple{3,Integer}, kind::Symbol)
+function genpath(extent::NTuple{3,Integer}, kind::Symbol, datum=Set())
   path = Int[]
 
   if kind == :raster
@@ -590,6 +592,28 @@ function genpath(extent::NTuple{3,Integer}, kind::Symbol)
     grid = falses(extent)
     grid[pivot] = true
     push!(path, pivot)
+
+    while !all(grid)
+      dilated = dilate(grid)
+      append!(path, find(dilated - grid))
+      grid = dilated
+    end
+  end
+
+  if kind == :datum
+    grid = falses(extent)
+    if isempty(datum)
+      nelm = prod(extent)
+      pivot = rand(1:nelm)
+      grid[pivot] = true
+      push!(path, pivot)
+    else
+      for (i,j,k) in datum
+        pivot = sub2ind(extent, i,j,k)
+        grid[pivot] = true
+        push!(path, pivot)
+      end
+    end
 
     while !all(grid)
       dilated = dilate(grid)
