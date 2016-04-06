@@ -379,18 +379,6 @@ function iqsim(training_image::AbstractArray,
       while !isempty(frontier)
         visited = 0
 
-        # disable tiles in the training image if they contain inactive voxels
-        disabledₜ = copy(NaNTI)
-        for i=1:tplx-1
-          disabledₜ = dilate(disabledₜ, [1])
-        end
-        for j=1:tply-1
-          disabledₜ = dilate(disabledₜ, [2])
-        end
-        for k=1:tplz-1
-          disabledₜ = dilate(disabledₜ, [3])
-        end
-
         # count data next to the frontier
         ndata = zeros(Int, gridsizex, gridsizey, gridsizez)
         for vox in frontier
@@ -416,6 +404,18 @@ function iqsim(training_image::AbstractArray,
         frontier = frontier[permvec]
 
         if any([tplx,tply,tplz] .> 1)
+          # disable tiles in the training image if they contain inactive voxels
+          disabledₜ = copy(NaNTI)
+          for i=1:tplx÷2
+            disabledₜ = dilate(disabledₜ, [1])
+          end
+          for j=1:tply÷2
+            disabledₜ = dilate(disabledₜ, [2])
+          end
+          for k=1:tplz÷2
+            disabledₜ = dilate(disabledₜ, [3])
+          end
+
           # scan training image
           for vox in frontier
             # tile center is given by (iᵥ,jᵥ,kᵥ)
