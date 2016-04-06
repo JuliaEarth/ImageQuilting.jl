@@ -21,7 +21,7 @@ function simplex_transform(img::AbstractArray, nvertices::Integer)
   # simplex construction
   vertices = [eye(ncoords) ones(ncoords)*(1-sqrt(ncoords+1))/2]
   center = sum(vertices, 2) / nvertices
-  vertices -= repeat(center, inner=[1,nvertices])
+  vertices = vertices .- center
 
   # map 0 to (0,0,...,0)
   vertices = [zeros(ncoords) vertices]
