@@ -25,7 +25,7 @@ function iqsim(training_image::AbstractArray,
   @assert all(0 .< [tplsizex, tplsizey, tplsizez] .≤ [size(training_image)...]) "invalid template size"
   @assert all([gridsizex, gridsizey, gridsizez] .≥ [tplsizex, tplsizey, tplsizez]) "invalid grid size"
   @assert all(0 .< [overlapx, overlapy, overlapz] .< 1) "overlaps must be in range (0,1)"
-  @assert cutoff > 0 "cutoff must be positive"
+  @assert 0 < cutoff ≤ 1 "cutoff must be in range (0,1]"
   @assert cut ∈ [:dijkstra,:boykov] "invalid cut algorithm (:dijkstra or :boykov)"
   @assert path ∈ [:raster,:random,:dilation,:datum] "invalid simulation path (:raster, :random, :dilation or :datum)"
 
@@ -40,8 +40,6 @@ function iqsim(training_image::AbstractArray,
       @assert ndims(aux.data) == 3 "soft data is not 3D (add ghost dimension for 2D)"
       @assert all([size(aux.data)...] .≥ [gridsizex, gridsizey, gridsizez]) "soft data size < grid size"
     end
-
-    @assert 0 < cutoff ≤ 1 "cutoff must be in range (0,1] when soft data is available"
   end
 
   # hard data checks
