@@ -22,6 +22,7 @@ if VERSION > v"0.5-"
   using Combinatorics: nthperm!
 end
 
+include("utils.jl")
 include("datatypes.jl")
 include("relaxation.jl")
 include("tau_model.jl")
