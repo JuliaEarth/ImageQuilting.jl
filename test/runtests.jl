@@ -111,3 +111,14 @@ reals = iqsim(TI, 10, 10, 10, size(TI)..., hard=data, nreal=3)
 for real in reals
   @test real[20,20,20] == 10
 end
+
+# different simulation paths
+for kind in [:raster,:dilation,:random,:datum]
+  path = ImageQuilting.genpath((10,10,10), kind)
+  @test length(path) == 1000
+end
+
+# datum is visited first if present
+path = ImageQuilting.genpath((10,10,10), :datum, [(1,1,1),(10,10,10)])
+@test path[1] == 1
+@test path[2] == 1000
