@@ -15,7 +15,7 @@
 function meanvoxreuse(training_image::AbstractArray,
                       tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
                       overlapx=1/6, overlapy=1/6, overlapz=1/6,
-                      nreal=10, categorical=false)
+                      nreal=10, cut=:dijkstra, categorical=false)
 
   # calculate the overlap from given percentage
   ovx = ceil(Int, overlapx * tplsizex)
@@ -35,7 +35,7 @@ function meanvoxreuse(training_image::AbstractArray,
   _, _, voxs = iqsim(training_image, tplsizex, tplsizey, tplsizez,
                      gridsizex, gridsizey, gridsizez,
                      overlapx=overlapx, overlapy=overlapy, overlapz=overlapz,
-                     nreal=nreal, categorical=categorical, debug=true)
+                     nreal=nreal, cut=cut, categorical=categorical, debug=true)
 
   mean(voxs)
 end
