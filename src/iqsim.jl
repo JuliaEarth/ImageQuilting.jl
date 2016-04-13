@@ -316,22 +316,28 @@ function iqsim(training_image::AbstractArray,
       # boundary cut mask
       M = falses(simdev)
       if overlapx > 1 && (i-1,j,k) ∈ pasted
-        M[1:overlapx,:,:] |= boundary_cut(simdev[1:overlapx,:,:], TIdev[1:overlapx,:,:], :x)
+        A = simdev[1:overlapx,:,:]; B = TIdev[1:overlapx,:,:]
+        M[1:overlapx,:,:] |= boundary_cut(A, B, :x)
       end
       if overlapx > 1 && (i+1,j,k) ∈ pasted
-        M[spacingx+1:end,:,:] |= !boundary_cut(simdev[spacingx+1:end,:,:], TIdev[spacingx+1:end,:,:], :x)
+        A = simdev[spacingx+1:end,:,:]; B = TIdev[spacingx+1:end,:,:]
+        M[spacingx+1:end,:,:] |= flipdim(boundary_cut(flipdim(A, 1), flipdim(B, 1), :x), 1)
       end
       if overlapy > 1 && (i,j-1,k) ∈ pasted
-        M[:,1:overlapy,:] |= boundary_cut(simdev[:,1:overlapy,:], TIdev[:,1:overlapy,:], :y)
+        A = simdev[:,1:overlapy,:]; B = TIdev[:,1:overlapy,:]
+        M[:,1:overlapy,:] |= boundary_cut(A, B, :y)
       end
       if overlapy > 1 && (i,j+1,k) ∈ pasted
-        M[:,spacingy+1:end,:] |= !boundary_cut(simdev[:,spacingy+1:end,:], TIdev[:,spacingy+1:end,:], :y)
+        A = simdev[:,spacingy+1:end,:]; B = TIdev[:,spacingy+1:end,:]
+        M[:,spacingy+1:end,:] |= flipdim(boundary_cut(flipdim(A, 2), flipdim(B, 2), :y), 2)
       end
       if overlapz > 1 && (i,j,k-1) ∈ pasted
-        M[:,:,1:overlapz] |= boundary_cut(simdev[:,:,1:overlapz], TIdev[:,:,1:overlapz], :z)
+        A = simdev[:,:,1:overlapz]; TIdev[:,:,1:overlapz]
+        M[:,:,1:overlapz] |= boundary_cut(A, B, :z)
       end
       if overlapz > 1 && (i,j,k+1) ∈ pasted
-        M[:,:,spacingz+1:end] |= !boundary_cut(simdev[:,:,spacingz+1:end], TIdev[:,:,spacingz+1:end], :z)
+        A = simdev[:,:,spacingz+1:end]; B = TIdev[:,:,spacingz+1:end]
+        M[:,:,spacingz+1:end] |= flipdim(boundary_cut(flipdim(A, 3), flipdim(B, 3), :z), 3)
       end
 
       # paste contributions from simulation grid and training image
