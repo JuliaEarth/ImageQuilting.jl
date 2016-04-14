@@ -332,7 +332,7 @@ function iqsim(training_image::AbstractArray,
         M[:,spacingy+1:end,:] |= flipdim(boundary_cut(flipdim(A, 2), flipdim(B, 2), :y), 2)
       end
       if overlapz > 1 && (i,j,k-1) ∈ pasted
-        A = simdev[:,:,1:overlapz]; TIdev[:,:,1:overlapz]
+        A = simdev[:,:,1:overlapz]; B = TIdev[:,:,1:overlapz]
         M[:,:,1:overlapz] |= boundary_cut(A, B, :z)
       end
       if overlapz > 1 && (i,j,k+1) ∈ pasted
