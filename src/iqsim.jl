@@ -17,7 +17,7 @@ function iqsim(training_image::AbstractArray,
                gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
                overlapx=1/6, overlapy=1/6, overlapz=1/6,
                soft=nothing, hard=nothing, cutoff=.1,
-               cut=:dijkstra, path=:raster, categorical=false,
+               cut=:dijkstra, path=:rasterup, categorical=false,
                seed=0, nreal=1, debug=false)
 
   # sanity checks
@@ -26,8 +26,8 @@ function iqsim(training_image::AbstractArray,
   @assert all([gridsizex, gridsizey, gridsizez] .≥ [tplsizex, tplsizey, tplsizez]) "invalid grid size"
   @assert all(0 .< [overlapx, overlapy, overlapz] .< 1) "overlaps must be in range (0,1)"
   @assert 0 < cutoff ≤ 1 "cutoff must be in range (0,1]"
-  @assert cut ∈ [:dijkstra,:boykov] "invalid cut algorithm (:dijkstra or :boykov)"
-  @assert path ∈ [:raster,:random,:dilation,:datum] "invalid simulation path (:raster, :random, :dilation or :datum)"
+  @assert cut ∈ [:dijkstra,:boykov] "invalid cut algorithm"
+  @assert path ∈ [:rasterup,:rasterdown,:dilation,:random,:datum] "invalid simulation path"
 
   # soft data checks
   if soft ≠ nothing
