@@ -19,7 +19,7 @@ Features
 Installation
 ------------
 
-For the latest stable release:
+Get the latest stable release with Julia's package manager:
 
 ```julia
 Pkg.add("ImageQuilting")
@@ -28,7 +28,7 @@ Pkg.add("ImageQuilting")
 Documentation
 -------------
 
-Please refer to the official documentation.
+Please refer to the official documentation:
 
 [![Latest Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://juliohm.github.io/ImageQuilting.jl/latest)
 

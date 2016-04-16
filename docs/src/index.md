@@ -10,7 +10,7 @@ A Julia package for fast 3D image quilting simulation.
 
 ## Installation
 
-For the latest stable release:
+Get the latest stable release with Julia's package manager:
 
 ```julia
 Pkg.add("ImageQuilting")
