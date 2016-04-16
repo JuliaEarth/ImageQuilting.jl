@@ -1,0 +1,23 @@
+site_name:        ImageQuilting.jl
+repo_url:         https://github.com/juliohm/ImageQuilting.jl
+site_description: Fast 3D image quilting simulation.
+site_author:      Júlio Hoffimann Mendes
+
+theme: readthedocs
+
+extra_css:
+  - assets/Documenter.css
+
+extra_javascript:
+  - https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML
+  - assets/mathjaxhelper.js
+
+markdown_extensions:
+  - extra
+  - tables
+  - fenced_code
+
+docs_dir: 'build'
+
+pages:
+  - Home: home.md
