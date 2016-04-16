@@ -1,12 +1,12 @@
 {
     "docs": [
         {
-            "location": "/home/", 
+            "location": "/", 
             "text": "Documentation for the \nImageQuilting.jl\n package.\n\n\n\n\nInstallation\n\n\nUse Julia package manager:\n\n\nPkg.add(\nImageQuilting\n)", 
             "title": "Home"
         }, 
         {
-            "location": "/home/#installation", 
+            "location": "/#installation", 
             "text": "Use Julia package manager:  Pkg.add( ImageQuilting )", 
             "title": "Installation"
         }
