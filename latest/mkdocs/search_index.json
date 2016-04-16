@@ -9,6 +9,26 @@
             "location": "/#installation", 
             "text": "Use Julia package manager:  Pkg.add( ImageQuilting )", 
             "title": "Installation"
+        }, 
+        {
+            "location": "/examples/", 
+            "text": "Unconditional\n\n\nTODO\n\n\n\n\nHard data\n\n\nTODO\n\n\n\n\nSoft data\n\n\nTODO", 
+            "title": "Examples"
+        }, 
+        {
+            "location": "/examples/#unconditional", 
+            "text": "TODO", 
+            "title": "Unconditional"
+        }, 
+        {
+            "location": "/examples/#hard-data", 
+            "text": "TODO", 
+            "title": "Hard data"
+        }, 
+        {
+            "location": "/examples/#soft-data", 
+            "text": "TODO", 
+            "title": "Soft data"
         }
     ]
 }
