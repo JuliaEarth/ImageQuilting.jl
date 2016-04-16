@@ -3,7 +3,7 @@ repo_url:         https://github.com/juliohm/ImageQuilting.jl
 site_description: Fast 3D image quilting simulation.
 site_author:      Júlio Hoffimann Mendes
 
-theme: readthedocs
+theme: flatly
 
 extra_css:
   - assets/Documenter.css
@@ -21,3 +21,4 @@ docs_dir: 'build'
 
 pages:
   - Home: index.md
+  - Examples: examples.md
