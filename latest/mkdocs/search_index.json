@@ -2,22 +2,47 @@
     "docs": [
         {
             "location": "/", 
-            "text": "Documentation for the \nImageQuilting.jl\n package.\n\n\n\n\nInstallation\n\n\nUse Julia package manager:\n\n\nPkg.add(\nImageQuilting\n)", 
+            "text": "Official documentation for \nImageQuilting.jl\n.\n\n\nA Julia package for fast 3D image quilting simulation.\n\n\n\n\nFeatures\n\n\n\n\nMasked grids\n\n\nHard data conditioning\n\n\nSoft data conditioning\n\n\n\n\n\n\nInstallation\n\n\nFor the latest stable release:\n\n\nPkg.add(\nImageQuilting\n)\n\n\n\n\n\n\nUsage\n\n\nreals = iqsim(training_image::AbstractArray,\n              tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,\n              gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;\n              overlapx=1/6, overlapy=1/6, overlapz=1/6,\n              soft=nothing, hard=nothing, cutoff=.1,\n              cut=:dijkstra, path=:rasterup, categorical=false,\n              seed=0, nreal=1, debug=false)\n\n\n\n\nwhere:\n\n\nrequired\n\n\n\n\ntraining_image\n can be any 3D array (add ghost dimension for 2D)\n\n\ntplsizex\n,\ntplsizey\n,\ntplsizez\n is the template size\n\n\ngridsizex\n,\ngridsizey\n,\ngridsizez\n is the simulation size\n\n\n\n\noptional\n\n\n\n\noverlapx\n,\noverlapy\n,\noverlapz\n is the percentage of overlap\n\n\nsoft\n is an instance of \nSoftData\n or an array of such instances\n\n\nhard\n is an instance of \nHardData\n\n\ncutoff\n is the overlap cutoff\n\n\nseed\n is the random seed\n\n\nnreal\n is the number of realizations\n\n\ncut\n is the cut algorithm (:dijkstra or :boykov)\n\n\npath\n is the simulation path (:rasterup, :rasterdown, :dilation, :random or :datum)\n\n\ncategorical\n informs whether the image is categorical or continuous\n\n\ndebug\n tells whether to export or not the boundary cuts and voxel reuse\n\n\n\n\nThe main output \nreals\n consists of a list of 3D realizations that can be indexed with \nreals[1], reals[2], ..., reals[nreal]\n. If \ndebug=true\n, additional output is generated:\n\n\nreals, cuts, voxs = iqsim(..., debug=true)\n\n\n\n\ncuts[i]\n is the boundary cut for \nreals[i]\n and \nvoxs[i]\n is the associated voxel reuse.\n\n\nA helper function is also provided for the fast approximation of the \nmean voxel reuse\n:\n\n\nmvr = meanvoxreuse(training_image::AbstractArray,\n                   tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;\n                   overlapx=1/6, overlapy=1/6, overlapz=1/6,\n                   nreal=10, categorical=false)\n\n\n\n\nwith \nmvr\n in the interval [0,1]. The approximation gets better as \nnreal\n is made larger.\n\n\n\n\nSoft data\n\n\nGiven 3D \ndata\n at least as large as the simulation size and a \ntransform\n such that \ntransform(training_image)\n is comparable with \ndata\n, the \nSoftData(data, transform)\n instance can be passed to \niqsim\n for local relaxation:\n\n\niqsim(..., soft=SoftData(seismic, blur))\n\n\n\n\n\n\nHard data\n\n\nVoxels can be assigned values that will be honored by the simulation. \nHardData()\n is a dictionary of locations and associated values specified by the user:\n\n\nwell = HardData([(i,j,k)=\nvalue(i,j,k) for i=10, j=10, k=1:100])\niqsim(..., hard=well)\n\n\n\n\n\n\nMasked grids\n\n\nMasked grids are a special case of hard data conditioning where inactive voxels are marked with the value \nNaN\n. The algorithm handles this hard data differently as it shouldn't be considered in the pattern similarity calculations.\n\n\ntraining_image\n can also have inactive voxels marked with \nNaN\n. Convolution results are only looked up in active regions.", 
             "title": "Home"
         }, 
         {
+            "location": "/#features", 
+            "text": "Masked grids  Hard data conditioning  Soft data conditioning", 
+            "title": "Features"
+        }, 
+        {
             "location": "/#installation", 
-            "text": "Use Julia package manager:  Pkg.add( ImageQuilting )", 
+            "text": "For the latest stable release:  Pkg.add( ImageQuilting )", 
             "title": "Installation"
         }, 
         {
+            "location": "/#usage", 
+            "text": "reals = iqsim(training_image::AbstractArray,\n              tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,\n              gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;\n              overlapx=1/6, overlapy=1/6, overlapz=1/6,\n              soft=nothing, hard=nothing, cutoff=.1,\n              cut=:dijkstra, path=:rasterup, categorical=false,\n              seed=0, nreal=1, debug=false)  where:  required   training_image  can be any 3D array (add ghost dimension for 2D)  tplsizex , tplsizey , tplsizez  is the template size  gridsizex , gridsizey , gridsizez  is the simulation size   optional   overlapx , overlapy , overlapz  is the percentage of overlap  soft  is an instance of  SoftData  or an array of such instances  hard  is an instance of  HardData  cutoff  is the overlap cutoff  seed  is the random seed  nreal  is the number of realizations  cut  is the cut algorithm (:dijkstra or :boykov)  path  is the simulation path (:rasterup, :rasterdown, :dilation, :random or :datum)  categorical  informs whether the image is categorical or continuous  debug  tells whether to export or not the boundary cuts and voxel reuse   The main output  reals  consists of a list of 3D realizations that can be indexed with  reals[1], reals[2], ..., reals[nreal] . If  debug=true , additional output is generated:  reals, cuts, voxs = iqsim(..., debug=true)  cuts[i]  is the boundary cut for  reals[i]  and  voxs[i]  is the associated voxel reuse.  A helper function is also provided for the fast approximation of the  mean voxel reuse :  mvr = meanvoxreuse(training_image::AbstractArray,\n                   tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;\n                   overlapx=1/6, overlapy=1/6, overlapz=1/6,\n                   nreal=10, categorical=false)  with  mvr  in the interval [0,1]. The approximation gets better as  nreal  is made larger.", 
+            "title": "Usage"
+        }, 
+        {
+            "location": "/#soft-data", 
+            "text": "Given 3D  data  at least as large as the simulation size and a  transform  such that  transform(training_image)  is comparable with  data , the  SoftData(data, transform)  instance can be passed to  iqsim  for local relaxation:  iqsim(..., soft=SoftData(seismic, blur))", 
+            "title": "Soft data"
+        }, 
+        {
+            "location": "/#hard-data", 
+            "text": "Voxels can be assigned values that will be honored by the simulation.  HardData()  is a dictionary of locations and associated values specified by the user:  well = HardData([(i,j,k)= value(i,j,k) for i=10, j=10, k=1:100])\niqsim(..., hard=well)", 
+            "title": "Hard data"
+        }, 
+        {
+            "location": "/#masked-grids", 
+            "text": "Masked grids are a special case of hard data conditioning where inactive voxels are marked with the value  NaN . The algorithm handles this hard data differently as it shouldn't be considered in the pattern similarity calculations.  training_image  can also have inactive voxels marked with  NaN . Convolution results are only looked up in active regions.", 
+            "title": "Masked grids"
+        }, 
+        {
             "location": "/examples/", 
-            "text": "Unconditional\n\n\nTODO\n\n\n\n\nHard data\n\n\nTODO\n\n\n\n\nSoft data\n\n\nTODO", 
+            "text": "Consider installing the \nGeoStatsImages.jl\n package.\n\n\n\n\nUnconditional\n\n\nusing ImageQuilting\nusing GeoStatsImages\n\nTI = training_image(\nStrebelle\n)\nreals = iqsim(TI, 62, 62, 1, size(TI)..., nreal=3)\n\nTI = training_image(\nStoneWall\n)\nreals, cuts, voxs = iqsim(TI, 13, 13, 1, size(TI)..., nreal=3, debug=true)\n\n\n\n\n\n\nHard data\n\n\nTODO\n\n\n\n\nSoft data\n\n\nTODO", 
             "title": "Examples"
         }, 
         {
             "location": "/examples/#unconditional", 
-            "text": "TODO", 
+            "text": "using ImageQuilting\nusing GeoStatsImages\n\nTI = training_image( Strebelle )\nreals = iqsim(TI, 62, 62, 1, size(TI)..., nreal=3)\n\nTI = training_image( StoneWall )\nreals, cuts, voxs = iqsim(TI, 13, 13, 1, size(TI)..., nreal=3, debug=true)", 
             "title": "Unconditional"
         }, 
         {

@@ -113,9 +113,19 @@
 </div></div>
             <div class="col-md-9" role="main">
 
+<p>Consider installing the <a href="https://github.com/juliohm/GeoStatsImages.jl">GeoStatsImages.jl</a> package.</p>
 <p><a id='Unconditional-1'></a></p>
 <h1 id="unconditional">Unconditional</h1>
-<p>TODO</p>
+<pre><code class="julia">using ImageQuilting
+using GeoStatsImages
+
+TI = training_image(&quot;Strebelle&quot;)
+reals = iqsim(TI, 62, 62, 1, size(TI)..., nreal=3)
+
+TI = training_image(&quot;StoneWall&quot;)
+reals, cuts, voxs = iqsim(TI, 13, 13, 1, size(TI)..., nreal=3, debug=true)
+</code></pre>
+
 <p><a id='Hard-data-1'></a></p>
 <h1 id="hard-data">Hard data</h1>
 <p>TODO</p>

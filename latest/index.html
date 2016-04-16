@@ -100,19 +100,101 @@
             <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
-        <li class="main active"><a href="#installation">Installation</a></li>
+        <li class="main active"><a href="#features">Features</a></li>
+        
+    
+        <li class="main "><a href="#installation">Installation</a></li>
+        
+    
+        <li class="main "><a href="#usage">Usage</a></li>
+        
+            <li><a href="#soft-data">Soft data</a></li>
+        
+            <li><a href="#hard-data">Hard data</a></li>
+        
+            <li><a href="#masked-grids">Masked grids</a></li>
         
     
     </ul>
 </div></div>
             <div class="col-md-9" role="main">
 
-<p>Documentation for the <code>ImageQuilting.jl</code> package.</p>
+<p>Official documentation for <em>ImageQuilting.jl</em>.</p>
+<p>A Julia package for fast 3D image quilting simulation.</p>
+<p><a id='Features-1'></a></p>
+<h2 id="features">Features</h2>
+<ul>
+<li>Masked grids</li>
+<li>Hard data conditioning</li>
+<li>Soft data conditioning</li>
+</ul>
 <p><a id='Installation-1'></a></p>
-<h1 id="installation">Installation</h1>
-<p>Use Julia package manager:</p>
+<h2 id="installation">Installation</h2>
+<p>For the latest stable release:</p>
 <pre><code class="julia">Pkg.add(&quot;ImageQuilting&quot;)
-</code></pre></div>
+</code></pre>
+
+<p><a id='Usage-1'></a></p>
+<h2 id="usage">Usage</h2>
+<pre><code class="julia">reals = iqsim(training_image::AbstractArray,
+              tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
+              gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
+              overlapx=1/6, overlapy=1/6, overlapz=1/6,
+              soft=nothing, hard=nothing, cutoff=.1,
+              cut=:dijkstra, path=:rasterup, categorical=false,
+              seed=0, nreal=1, debug=false)
+</code></pre>
+
+<p>where:</p>
+<p><strong>required</strong></p>
+<ul>
+<li><code>training_image</code> can be any 3D array (add ghost dimension for 2D)</li>
+<li><code>tplsizex</code>,<code>tplsizey</code>,<code>tplsizez</code> is the template size</li>
+<li><code>gridsizex</code>,<code>gridsizey</code>,<code>gridsizez</code> is the simulation size</li>
+</ul>
+<p><strong>optional</strong></p>
+<ul>
+<li><code>overlapx</code>,<code>overlapy</code>,<code>overlapz</code> is the percentage of overlap</li>
+<li><code>soft</code> is an instance of <code>SoftData</code> or an array of such instances</li>
+<li><code>hard</code> is an instance of <code>HardData</code></li>
+<li><code>cutoff</code> is the overlap cutoff</li>
+<li><code>seed</code> is the random seed</li>
+<li><code>nreal</code> is the number of realizations</li>
+<li><code>cut</code> is the cut algorithm (:dijkstra or :boykov)</li>
+<li><code>path</code> is the simulation path (:rasterup, :rasterdown, :dilation, :random or :datum)</li>
+<li><code>categorical</code> informs whether the image is categorical or continuous</li>
+<li><code>debug</code> tells whether to export or not the boundary cuts and voxel reuse</li>
+</ul>
+<p>The main output <code>reals</code> consists of a list of 3D realizations that can be indexed with <code>reals[1], reals[2], ..., reals[nreal]</code>. If <code>debug=true</code>, additional output is generated:</p>
+<pre><code class="julia">reals, cuts, voxs = iqsim(..., debug=true)
+</code></pre>
+
+<p><code>cuts[i]</code> is the boundary cut for <code>reals[i]</code> and <code>voxs[i]</code> is the associated voxel reuse.</p>
+<p>A helper function is also provided for the fast approximation of the <em>mean voxel reuse</em>:</p>
+<pre><code class="julia">mvr = meanvoxreuse(training_image::AbstractArray,
+                   tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
+                   overlapx=1/6, overlapy=1/6, overlapz=1/6,
+                   nreal=10, categorical=false)
+</code></pre>
+
+<p>with <code>mvr</code> in the interval [0,1]. The approximation gets better as <code>nreal</code> is made larger.</p>
+<p><a id='Soft-data-1'></a></p>
+<h3 id="soft-data">Soft data</h3>
+<p>Given 3D <code>data</code> at least as large as the simulation size and a <code>transform</code> such that <code>transform(training_image)</code> is comparable with <code>data</code>, the <code>SoftData(data, transform)</code> instance can be passed to <code>iqsim</code> for local relaxation:</p>
+<pre><code class="julia">iqsim(..., soft=SoftData(seismic, blur))
+</code></pre>
+
+<p><a id='Hard-data-1'></a></p>
+<h3 id="hard-data">Hard data</h3>
+<p>Voxels can be assigned values that will be honored by the simulation. <code>HardData()</code> is a dictionary of locations and associated values specified by the user:</p>
+<pre><code class="julia">well = HardData([(i,j,k)=&gt;value(i,j,k) for i=10, j=10, k=1:100])
+iqsim(..., hard=well)
+</code></pre>
+
+<p><a id='Masked-grids-1'></a></p>
+<h3 id="masked-grids">Masked grids</h3>
+<p>Masked grids are a special case of hard data conditioning where inactive voxels are marked with the value <code>NaN</code>. The algorithm handles this hard data differently as it shouldn't be considered in the pattern similarity calculations.</p>
+<p><code>training_image</code> can also have inactive voxels marked with <code>NaN</code>. Convolution results are only looked up in active regions.</p></div>
         </div>
 
         <footer class="col-md-12">
