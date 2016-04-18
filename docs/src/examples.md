@@ -19,4 +19,17 @@ TODO
 
 # Soft data
 
-TODO
+```julia
+using ImageQuilting
+using GeoStatsImages
+using Images: imfilter_gaussian
+
+TI = training_image("WalkerLake")
+truth = training_image("WalkerLakeTruth")
+
+G(m) = imfilter_gaussian(m, [10,10,0])
+
+data = SoftData(G(truth), G)
+
+reals = iqsim(TI, 27, 27, 1, size(truth)..., soft=data, nreal=3)
+```
