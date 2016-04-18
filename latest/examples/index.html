@@ -131,7 +131,19 @@ reals, cuts, voxs = iqsim(TI, 13, 13, 1, size(TI)..., nreal=3, debug=true)
 <p>TODO</p>
 <p><a id='Soft-data-1'></a></p>
 <h1 id="soft-data">Soft data</h1>
-<p>TODO</p></div>
+<pre><code class="julia">using ImageQuilting
+using GeoStatsImages
+using Images: imfilter_gaussian
+
+TI = training_image(&quot;WalkerLake&quot;)
+truth = training_image(&quot;WalkerLakeTruth&quot;)
+
+G(m) = imfilter_gaussian(m, [10,10,0])
+
+data = SoftData(G(truth), G)
+
+reals = iqsim(TI, 27, 27, 1, size(truth)..., soft=data, nreal=3)
+</code></pre></div>
         </div>
 
         <footer class="col-md-12">
