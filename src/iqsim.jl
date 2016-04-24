@@ -376,10 +376,6 @@ function iqsim(training_image::AbstractArray,
       dilated = dilate(simulated) & activated
       frontier = find(dilated - simulated)
 
-      # hard frontier
-      dilatedₕ = dilate(preset[1:gridsizex,1:gridsizey,1:gridsizez]) & activated
-      frontierₕ = find(dilatedₕ - preset[1:gridsizex,1:gridsizey,1:gridsizez])
-
       while !isempty(frontier)
         visited = 0
 
@@ -399,9 +395,6 @@ function iqsim(training_image::AbstractArray,
 
           ndata[vox] = sum(simulated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
         end
-
-        # start inpainting nearby hard data if possible
-        ndata[frontierₕ] += tplsizex*tplsizey*tplsizez
 
         # data-driven visiting order
         permvec = sortperm(ndata[frontier], rev=true)
