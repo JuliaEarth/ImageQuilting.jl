@@ -113,7 +113,7 @@ for real in reals
 end
 
 # different simulation paths
-for kind in [:rasterup,:rasterdown,:dilation,:random,:datum]
+for kind in [:rasterup,:rasterdown,:dilation,:random]
   path = ImageQuilting.genpath((10,10,10), kind)
   @test length(path) == 1000
 end

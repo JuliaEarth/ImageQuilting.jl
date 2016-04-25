@@ -58,29 +58,24 @@ function genpath(extent::NTuple{3,Integer}, kind::Symbol, datum=Set())
     push!(path, pivot)
 
     while !all(grid)
-      dilated = dilate(grid)
+      dilated = dilate(grid, [1,2,3])
       append!(path, find(dilated - grid))
       grid = dilated
     end
   end
 
   if kind == :datum
+    @assert !isempty(datum) "datum path cannot be generated without data"
+
     grid = falses(extent)
-    if isempty(datum)
-      nelm = prod(extent)
-      pivot = rand(1:nelm)
+    for (i,j,k) in datum
+      pivot = sub2ind(extent, i,j,k)
       grid[pivot] = true
       push!(path, pivot)
-    else
-      for (i,j,k) in datum
-        pivot = sub2ind(extent, i,j,k)
-        grid[pivot] = true
-        push!(path, pivot)
-      end
     end
 
     while !all(grid)
-      dilated = dilate(grid)
+      dilated = dilate(grid, [1,2,3])
       append!(path, find(dilated - grid))
       grid = dilated
     end

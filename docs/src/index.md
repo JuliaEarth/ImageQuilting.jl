@@ -45,7 +45,7 @@ where:
 * `seed` is the random seed
 * `nreal` is the number of realizations
 * `cut` is the cut algorithm (:dijkstra or :boykov)
-* `path` is the simulation path (:rasterup, :rasterdown, :dilation, :random or :datum)
+* `path` is the simulation path (:rasterup, :rasterdown, :dilation or :random)
 * `categorical` informs whether the image is categorical or continuous
 * `debug` tells whether to export or not the boundary cuts and voxel reuse
 

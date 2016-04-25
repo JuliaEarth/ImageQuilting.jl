@@ -27,7 +27,7 @@ function iqsim(training_image::AbstractArray,
   @assert all(0 .< [overlapx, overlapy, overlapz] .< 1) "overlaps must be in range (0,1)"
   @assert 0 < cutoff ≤ 1 "cutoff must be in range (0,1]"
   @assert cut ∈ [:dijkstra,:boykov] "invalid cut algorithm"
-  @assert path ∈ [:rasterup,:rasterdown,:dilation,:random,:datum] "invalid simulation path"
+  @assert path ∈ [:rasterup,:rasterdown,:dilation,:random] "invalid simulation path"
 
   # soft data checks
   if soft ≠ nothing
@@ -94,7 +94,7 @@ function iqsim(training_image::AbstractArray,
     activated[:,:,gridsizez+1:nz] = false
   end
 
-  # tiles that contain hard data are skipped during raster path
+  # keep track of hard data and inactive voxels
   skipped = Set(); datum = Set(); rastered = []
   if hard ≠ nothing
     rastered = falses(nx, ny, nz)
@@ -119,11 +119,11 @@ function iqsim(training_image::AbstractArray,
 
     simulated = preset | rastered
 
-    # raster path must be non-empty or data must be available
+    # path must be non-empty or data must be available
     any_activated = any(activated[1:gridsizex,1:gridsizey,1:gridsizez])
     any_simulated = any(simulated[1:gridsizex,1:gridsizey,1:gridsizez])
     @assert any_activated "simulation grid has no active voxel"
-    @assert any_simulated "raster path must visit at least one tile in the absence of data"
+    @assert any_simulated "path must visit at least one tile in the absence of data"
   end
 
   # always work with floating point
@@ -182,6 +182,9 @@ function iqsim(training_image::AbstractArray,
       push!(softTI, auxTI)
     end
   end
+
+  # overwrite path option if data is available
+  !isempty(datum) && (path = :datum)
 
   # select cut algorithm
   boundary_cut = cut == :dijkstra ? dijkstra_cut : boykov_kolmogorov_cut
@@ -373,7 +376,7 @@ function iqsim(training_image::AbstractArray,
       activated = activated[1:gridsizex,1:gridsizey,1:gridsizez]
 
       # simulation frontier
-      dilated = dilate(simulated) & activated
+      dilated = dilate(simulated, [1,2,3]) & activated
       frontier = find(dilated - simulated)
 
       while !isempty(frontier)
@@ -535,7 +538,7 @@ function iqsim(training_image::AbstractArray,
           idx == 1 && (tplz = max(tplz-1,1))
         end
 
-        dilated = dilate(simulated) & activated
+        dilated = dilate(simulated, [1,2,3]) & activated
         frontier = find(dilated - simulated)
       end
 
