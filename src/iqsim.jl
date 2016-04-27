@@ -379,11 +379,13 @@ function iqsim(training_image::AbstractArray,
       dilated = dilate(simulated, [1,2,3]) & activated
       frontier = find(dilated - simulated)
 
+      # confidence map
+      C = map(Float64, simulated)
+
       while !isempty(frontier)
         visited = 0
 
-        # count data next to the frontier
-        ndata = zeros(Int, gridsizex, gridsizey, gridsizez)
+        # update confidence in the frontier
         for vox in frontier
           # tile center is given by (iᵥ,jᵥ,kᵥ)
           iᵥ, jᵥ, kᵥ = ind2sub(size(simgrid), vox)
@@ -396,11 +398,14 @@ function iqsim(training_image::AbstractArray,
           jₑ = min(jᵥ + tply÷2, gridsizey)
           kₑ = min(kᵥ + tplz÷2, gridsizez)
 
-          ndata[vox] = sum(simulated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
+          confdev = C[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+          booldev = simulated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+
+          C[vox] = sum(confdev[booldev]) / (tplx*tply*tplz)
         end
 
         # data-driven visiting order
-        permvec = sortperm(ndata[frontier], rev=true)
+        permvec = sortperm(C[frontier], rev=true)
         frontier = frontier[permvec]
 
         if any([tplx,tply,tplz] .> 1)
