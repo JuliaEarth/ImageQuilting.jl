@@ -24,6 +24,7 @@ end
 
 include("utils.jl")
 include("datatypes.jl")
+include("ndgradients.jl")
 include("relaxation.jl")
 include("tau_model.jl")
 include("dijkstra_cut.jl")

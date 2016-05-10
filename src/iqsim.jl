@@ -379,8 +379,8 @@ function iqsim(training_image::AbstractArray,
       dilated = dilate(simulated, [1,2,3]) & activated
       frontier = find(dilated - simulated)
 
-      # confidence map
-      C = map(Float64, simulated)
+      # initialize confidence map
+      Cmap = map(Float64, simulated)
 
       while !isempty(frontier)
         visited = 0
@@ -398,14 +398,20 @@ function iqsim(training_image::AbstractArray,
           jₑ = min(jᵥ + tply÷2, gridsizey)
           kₑ = min(kᵥ + tplz÷2, gridsizez)
 
-          confdev = C[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+          confdev = Cmap[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
           booldev = simulated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
 
-          C[vox] = sum(confdev[booldev]) / (tplx*tply*tplz)
+          Cmap[vox] = sum(confdev[booldev]) / (tplx*tply*tplz)
         end
 
+        # isophote map
+        G = ndgradients(simgrid, frontier)
+        N = ndgradients(simulated, frontier)
+        Dmap = vec(abs(sum(G.*N, 2)))
+        Dmap /= maximum(Dmap)
+
         # data-driven visiting order
-        permvec = sortperm(C[frontier], rev=true)
+        permvec = sortperm(Cmap[frontier].*Dmap, rev=true)
         frontier = frontier[permvec]
 
         if any([tplx,tply,tplz] .> 1)
