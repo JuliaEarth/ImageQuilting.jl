@@ -22,3 +22,7 @@ docs_dir: 'build'
 pages:
   - Home: index.md
   - Examples: examples.md
+  - GPU support: gpu-support.md
+  - About:
+    - License: about/license.md
+    - Author:  about/author.md
