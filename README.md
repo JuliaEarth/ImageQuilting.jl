@@ -15,6 +15,7 @@ Features
 * Masked grids
 * Hard data conditioning
 * Soft data conditioning
+* Fast computation with GPUs
 
 Installation
 ------------

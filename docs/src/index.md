@@ -1,4 +1,4 @@
-Official documentation for *ImageQuilting.jl*.
+## Overview
 
 A Julia package for fast 3D image quilting simulation.
 
@@ -7,6 +7,7 @@ A Julia package for fast 3D image quilting simulation.
 - Masked grids
 - Hard data conditioning
 - Soft data conditioning
+- Fast computation with GPUs
 
 ## Installation
 
