@@ -17,4 +17,28 @@
     </url>
     
 
+    
+    <url>
+     <loc>None/gpu-support/</loc>
+     <lastmod>2016-05-20</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+        
+    <url>
+     <loc>None/about/license/</loc>
+     <lastmod>2016-05-20</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>None/about/author/</loc>
+     <lastmod>2016-05-20</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    
+
 </urlset>

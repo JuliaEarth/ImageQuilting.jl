@@ -7,15 +7,15 @@
         
         <meta name="author" content="Júlio Hoffimann Mendes">
         
-        <link rel="shortcut icon" href="../img/favicon.ico">
+        <link rel="shortcut icon" href="../../img/favicon.ico">
 
-	<title>Examples - ImageQuilting.jl</title>
+	<title>Author - ImageQuilting.jl</title>
 
-        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
-        <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
-        <link rel="stylesheet" href="../css/highlight.css">
-        <link href="../css/base.css" rel="stylesheet">
-        <link href="../assets/Documenter.css" rel="stylesheet">
+        <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link rel="stylesheet" href="../../css/highlight.css">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link href="../../assets/Documenter.css" rel="stylesheet">
 
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
@@ -42,7 +42,7 @@
             </button>
 
             <!-- Main title -->
-            <a class="navbar-brand" href="..">ImageQuilting.jl</a>
+            <a class="navbar-brand" href="../..">ImageQuilting.jl</a>
         </div>
 
         <!-- Expanded navigation -->
@@ -52,36 +52,36 @@
             
             
                 <li >
-                    <a href="..">Home</a>
-                </li>
-            
-            
-            
-                <li class="active">
-                    <a href="./">Examples</a>
+                    <a href="../..">Home</a>
                 </li>
             
             
             
                 <li >
-                    <a href="../gpu-support/">GPU support</a>
+                    <a href="../../examples/">Examples</a>
                 </li>
             
             
             
-                <li class="dropdown">
+                <li >
+                    <a href="../../gpu-support/">GPU support</a>
+                </li>
+            
+            
+            
+                <li class="dropdown active">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                     
                         
 <li >
-    <a href="../about/license/">License</a>
+    <a href="../license/">License</a>
 </li>
 
                     
                         
-<li >
-    <a href="../about/author/">Author</a>
+<li class="active">
+    <a href="./">Author</a>
 </li>
 
                     
@@ -99,12 +99,12 @@
                     </a>
                 </li>
                 <li >
-                    <a rel="next" href="..">
+                    <a rel="next" href="../license/">
                         <i class="fa fa-arrow-left"></i> Previous
                     </a>
                 </li>
-                <li >
-                    <a rel="prev" href="../gpu-support/">
+                <li class="disabled">
+                    <a rel="prev" >
                         Next <i class="fa fa-arrow-right"></i>
                     </a>
                 </li>
@@ -127,50 +127,17 @@
             <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
-        <li class="main active"><a href="#unconditional">Unconditional</a></li>
-        
-    
-        <li class="main "><a href="#hard-data">Hard data</a></li>
-        
-    
-        <li class="main "><a href="#soft-data">Soft data</a></li>
+        <li class="main active"><a href="#author">Author</a></li>
         
     
     </ul>
 </div></div>
             <div class="col-md-9" role="main">
 
-<p>Consider installing the <a href="https://github.com/juliohm/GeoStatsImages.jl">GeoStatsImages.jl</a> package.</p>
-<p><a id='Unconditional-1'></a></p>
-<h1 id="unconditional">Unconditional</h1>
-<pre><code class="julia">using ImageQuilting
-using GeoStatsImages
-
-TI = training_image(&quot;Strebelle&quot;)
-reals = iqsim(TI, 62, 62, 1, size(TI)..., nreal=3)
-
-TI = training_image(&quot;StoneWall&quot;)
-reals, cuts, voxs = iqsim(TI, 13, 13, 1, size(TI)..., nreal=3, debug=true)
-</code></pre>
-
-<p><a id='Hard-data-1'></a></p>
-<h1 id="hard-data">Hard data</h1>
-<p>TODO</p>
-<p><a id='Soft-data-1'></a></p>
-<h1 id="soft-data">Soft data</h1>
-<pre><code class="julia">using ImageQuilting
-using GeoStatsImages
-using Images: imfilter_gaussian
-
-TI = training_image(&quot;WalkerLake&quot;)
-truth = training_image(&quot;WalkerLakeTruth&quot;)
-
-G(m) = imfilter_gaussian(m, [10,10,0])
-
-data = SoftData(G(truth), G)
-
-reals = iqsim(TI, 27, 27, 1, size(truth)..., soft=data, nreal=3)
-</code></pre></div>
+<p><a id='Author-1'></a></p>
+<h1 id="author">Author</h1>
+<p>This package was inspired by the many contributions from the Computer Graphics and Vision community.</p>
+<p><strong>Júlio Hoffimann Mendes</strong> <br/> Ph.D. candidate @ Stanford University <br/> Department of Energy Resources Engineering</p></div>
         </div>
 
         <footer class="col-md-12">
@@ -179,14 +146,14 @@ reals = iqsim(TI, 27, 27, 1, size(truth)..., soft=data, nreal=3)
             <center>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</center>
         </footer>
 
-        <script src="../js/jquery-1.10.2.min.js"></script>
-        <script src="../js/bootstrap-3.0.3.min.js"></script>
-        <script src="../js/highlight.pack.js"></script>
-        <script>var base_url = '..';</script>
-        <script data-main="../mkdocs/js/search.js" src="../mkdocs/js/require.js"></script>
-        <script src="../js/base.js"></script>
+        <script src="../../js/jquery-1.10.2.min.js"></script>
+        <script src="../../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../../js/highlight.pack.js"></script>
+        <script>var base_url = '../..';</script>
+        <script data-main="../../mkdocs/js/search.js" src="../../mkdocs/js/require.js"></script>
+        <script src="../../js/base.js"></script>
         <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
-        <script src="../assets/mathjaxhelper.js"></script>
+        <script src="../../assets/mathjaxhelper.js"></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
             <div class="modal-dialog">

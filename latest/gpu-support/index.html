@@ -9,7 +9,7 @@
         
         <link rel="shortcut icon" href="../img/favicon.ico">
 
-	<title>Examples - ImageQuilting.jl</title>
+	<title>GPU support - ImageQuilting.jl</title>
 
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
@@ -57,14 +57,14 @@
             
             
             
-                <li class="active">
-                    <a href="./">Examples</a>
+                <li >
+                    <a href="../examples/">Examples</a>
                 </li>
             
             
             
-                <li >
-                    <a href="../gpu-support/">GPU support</a>
+                <li class="active">
+                    <a href="./">GPU support</a>
                 </li>
             
             
@@ -99,12 +99,12 @@
                     </a>
                 </li>
                 <li >
-                    <a rel="next" href="..">
+                    <a rel="next" href="../examples/">
                         <i class="fa fa-arrow-left"></i> Previous
                     </a>
                 </li>
                 <li >
-                    <a rel="prev" href="../gpu-support/">
+                    <a rel="prev" href="../about/license/">
                         Next <i class="fa fa-arrow-right"></i>
                     </a>
                 </li>
@@ -127,50 +127,55 @@
             <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
-        <li class="main active"><a href="#unconditional">Unconditional</a></li>
+        <li class="main active"><a href="#gpu-installation">GPU installation</a></li>
         
-    
-        <li class="main "><a href="#hard-data">Hard data</a></li>
+            <li><a href="#installing-opencl-driver">Installing OpenCL driver</a></li>
         
-    
-        <li class="main "><a href="#soft-data">Soft data</a></li>
+            <li><a href="#installing-clfft-c-library">Installing clFFT C++ library</a></li>
         
     
     </ul>
 </div></div>
             <div class="col-md-9" role="main">
 
-<p>Consider installing the <a href="https://github.com/juliohm/GeoStatsImages.jl">GeoStatsImages.jl</a> package.</p>
-<p><a id='Unconditional-1'></a></p>
-<h1 id="unconditional">Unconditional</h1>
-<pre><code class="julia">using ImageQuilting
-using GeoStatsImages
+<p><a id='GPU-installation-1'></a></p>
+<h1 id="gpu-installation">GPU installation</h1>
+<blockquote>
+<p><strong>Disclaimer:</strong> GPGPU is one of the most unportable corners in the programming world. Although I did make use of <a href="https://www.khronos.org/opencl">OpenCL</a>, drivers for graphics cards are problematic and vendors such as NVIDIA do not officially support all widely known operating systems.</p>
+</blockquote>
+<p>Two external dependencies need to be manually installed:</p>
+<ol>
+<li>OpenCL driver</li>
+<li>clFFT C++ library</li>
+</ol>
+<p><a id='Installing-OpenCL-driver-1'></a></p>
+<h2 id="installing-opencl-driver">Installing OpenCL driver</h2>
+<p>The choice of the OpenCL driver is dependent on the graphics card you have. Find what is the model of your graphics card and download the appropriate driver from the links below:</p>
+<ul>
+<li><a href="https://software.intel.com/en-us/articles/opencl-drivers">Intel</a></li>
+<li><a href="http://support.amd.com/en-us/download">AMD</a></li>
+<li><a href="http://www.nvidia.com/Download/index.aspx">NVIDIA</a></li>
+</ul>
+<p>If you are on Linux like myself, check the repositories of your distribution for a more straightforward installation. If you have a recent Intel graphics card, consider the open source <a href="https://www.freedesktop.org/wiki/Software/Beignet">Beignet driver</a> also available in some distributions (e.g. AUR repos in Arch Linux).</p>
+<p>To make sure that everything is working properly, install the <code>OpenCL.jl</code> package in Julia and run the tests:</p>
+<pre><code class="julia">Pkg.add(&quot;OpenCL&quot;)
 
-TI = training_image(&quot;Strebelle&quot;)
-reals = iqsim(TI, 62, 62, 1, size(TI)..., nreal=3)
-
-TI = training_image(&quot;StoneWall&quot;)
-reals, cuts, voxs = iqsim(TI, 13, 13, 1, size(TI)..., nreal=3, debug=true)
+using OpenCL # force compilation
+Pkg.test(&quot;OpenCL&quot;)
 </code></pre>
 
-<p><a id='Hard-data-1'></a></p>
-<h1 id="hard-data">Hard data</h1>
-<p>TODO</p>
-<p><a id='Soft-data-1'></a></p>
-<h1 id="soft-data">Soft data</h1>
-<pre><code class="julia">using ImageQuilting
-using GeoStatsImages
-using Images: imfilter_gaussian
+<p>If the tests are successful, proceed to the next section.</p>
+<p><a id='Installing-clFFT-C-library-1'></a></p>
+<h2 id="installing-clfft-c-library">Installing clFFT C++ library</h2>
+<p>Download and install the <a href="https://github.com/clMathLibraries/clFFT/releases">pre-built binaries</a>. If you are on Linux, you can also check the repositories of your distribution.</p>
+<p>Install the <code>CLFFT.jl</code> package in Julia and run the tests:</p>
+<pre><code class="julia">Pkg.add(&quot;CLFFT&quot;)
 
-TI = training_image(&quot;WalkerLake&quot;)
-truth = training_image(&quot;WalkerLakeTruth&quot;)
+using CLFFT # force compilation
+Pkg.test(&quot;CLFFT&quot;)
+</code></pre>
 
-G(m) = imfilter_gaussian(m, [10,10,0])
-
-data = SoftData(G(truth), G)
-
-reals = iqsim(TI, 27, 27, 1, size(truth)..., soft=data, nreal=3)
-</code></pre></div>
+<p>If the tests are successful, the installation is complete. Pass in the option <code>gpu=true</code> to <code>iqsim</code> for computations with GPU.</p></div>
         </div>
 
         <footer class="col-md-12">

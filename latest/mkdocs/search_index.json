@@ -2,7 +2,7 @@
     "docs": [
         {
             "location": "/", 
-            "text": "Overview\n\n\nA Julia package for fast 3D image quilting simulation.\n\n\n\n\nFeatures\n\n\n\n\nMasked grids\n\n\nHard data conditioning\n\n\nSoft data conditioning\n\n\nFast computation with GPUs\n\n\n\n\n\n\nInstallation\n\n\nGet the latest stable release with Julia's package manager:\n\n\nPkg.add(\nImageQuilting\n)\n\n\n\n\n\n\nUsage\n\n\nreals = iqsim(training_image::AbstractArray,\n              tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,\n              gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;\n              overlapx=1/6, overlapy=1/6, overlapz=1/6,\n              soft=nothing, hard=nothing, cutoff=.1,\n              cut=:dijkstra, path=:rasterup, categorical=false,\n              seed=0, gpu=false, nreal=1, debug=false)\n\n\n\n\nwhere:\n\n\nrequired\n\n\n\n\ntraining_image\n can be any 3D array (add ghost dimension for 2D)\n\n\ntplsizex\n,\ntplsizey\n,\ntplsizez\n is the template size\n\n\ngridsizex\n,\ngridsizey\n,\ngridsizez\n is the simulation size\n\n\n\n\noptional\n\n\n\n\noverlapx\n,\noverlapy\n,\noverlapz\n is the percentage of overlap\n\n\nsoft\n is an instance of \nSoftData\n or an array of such instances\n\n\nhard\n is an instance of \nHardData\n\n\ncutoff\n is the overlap cutoff\n\n\nseed\n is the random seed\n\n\ngpu\n tells whether to use the GPU or the CPU\n\n\nnreal\n is the number of realizations\n\n\ncut\n is the cut algorithm (:dijkstra or :boykov)\n\n\npath\n is the simulation path (:rasterup, :rasterdown, :dilation or :random)\n\n\ncategorical\n informs whether the image is categorical or continuous\n\n\ndebug\n tells whether to export or not the boundary cuts and voxel reuse\n\n\n\n\nThe main output \nreals\n consists of a list of 3D realizations that can be indexed with \nreals[1], reals[2], ..., reals[nreal]\n. If \ndebug=true\n, additional output is generated:\n\n\nreals, cuts, voxs = iqsim(..., debug=true)\n\n\n\n\ncuts[i]\n is the boundary cut for \nreals[i]\n and \nvoxs[i]\n is the associated voxel reuse.\n\n\nA helper function is also provided for the fast approximation of the \nmean voxel reuse\n:\n\n\nmvr = meanvoxreuse(training_image::AbstractArray,\n                   tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;\n                   overlapx=1/6, overlapy=1/6, overlapz=1/6,\n                   nreal=10, categorical=false)\n\n\n\n\nwith \nmvr\n in the interval [0,1]. The approximation gets better as \nnreal\n is made larger.\n\n\n\n\nSoft data\n\n\nGiven 3D \ndata\n at least as large as the simulation size and a \ntransform\n such that \ntransform(training_image)\n is comparable with \ndata\n, the \nSoftData(data, transform)\n instance can be passed to \niqsim\n for local relaxation:\n\n\niqsim(..., soft=SoftData(seismic, blur))\n\n\n\n\n\n\nHard data\n\n\nVoxels can be assigned values that will be honored by the simulation. \nHardData()\n is a dictionary of locations and associated values specified by the user:\n\n\nwell = HardData([(i,j,k)=\nvalue(i,j,k) for i=10, j=10, k=1:100])\niqsim(..., hard=well)\n\n\n\n\n\n\nMasked grids\n\n\nMasked grids are a special case of hard data conditioning where inactive voxels are marked with the value \nNaN\n. The algorithm handles this hard data differently as it shouldn't be considered in the pattern similarity calculations.\n\n\ntraining_image\n can also have inactive voxels marked with \nNaN\n. Convolution results are only looked up in active regions.", 
+            "text": "Overview\n\n\nA Julia package for fast 3D image quilting simulation.\n\n\n\n\nFeatures\n\n\n\n\nMasked grids\n\n\nHard data conditioning\n\n\nSoft data conditioning\n\n\nFast computation with GPUs\n\n\n\n\n\n\nInstallation\n\n\nGet the latest stable release with Julia's package manager:\n\n\nPkg.add(\nImageQuilting\n)\n\n\n\n\nFor fast computation with GPUs, please follow the instructions in \nGPU support\n.\n\n\n\n\nUsage\n\n\nreals = iqsim(training_image::AbstractArray,\n              tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,\n              gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;\n              overlapx=1/6, overlapy=1/6, overlapz=1/6,\n              soft=nothing, hard=nothing, cutoff=.1,\n              cut=:dijkstra, path=:rasterup, categorical=false,\n              seed=0, gpu=false, nreal=1, debug=false)\n\n\n\n\nwhere:\n\n\nrequired\n\n\n\n\ntraining_image\n can be any 3D array (add ghost dimension for 2D)\n\n\ntplsizex\n,\ntplsizey\n,\ntplsizez\n is the template size\n\n\ngridsizex\n,\ngridsizey\n,\ngridsizez\n is the simulation size\n\n\n\n\noptional\n\n\n\n\noverlapx\n,\noverlapy\n,\noverlapz\n is the percentage of overlap\n\n\nsoft\n is an instance of \nSoftData\n or an array of such instances\n\n\nhard\n is an instance of \nHardData\n\n\ncutoff\n is the overlap cutoff\n\n\nseed\n is the random seed\n\n\ngpu\n tells whether to use the GPU or the CPU\n\n\nnreal\n is the number of realizations\n\n\ncut\n is the cut algorithm (:dijkstra or :boykov)\n\n\npath\n is the simulation path (:rasterup, :rasterdown, :dilation or :random)\n\n\ncategorical\n informs whether the image is categorical or continuous\n\n\ndebug\n tells whether to export or not the boundary cuts and voxel reuse\n\n\n\n\nThe main output \nreals\n consists of a list of 3D realizations that can be indexed with \nreals[1], reals[2], ..., reals[nreal]\n. If \ndebug=true\n, additional output is generated:\n\n\nreals, cuts, voxs = iqsim(..., debug=true)\n\n\n\n\ncuts[i]\n is the boundary cut for \nreals[i]\n and \nvoxs[i]\n is the associated voxel reuse.\n\n\nA helper function is also provided for the fast approximation of the \nmean voxel reuse\n:\n\n\nmvr = meanvoxreuse(training_image::AbstractArray,\n                   tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;\n                   overlapx=1/6, overlapy=1/6, overlapz=1/6,\n                   nreal=10, categorical=false)\n\n\n\n\nwith \nmvr\n in the interval [0,1]. The approximation gets better as \nnreal\n is made larger.\n\n\n\n\nSoft data\n\n\nGiven 3D \ndata\n at least as large as the simulation size and a \ntransform\n such that \ntransform(training_image)\n is comparable with \ndata\n, the \nSoftData(data, transform)\n instance can be passed to \niqsim\n for local relaxation:\n\n\niqsim(..., soft=SoftData(seismic, blur))\n\n\n\n\n\n\nHard data\n\n\nVoxels can be assigned values that will be honored by the simulation. \nHardData()\n is a dictionary of locations and associated values specified by the user:\n\n\nwell = HardData([(i,j,k)=\nvalue(i,j,k) for i=10, j=10, k=1:100])\niqsim(..., hard=well)\n\n\n\n\n\n\nMasked grids\n\n\nMasked grids are a special case of hard data conditioning where inactive voxels are marked with the value \nNaN\n. The algorithm handles this hard data differently as it shouldn't be considered in the pattern similarity calculations.\n\n\ntraining_image\n can also have inactive voxels marked with \nNaN\n. Convolution results are only looked up in active regions.\n\n\n\n\nCiting\n\n\nFor citing the sofware, please use:\n\n\nPaper comping up...", 
             "title": "Home"
         }, 
         {
@@ -17,7 +17,7 @@
         }, 
         {
             "location": "/#installation", 
-            "text": "Get the latest stable release with Julia's package manager:  Pkg.add( ImageQuilting )", 
+            "text": "Get the latest stable release with Julia's package manager:  Pkg.add( ImageQuilting )  For fast computation with GPUs, please follow the instructions in  GPU support .", 
             "title": "Installation"
         }, 
         {
@@ -41,6 +41,11 @@
             "title": "Masked grids"
         }, 
         {
+            "location": "/#citing", 
+            "text": "For citing the sofware, please use:  Paper comping up...", 
+            "title": "Citing"
+        }, 
+        {
             "location": "/examples/", 
             "text": "Consider installing the \nGeoStatsImages.jl\n package.\n\n\n\n\nUnconditional\n\n\nusing ImageQuilting\nusing GeoStatsImages\n\nTI = training_image(\nStrebelle\n)\nreals = iqsim(TI, 62, 62, 1, size(TI)..., nreal=3)\n\nTI = training_image(\nStoneWall\n)\nreals, cuts, voxs = iqsim(TI, 13, 13, 1, size(TI)..., nreal=3, debug=true)\n\n\n\n\n\n\nHard data\n\n\nTODO\n\n\n\n\nSoft data\n\n\nusing ImageQuilting\nusing GeoStatsImages\nusing Images: imfilter_gaussian\n\nTI = training_image(\nWalkerLake\n)\ntruth = training_image(\nWalkerLakeTruth\n)\n\nG(m) = imfilter_gaussian(m, [10,10,0])\n\ndata = SoftData(G(truth), G)\n\nreals = iqsim(TI, 27, 27, 1, size(truth)..., soft=data, nreal=3)", 
             "title": "Examples"
@@ -59,6 +64,46 @@
             "location": "/examples/#soft-data", 
             "text": "using ImageQuilting\nusing GeoStatsImages\nusing Images: imfilter_gaussian\n\nTI = training_image( WalkerLake )\ntruth = training_image( WalkerLakeTruth )\n\nG(m) = imfilter_gaussian(m, [10,10,0])\n\ndata = SoftData(G(truth), G)\n\nreals = iqsim(TI, 27, 27, 1, size(truth)..., soft=data, nreal=3)", 
             "title": "Soft data"
+        }, 
+        {
+            "location": "/gpu-support/", 
+            "text": "GPU installation\n\n\n\n\nDisclaimer:\n GPGPU is one of the most unportable corners in the programming world. Although I did make use of \nOpenCL\n, drivers for graphics cards are problematic and vendors such as NVIDIA do not officially support all widely known operating systems.\n\n\n\n\nTwo external dependencies need to be manually installed:\n\n\n\n\nOpenCL driver\n\n\nclFFT C++ library\n\n\n\n\n\n\nInstalling OpenCL driver\n\n\nThe choice of the OpenCL driver is dependent on the graphics card you have. Find what is the model of your graphics card and download the appropriate driver from the links below:\n\n\n\n\nIntel\n\n\nAMD\n\n\nNVIDIA\n\n\n\n\nIf you are on Linux like myself, check the repositories of your distribution for a more straightforward installation. If you have a recent Intel graphics card, consider the open source \nBeignet driver\n also available in some distributions (e.g. AUR repos in Arch Linux).\n\n\nTo make sure that everything is working properly, install the \nOpenCL.jl\n package in Julia and run the tests:\n\n\nPkg.add(\nOpenCL\n)\n\nusing OpenCL # force compilation\nPkg.test(\nOpenCL\n)\n\n\n\n\nIf the tests are successful, proceed to the next section.\n\n\n\n\nInstalling clFFT C++ library\n\n\nDownload and install the \npre-built binaries\n. If you are on Linux, you can also check the repositories of your distribution.\n\n\nInstall the \nCLFFT.jl\n package in Julia and run the tests:\n\n\nPkg.add(\nCLFFT\n)\n\nusing CLFFT # force compilation\nPkg.test(\nCLFFT\n)\n\n\n\n\nIf the tests are successful, the installation is complete. Pass in the option \ngpu=true\n to \niqsim\n for computations with GPU.", 
+            "title": "GPU support"
+        }, 
+        {
+            "location": "/gpu-support/#gpu-installation", 
+            "text": "Disclaimer:  GPGPU is one of the most unportable corners in the programming world. Although I did make use of  OpenCL , drivers for graphics cards are problematic and vendors such as NVIDIA do not officially support all widely known operating systems.   Two external dependencies need to be manually installed:   OpenCL driver  clFFT C++ library", 
+            "title": "GPU installation"
+        }, 
+        {
+            "location": "/gpu-support/#installing-opencl-driver", 
+            "text": "The choice of the OpenCL driver is dependent on the graphics card you have. Find what is the model of your graphics card and download the appropriate driver from the links below:   Intel  AMD  NVIDIA   If you are on Linux like myself, check the repositories of your distribution for a more straightforward installation. If you have a recent Intel graphics card, consider the open source  Beignet driver  also available in some distributions (e.g. AUR repos in Arch Linux).  To make sure that everything is working properly, install the  OpenCL.jl  package in Julia and run the tests:  Pkg.add( OpenCL )\n\nusing OpenCL # force compilation\nPkg.test( OpenCL )  If the tests are successful, proceed to the next section.", 
+            "title": "Installing OpenCL driver"
+        }, 
+        {
+            "location": "/gpu-support/#installing-clfft-c-library", 
+            "text": "Download and install the  pre-built binaries . If you are on Linux, you can also check the repositories of your distribution.  Install the  CLFFT.jl  package in Julia and run the tests:  Pkg.add( CLFFT )\n\nusing CLFFT # force compilation\nPkg.test( CLFFT )  If the tests are successful, the installation is complete. Pass in the option  gpu=true  to  iqsim  for computations with GPU.", 
+            "title": "Installing clFFT C++ library"
+        }, 
+        {
+            "location": "/about/license/", 
+            "text": "License\n\n\nCopyright (c) 2015, J\u00falio Hoffimann Mendes \n\n\nPermission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.\n\n\nTHE SOFTWARE IS PROVIDED \"AS IS\" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.", 
+            "title": "License"
+        }, 
+        {
+            "location": "/about/license/#license", 
+            "text": "Copyright (c) 2015, J\u00falio Hoffimann Mendes   Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.  THE SOFTWARE IS PROVIDED \"AS IS\" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.", 
+            "title": "License"
+        }, 
+        {
+            "location": "/about/author/", 
+            "text": "Author\n\n\nThis package was inspired by the many contributions from the Computer Graphics and Vision community.\n\n\nJ\u00falio Hoffimann Mendes\n \n Ph.D. candidate @ Stanford University \n Department of Energy Resources Engineering", 
+            "title": "Author"
+        }, 
+        {
+            "location": "/about/author/#author", 
+            "text": "This package was inspired by the many contributions from the Computer Graphics and Vision community.  J\u00falio Hoffimann Mendes    Ph.D. candidate @ Stanford University   Department of Energy Resources Engineering", 
+            "title": "Author"
         }
     ]
 }

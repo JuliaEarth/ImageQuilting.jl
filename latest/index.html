@@ -62,6 +62,33 @@
                 </li>
             
             
+            
+                <li >
+                    <a href="gpu-support/">GPU support</a>
+                </li>
+            
+            
+            
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                    
+                        
+<li >
+    <a href="about/license/">License</a>
+</li>
+
+                    
+                        
+<li >
+    <a href="about/author/">Author</a>
+</li>
+
+                    
+                    </ul>
+                </li>
+            
+            
             </ul>
 
             <!-- Search, Navigation and Repo links -->
@@ -118,15 +145,18 @@
             <li><a href="#masked-grids">Masked grids</a></li>
         
     
+        <li class="main "><a href="#citing">Citing</a></li>
+        
+    
     </ul>
 </div></div>
             <div class="col-md-9" role="main">
 
 <p><a id='Overview-1'></a></p>
-<h2 id="overview">Overview</h2>
+<h1 id="overview">Overview</h1>
 <p>A Julia package for fast 3D image quilting simulation.</p>
 <p><a id='Features-1'></a></p>
-<h2 id="features">Features</h2>
+<h1 id="features">Features</h1>
 <ul>
 <li>Masked grids</li>
 <li>Hard data conditioning</li>
@@ -134,13 +164,14 @@
 <li>Fast computation with GPUs</li>
 </ul>
 <p><a id='Installation-1'></a></p>
-<h2 id="installation">Installation</h2>
+<h1 id="installation">Installation</h1>
 <p>Get the latest stable release with Julia's package manager:</p>
 <pre><code class="julia">Pkg.add(&quot;ImageQuilting&quot;)
 </code></pre>
 
+<p>For fast computation with GPUs, please follow the instructions in <a href="gpu-support/">GPU support</a>.</p>
 <p><a id='Usage-1'></a></p>
-<h2 id="usage">Usage</h2>
+<h1 id="usage">Usage</h1>
 <pre><code class="julia">reals = iqsim(training_image::AbstractArray,
               tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
               gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
@@ -185,22 +216,27 @@
 
 <p>with <code>mvr</code> in the interval [0,1]. The approximation gets better as <code>nreal</code> is made larger.</p>
 <p><a id='Soft-data-1'></a></p>
-<h3 id="soft-data">Soft data</h3>
+<h2 id="soft-data">Soft data</h2>
 <p>Given 3D <code>data</code> at least as large as the simulation size and a <code>transform</code> such that <code>transform(training_image)</code> is comparable with <code>data</code>, the <code>SoftData(data, transform)</code> instance can be passed to <code>iqsim</code> for local relaxation:</p>
 <pre><code class="julia">iqsim(..., soft=SoftData(seismic, blur))
 </code></pre>
 
 <p><a id='Hard-data-1'></a></p>
-<h3 id="hard-data">Hard data</h3>
+<h2 id="hard-data">Hard data</h2>
 <p>Voxels can be assigned values that will be honored by the simulation. <code>HardData()</code> is a dictionary of locations and associated values specified by the user:</p>
 <pre><code class="julia">well = HardData([(i,j,k)=&gt;value(i,j,k) for i=10, j=10, k=1:100])
 iqsim(..., hard=well)
 </code></pre>
 
 <p><a id='Masked-grids-1'></a></p>
-<h3 id="masked-grids">Masked grids</h3>
+<h2 id="masked-grids">Masked grids</h2>
 <p>Masked grids are a special case of hard data conditioning where inactive voxels are marked with the value <code>NaN</code>. The algorithm handles this hard data differently as it shouldn't be considered in the pattern similarity calculations.</p>
-<p><code>training_image</code> can also have inactive voxels marked with <code>NaN</code>. Convolution results are only looked up in active regions.</p></div>
+<p><code>training_image</code> can also have inactive voxels marked with <code>NaN</code>. Convolution results are only looked up in active regions.</p>
+<p><a id='Citing-1'></a></p>
+<h1 id="citing">Citing</h1>
+<p>For citing the sofware, please use:</p>
+<pre><code class="latex">Paper comping up...
+</code></pre></div>
         </div>
 
         <footer class="col-md-12">
