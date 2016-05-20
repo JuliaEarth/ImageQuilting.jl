@@ -13,7 +13,7 @@
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 immutable GPUmeta
-  gpu
+  dev
   ctx
   queue
   mult_kernel

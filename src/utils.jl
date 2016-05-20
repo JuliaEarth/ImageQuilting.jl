@@ -12,19 +12,19 @@
 ## ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-function get_imfilter_impl(meta)
-  if meta ≠ nothing
-    (img, kern, border) -> imfilter_gpu(img, kern, border, meta)
+function get_imfilter_impl(GPU)
+  if GPU ≠ nothing
+    imfilter_gpu
   else
     imfilter_fft
   end
 end
 
-function convdist(Xs::AbstractArray, masks::AbstractArray; weights=nothing, inner=true, meta=nothing)
+function convdist(Xs::AbstractArray, masks::AbstractArray; weights=nothing, inner=true)
   padding = inner == true ? "inner" : "symmetric"
 
   # choose among imfilter implementations
-  imfilter_impl = get_imfilter_impl(meta)
+  imfilter_impl = get_imfilter_impl(GPU)
 
   result = []
   for (X, mask) in zip(Xs, masks)

@@ -31,7 +31,7 @@ function iqsim(training_image::AbstractArray,
   @assert nreal > 0 "invalid number of realizations"
 
   # GPU setup
-  meta = gpu ? gpu_setup() : nothing
+  global GPU = gpu ? gpu_setup() : nothing
 
   # soft data checks
   if soft ≠ nothing
@@ -244,42 +244,42 @@ function iqsim(training_image::AbstractArray,
         ovx = simdev[1:overlapx,:,:]
         xsimplex = categorical ? simplex_transform(ovx, nvertices) : Any[ovx]
 
-        D = convdist(simplexTI, xsimplex, meta=meta)
+        D = convdist(simplexTI, xsimplex)
         distance += D[1:mₜ-tplsizex+1,:,:]
       end
       if overlapx > 1 && (i+1,j,k) ∈ pasted
         ovx = simdev[spacingx+1:end,:,:]
         xsimplex = categorical ? simplex_transform(ovx, nvertices) : Any[ovx]
 
-        D = convdist(simplexTI, xsimplex, meta=meta)
+        D = convdist(simplexTI, xsimplex)
         distance += D[spacingx+1:end,:,:]
       end
       if overlapy > 1 && (i,j-1,k) ∈ pasted
         ovy = simdev[:,1:overlapy,:]
         ysimplex = categorical ? simplex_transform(ovy, nvertices) : Any[ovy]
 
-        D = convdist(simplexTI, ysimplex, meta=meta)
+        D = convdist(simplexTI, ysimplex)
         distance += D[:,1:nₜ-tplsizey+1,:]
       end
       if overlapy > 1 && (i,j+1,k) ∈ pasted
         ovy = simdev[:,spacingy+1:end,:]
         ysimplex = categorical ? simplex_transform(ovy, nvertices) : Any[ovy]
 
-        D = convdist(simplexTI, ysimplex, meta=meta)
+        D = convdist(simplexTI, ysimplex)
         distance += D[:,spacingy+1:end,:]
       end
       if overlapz > 1 && (i,j,k-1) ∈ pasted
         ovz = simdev[:,:,1:overlapz]
         zsimplex = categorical ? simplex_transform(ovz, nvertices) : Any[ovz]
 
-        D = convdist(simplexTI, zsimplex, meta=meta)
+        D = convdist(simplexTI, zsimplex)
         distance += D[:,:,1:pₜ-tplsizez+1]
       end
       if overlapz > 1 && (i,j,k+1) ∈ pasted
         ovz = simdev[:,:,spacingz+1:end]
         zsimplex = categorical ? simplex_transform(ovz, nvertices) : Any[ovz]
 
-        D = convdist(simplexTI, zsimplex, meta=meta)
+        D = convdist(simplexTI, zsimplex)
         distance += D[:,:,spacingz+1:end]
       end
 
@@ -290,7 +290,7 @@ function iqsim(training_image::AbstractArray,
       auxdistances = []
       for n=1:length(softTI)
         softdev = softgrid[n][iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-        D = convdist(Any[softTI[n]], Any[softdev], meta=meta)
+        D = convdist(Any[softTI[n]], Any[softdev])
 
         # disable dataevents that contain inactive voxels
         D[disabled] = Inf
@@ -300,7 +300,7 @@ function iqsim(training_image::AbstractArray,
       if hard ≠ nothing && any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
         harddev = hardgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
         hsimplex = categorical ? simplex_transform(harddev, nvertices) : Any[harddev]
-        D = convdist(simplexTI, hsimplex, weights=preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ], meta=meta)
+        D = convdist(simplexTI, hsimplex, weights=preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
 
         # disable dataevents that contain inactive voxels
         D[disabled] = Inf
@@ -457,7 +457,7 @@ function iqsim(training_image::AbstractArray,
 
               # compute the distance between the simulation dataevent
               # and all patterns in the training image
-              distance = convdist(simplexTI, simplexdev, weights=booldev, inner=false, meta=meta)
+              distance = convdist(simplexTI, simplexdev, weights=booldev, inner=false)
 
               # disable dataevents that contain inactive voxels
               distance[disabledₜ] = Inf
@@ -466,7 +466,7 @@ function iqsim(training_image::AbstractArray,
               auxdistances = []
               for n=1:length(softTI)
                 softdev = softgrid[n][iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-                D = convdist(Any[softTI[n]], Any[softdev], weights=booldev, inner=false, meta=meta)
+                D = convdist(Any[softTI[n]], Any[softdev], weights=booldev, inner=false)
 
                 # disable dataevents that contain inactive voxels
                 D[disabledₜ] = Inf
@@ -476,7 +476,7 @@ function iqsim(training_image::AbstractArray,
               if hard ≠ nothing && any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
                 harddev = hardgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
                 hsimplex = categorical ? simplex_transform(harddev, nvertices) : Any[harddev]
-                D = convdist(simplexTI, hsimplex, weights=preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ], inner=false, meta=meta)
+                D = convdist(simplexTI, hsimplex, weights=preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ], inner=false)
 
                 # disable dataevents that contain inactive voxels
                 D[disabledₜ] = Inf

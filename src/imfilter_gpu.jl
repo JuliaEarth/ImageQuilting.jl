@@ -12,10 +12,10 @@
 ## ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-function imfilter_gpu{T<:Real,K<:Real,N}(img::AbstractArray{T,N}, kern::AbstractArray{K,N}, border::AbstractString, meta::GPUmeta)
+function imfilter_gpu{T<:Real,K<:Real,N}(img::AbstractArray{T,N}, kern::AbstractArray{K,N}, border::AbstractString)
   # GPU metadata
-  ctx = meta.ctx; queue = meta.queue
-  mult_kernel = meta.mult_kernel
+  ctx = GPU.ctx; queue = GPU.queue
+  mult_kernel = GPU.mult_kernel
 
   # operations with complex type
   img = map(Complex64, img)
