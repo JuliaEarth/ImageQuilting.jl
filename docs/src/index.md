@@ -26,7 +26,7 @@ reals = iqsim(training_image::AbstractArray,
               overlapx=1/6, overlapy=1/6, overlapz=1/6,
               soft=nothing, hard=nothing, cutoff=.1,
               cut=:dijkstra, path=:rasterup, categorical=false,
-              seed=0, nreal=1, debug=false)
+              seed=0, gpu=false, nreal=1, debug=false)
 ```
 
 where:
@@ -44,6 +44,7 @@ where:
 * `hard` is an instance of `HardData`
 * `cutoff` is the overlap cutoff
 * `seed` is the random seed
+* `gpu` tells whether to use the GPU or the CPU
 * `nreal` is the number of realizations
 * `cut` is the cut algorithm (:dijkstra or :boykov)
 * `path` is the simulation path (:rasterup, :rasterdown, :dilation or :random)
