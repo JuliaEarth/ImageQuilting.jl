@@ -14,6 +14,7 @@
 
 module ImageQuilting
 
+using Base: @nexprs, @nloops, @nref
 using Images: imfilter_fft, padarray, dilate
 using StatsBase: sample, weights
 using LightGraphs
@@ -22,9 +23,21 @@ if VERSION > v"0.5-"
   using Combinatorics: nthperm!
 end
 
+try # optional dependencies
+  using OpenCL
+  using CLFFT
+  global cl = OpenCL
+  global clfft = CLFFT
+catch
+  global cl = nothing
+  global clfft = nothing
+end
+
 include("utils.jl")
+include("utils_gpu.jl")
 include("datatypes.jl")
 include("ndgradients.jl")
+include("imfilter_gpu.jl")
 include("relaxation.jl")
 include("tau_model.jl")
 include("dijkstra_cut.jl")

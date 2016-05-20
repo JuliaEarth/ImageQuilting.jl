@@ -12,15 +12,26 @@
 ## ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-function convdist(Xs::AbstractArray, masks::AbstractArray; weights=nothing, inner=true)
+function get_imfilter_impl(meta)
+  if meta ≠ nothing
+    (img, kern, border) -> imfilter_gpu(img, kern, border, meta)
+  else
+    imfilter_fft
+  end
+end
+
+function convdist(Xs::AbstractArray, masks::AbstractArray; weights=nothing, inner=true, meta=nothing)
   padding = inner == true ? "inner" : "symmetric"
+
+  # choose among imfilter implementations
+  imfilter_impl = get_imfilter_impl(meta)
 
   result = []
   for (X, mask) in zip(Xs, masks)
     weights = weights ≠ nothing ? weights : ones(mask)
 
-    A² = imfilter_fft(X.^2, weights.*ones(mask), padding)
-    AB = imfilter_fft(X, weights.*mask, padding)
+    A² = imfilter_impl(X.^2, weights.*ones(mask), padding)
+    AB = imfilter_impl(X, weights.*mask, padding)
     B² = sum((weights.*mask).^2)
 
     push!(result, abs(A² - 2AB + B²))
