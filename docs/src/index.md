@@ -2,6 +2,12 @@
 
 A Julia package for fast 3D image quilting simulation.
 
+[![Build Status](https://travis-ci.org/juliohm/ImageQuilting.jl.svg?branch=master)](https://travis-ci.org/juliohm/ImageQuilting.jl)
+[![ImageQuilting](http://pkg.julialang.org/badges/ImageQuilting_0.4.svg)](http://pkg.julialang.org/?pkg=ImageQuilting&ver=0.4)
+[![Coverage Status](https://coveralls.io/repos/juliohm/ImageQuilting.jl/badge.svg?branch=master)](https://coveralls.io/r/juliohm/ImageQuilting.jl?branch=master)
+
+![3D Quilting Animation](images/quilting.gif)
+
 # Features
 
 - Masked grids
