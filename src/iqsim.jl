@@ -20,6 +20,12 @@ function iqsim(training_image::AbstractArray,
                cut=:dijkstra, path=:rasterup, categorical=false,
                seed=0, gpu=false, nreal=1, debug=false)
 
+  # GPU setup
+  global GPU = gpu ? gpu_setup() : nothing
+
+  # use all CPU cores in FFT
+  FFTW.set_num_threads(CPU_CORES)
+
   # sanity checks
   @assert ndims(training_image) == 3 "training image is not 3D (add ghost dimension for 2D)"
   @assert all(0 .< [tplsizex, tplsizey, tplsizez] .≤ [size(training_image)...]) "invalid template size"
@@ -29,9 +35,6 @@ function iqsim(training_image::AbstractArray,
   @assert cut ∈ [:dijkstra,:boykov] "invalid cut algorithm"
   @assert path ∈ [:rasterup,:rasterdown,:dilation,:random] "invalid simulation path"
   @assert nreal > 0 "invalid number of realizations"
-
-  # GPU setup
-  global GPU = gpu ? gpu_setup() : nothing
 
   # soft data checks
   if soft ≠ nothing
@@ -192,9 +195,6 @@ function iqsim(training_image::AbstractArray,
 
   # select cut algorithm
   boundary_cut = cut == :dijkstra ? dijkstra_cut : boykov_kolmogorov_cut
-
-  # use all CPU cores in FFT
-  FFTW.set_num_threads(CPU_CORES)
 
   # main output is a vector of 3D grids
   realizations = []
