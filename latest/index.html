@@ -178,7 +178,7 @@
               tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
               gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
               overlapx=1/6, overlapy=1/6, overlapz=1/6,
-              soft=nothing, hard=nothing, cutoff=.1,
+              soft=nothing, hard=nothing, tol=.1,
               cut=:dijkstra, path=:rasterup, categorical=false,
               seed=0, gpu=false, nreal=1, debug=false)
 </code></pre>
@@ -195,7 +195,7 @@
 <li><code>overlapx</code>,<code>overlapy</code>,<code>overlapz</code> is the percentage of overlap</li>
 <li><code>soft</code> is an instance of <code>SoftData</code> or an array of such instances</li>
 <li><code>hard</code> is an instance of <code>HardData</code></li>
-<li><code>cutoff</code> is the overlap cutoff</li>
+<li><code>tol</code> is the tolerance in (0,1]</li>
 <li><code>seed</code> is the random seed</li>
 <li><code>gpu</code> tells whether to use the GPU or the CPU</li>
 <li><code>nreal</code> is the number of realizations</li>
