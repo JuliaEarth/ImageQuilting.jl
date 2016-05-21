@@ -16,7 +16,7 @@ function iqsim(training_image::AbstractArray,
                tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
                gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
                overlapx=1/6, overlapy=1/6, overlapz=1/6,
-               soft=nothing, hard=nothing, cutoff=.1,
+               soft=nothing, hard=nothing, tol=.1,
                cut=:dijkstra, path=:rasterup, categorical=false,
                seed=0, gpu=false, nreal=1, debug=false)
 
@@ -31,7 +31,7 @@ function iqsim(training_image::AbstractArray,
   @assert all(0 .< [tplsizex, tplsizey, tplsizez] .≤ [size(training_image)...]) "invalid template size"
   @assert all([gridsizex, gridsizey, gridsizez] .≥ [tplsizex, tplsizey, tplsizez]) "invalid grid size"
   @assert all(0 .< [overlapx, overlapy, overlapz] .< 1) "overlaps must be in range (0,1)"
-  @assert 0 < cutoff ≤ 1 "cutoff must be in range (0,1]"
+  @assert 0 < tol ≤ 1 "tolerance must be in range (0,1]"
   @assert cut ∈ [:dijkstra,:boykov] "invalid cut algorithm"
   @assert path ∈ [:rasterup,:rasterdown,:dilation,:random] "invalid simulation path"
   @assert nreal > 0 "invalid number of realizations"
@@ -309,8 +309,8 @@ function iqsim(training_image::AbstractArray,
       end
 
       # current pattern database
-      patterndb = isempty(auxdistances) ? find(distance .≤ (1+cutoff)minimum(distance)) :
-                                          relaxation(distance, auxdistances, cutoff)
+      patterndb = isempty(auxdistances) ? find(distance .≤ (1+tol)minimum(distance)) :
+                                          relaxation(distance, auxdistances, tol)
       patternprobs = tau_model(patterndb, distance, auxdistances)
 
       # pick a pattern at random from the database
@@ -485,8 +485,8 @@ function iqsim(training_image::AbstractArray,
               end
 
               # current pattern database
-              patterndb = isempty(auxdistances) ? find(distance .≤ (1+cutoff)minimum(distance)) :
-                                                  relaxation(distance, auxdistances, cutoff)
+              patterndb = isempty(auxdistances) ? find(distance .≤ (1+tol)minimum(distance)) :
+                                                  relaxation(distance, auxdistances, tol)
               patternprobs = tau_model(patterndb, distance, auxdistances)
 
               # pick a pattern at random from the database

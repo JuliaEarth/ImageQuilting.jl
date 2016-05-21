@@ -32,7 +32,7 @@ reals = iqsim(training_image::AbstractArray,
               tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
               gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
               overlapx=1/6, overlapy=1/6, overlapz=1/6,
-              soft=nothing, hard=nothing, cutoff=.1,
+              soft=nothing, hard=nothing, tol=.1,
               cut=:dijkstra, path=:rasterup, categorical=false,
               seed=0, gpu=false, nreal=1, debug=false)
 ```
@@ -50,7 +50,7 @@ where:
 * `overlapx`,`overlapy`,`overlapz` is the percentage of overlap
 * `soft` is an instance of `SoftData` or an array of such instances
 * `hard` is an instance of `HardData`
-* `cutoff` is the overlap cutoff
+* `tol` is the tolerance in (0,1]
 * `seed` is the random seed
 * `gpu` tells whether to use the GPU or the CPU
 * `nreal` is the number of realizations
