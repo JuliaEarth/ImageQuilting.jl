@@ -136,13 +136,16 @@ function iqsim(training_image::AbstractArray,
   # always work with floating point
   TI = map(Float64, training_image)
 
+  # OpenCL FFT expects multiples of 2, 3 or 5
+  gpu && (TI = padarray(TI, [0,0,0], [size(TI)...] % 2, "symmetric"))
+
   # inactive voxels in the training image
-  NaNTI = isnan(training_image); TI[NaNTI] = 0
+  NaNTI = isnan(TI); TI[NaNTI] = 0
 
   # perform simplex transform
   simplexTI = Any[TI]; nvertices = 1
   if categorical
-    categories = Set(training_image[!NaNTI])
+    categories = Set(TI[!NaNTI])
     ncategories = nvertices = length(categories) - 1
 
     @assert categories == Set(0:ncategories) "categories should be labeled 1, 2, 3,..."
@@ -180,6 +183,9 @@ function iqsim(training_image::AbstractArray,
       push!(softgrid, auxpad)
 
       auxTI = copy(aux.transform(training_image))
+
+      # OpenCL FFT expects multiples of 2, 3 or 5
+      gpu && (auxTI = padarray(auxTI, [0,0,0], [size(auxTI)...] % 2, "symmetric"))
 
       @assert size(auxTI) == size(TI) "auxiliary TI must have the same size as TI"
 
