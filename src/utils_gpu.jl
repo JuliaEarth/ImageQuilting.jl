@@ -59,3 +59,13 @@ function basic_kernels(ctx)
 
   cl.Kernel(prog, "mult")
 end
+
+function clfftpad(A::AbstractArray)
+  res = Int[]
+  for s in size(A)
+    fs = keys(factor(s))
+    push!(res, fs ⊆ [2,3,5,7,11,13] ? 0 : nextpow2(s) - s)
+  end
+
+  res
+end
