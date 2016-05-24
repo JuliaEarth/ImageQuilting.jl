@@ -116,10 +116,11 @@ function iqsim(training_image::AbstractArray,
 
       if all(!activated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
         push!(skipped, (i,j,k))
-      elseif all(!preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
-        rastered[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = true
       else
-        push!(datum, (i,j,k))
+        rastered[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = true
+        if any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
+          push!(datum, (i,j,k))
+        end
       end
     end
     rastered[!activated] = false
@@ -360,9 +361,29 @@ function iqsim(training_image::AbstractArray,
       debug && (cutgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = M)
     end
 
-    # prepare tiles with hard data for dilation
+    # prepare tiles with hard data for inpainting
+    erased = []
     if hard ≠ nothing
-      simgrid[!rastered] = 0
+      erased = falses(nx, ny, nz)
+      for (i,j,k) in datum
+        # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
+        iₛ = (i-1)spacingx + 1
+        jₛ = (j-1)spacingy + 1
+        kₛ = (k-1)spacingz + 1
+        iₑ = iₛ + tplsizex - 1
+        jₑ = jₛ + tplsizey - 1
+        kₑ = kₛ + tplsizez - 1
+
+        simdev = simgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+        harddev = hardgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+        hardloc = preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+
+        if simdev[hardloc] != harddev[hardloc]
+          erased[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = true
+        end
+      end
+
+      simgrid[erased] = 0
       simgrid[preset] = hardgrid[preset]
     end
 
@@ -379,7 +400,7 @@ function iqsim(training_image::AbstractArray,
     if hard ≠ nothing
       tplx, tply, tplz = tplsizex, tplsizey, tplsizez
 
-      simulated = preset | rastered
+      simulated = preset | (rastered & !erased)
 
       # throw away voxels that are outside of the grid
       simulated = simulated[1:gridsizex,1:gridsizey,1:gridsizez]
