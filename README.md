@@ -31,6 +31,7 @@ Documentation
 
 Please refer to the official documentation:
 
+[![Stable Documentation](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliohm.github.io/ImageQuilting.jl/stable)
 [![Latest Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://juliohm.github.io/ImageQuilting.jl/latest)
 
 REFERENCES
