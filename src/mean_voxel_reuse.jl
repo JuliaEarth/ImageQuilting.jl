@@ -15,7 +15,7 @@
 function meanvoxreuse(training_image::AbstractArray,
                       tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
                       overlapx=1/6, overlapy=1/6, overlapz=1/6,
-                      nreal=10, cut=:dijkstra, gpu=false, categorical=false)
+                      nreal=10, cut=:boykov, categorical=false, gpu=false)
 
   # calculate the overlap from given percentage
   ovx = ceil(Int, overlapx * tplsizex)
