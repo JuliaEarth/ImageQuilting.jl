@@ -23,7 +23,7 @@ Get the latest stable release with Julia's package manager:
 Pkg.add("ImageQuilting")
 ```
 
-For fast computation with GPUs, please follow the instructions in [GPU support](gpu-support.md).
+For even faster computation with GPUs, please follow the instructions in [GPU support](gpu-support.md).
 
 # Usage
 
@@ -34,7 +34,7 @@ reals = iqsim(training_image::AbstractArray,
               overlapx=1/6, overlapy=1/6, overlapz=1/6,
               soft=nothing, hard=nothing, tol=.1,
               cut=:dijkstra, path=:rasterup, categorical=false,
-              seed=0, gpu=false, nreal=1, debug=false)
+              nreal=1, gpu=false, debug=false)
 ```
 
 where:
@@ -51,12 +51,11 @@ where:
 * `soft` is an instance of `SoftData` or an array of such instances
 * `hard` is an instance of `HardData`
 * `tol` is the tolerance in (0,1]
-* `seed` is the random seed
-* `gpu` tells whether to use the GPU or the CPU
-* `nreal` is the number of realizations
 * `cut` is the cut algorithm (:dijkstra or :boykov)
 * `path` is the simulation path (:rasterup, :rasterdown, :dilation or :random)
 * `categorical` informs whether the image is categorical or continuous
+* `nreal` is the number of realizations
+* `gpu` tells whether to use the GPU or the CPU
 * `debug` tells whether to export or not the boundary cuts and voxel reuse
 
 The main output `reals` consists of a list of 3D realizations that can be indexed with
