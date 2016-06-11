@@ -137,9 +137,6 @@ function iqsim(training_image::AbstractArray,
   # always work with floating point
   TI = map(Float64, training_image)
 
-  # OpenCL FFT expects powers of 2, 3, 5, 7, 11 or 13
-  gpu && (TI = padarray(TI, [0,0,0], clfftpad(TI), "symmetric"))
-
   # inactive voxels in the training image
   NaNTI = isnan(TI); TI[NaNTI] = 0
 
@@ -184,9 +181,6 @@ function iqsim(training_image::AbstractArray,
       push!(softgrid, auxpad)
 
       auxTI = copy(aux.transform(training_image))
-
-      # OpenCL FFT expects powers of 2, 3, 5, 7, 11 or 13
-      gpu && (auxTI = padarray(auxTI, [0,0,0], clfftpad(auxTI), "symmetric"))
 
       @assert size(auxTI) == size(TI) "auxiliary TI must have the same size as TI"
 

@@ -28,6 +28,10 @@ function imfilter_gpu{T<:Real,K<:Real,N}(img::AbstractArray{T,N}, kern::Abstract
 
   A = border == "inner" ? img : padarray(img, prepad, fullpad, border, Complex64(0))
 
+  # OpenCL FFT expects powers of 2, 3, 5, 7, 11 or 13
+  paddings = clfftpad(A)
+  A = padarray(A, zeros(Int, ndims(A)), paddings, "symmetric")
+
   krn = zeros(Complex64, size(A))
   indexesK = ntuple(d->[size(krn,d)-prepad[d]+1:size(krn,d);1:size(kern,d)-prepad[d]], N)
   krn[indexesK...] = reflect(kern)
@@ -51,6 +55,9 @@ function imfilter_gpu{T<:Real,K<:Real,N}(img::AbstractArray{T,N}, kern::Abstract
 
   # get result back
   AF = reshape(cl.read(queue, bufRES), size(A))
+
+  # undo OpenCL FFT paddings
+  AF = padarray(AF, zeros(Int, ndims(AF)), -paddings, "symmetric")
 
   out = []
   if border == "inner"
