@@ -64,7 +64,21 @@ function clfftpad(A::AbstractArray)
   res = Int[]
   for s in size(A)
     fs = keys(factor(s))
-    push!(res, fs ⊆ [2,3,5,7,11,13] ? 0 : nextpow2(s) - s)
+    if fs ⊆ [2,3,5,7,11,13]
+      push!(res, 0)
+    else
+      # Try a closer number that has prime factors of 2 and 3.
+      # Use the next power of 2 (say N) to get multiple new
+      # candidates.
+      N = nextpow2(s)
+
+      # fractions of N: 100%, 93%, 84%, 75%, 56%
+      candidates = [N, 15(N÷16), 27(N÷32), 3(N÷4), 9(N÷16)]
+      candidates = candidates[candidates .> s]
+      n = minimum(candidates)
+
+      push!(res, n - s)
+    end
   end
 
   res
