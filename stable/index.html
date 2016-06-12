@@ -171,7 +171,7 @@
 <pre><code class="julia">Pkg.add(&quot;ImageQuilting&quot;)
 </code></pre>
 
-<p>For fast computation with GPUs, please follow the instructions in <a href="gpu-support/">GPU support</a>.</p>
+<p>For even faster computation with GPUs, please follow the instructions in <a href="gpu-support/">GPU support</a>.</p>
 <p><a id='Usage-1'></a></p>
 <h1 id="usage">Usage</h1>
 <pre><code class="julia">reals = iqsim(training_image::AbstractArray,
@@ -180,7 +180,7 @@
               overlapx=1/6, overlapy=1/6, overlapz=1/6,
               soft=nothing, hard=nothing, tol=.1,
               cut=:dijkstra, path=:rasterup, categorical=false,
-              seed=0, gpu=false, nreal=1, debug=false)
+              nreal=1, gpu=false, debug=false)
 </code></pre>
 
 <p>where:</p>
@@ -196,12 +196,11 @@
 <li><code>soft</code> is an instance of <code>SoftData</code> or an array of such instances</li>
 <li><code>hard</code> is an instance of <code>HardData</code></li>
 <li><code>tol</code> is the tolerance in (0,1]</li>
-<li><code>seed</code> is the random seed</li>
-<li><code>gpu</code> tells whether to use the GPU or the CPU</li>
-<li><code>nreal</code> is the number of realizations</li>
 <li><code>cut</code> is the cut algorithm (:dijkstra or :boykov)</li>
 <li><code>path</code> is the simulation path (:rasterup, :rasterdown, :dilation or :random)</li>
 <li><code>categorical</code> informs whether the image is categorical or continuous</li>
+<li><code>nreal</code> is the number of realizations</li>
+<li><code>gpu</code> tells whether to use the GPU or the CPU</li>
 <li><code>debug</code> tells whether to export or not the boundary cuts and voxel reuse</li>
 </ul>
 <p>The main output <code>reals</code> consists of a list of 3D realizations that can be indexed with <code>reals[1], reals[2], ..., reals[nreal]</code>. If <code>debug=true</code>, additional output is generated:</p>
@@ -213,7 +212,7 @@
 <pre><code class="julia">mvr = meanvoxreuse(training_image::AbstractArray,
                    tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
                    overlapx=1/6, overlapy=1/6, overlapz=1/6,
-                   nreal=10, categorical=false)
+                   nreal=10, cut=:boykov, categorical=false, gpu=false)
 </code></pre>
 
 <p>with <code>mvr</code> in the interval [0,1]. The approximation gets better as <code>nreal</code> is made larger.</p>
