@@ -36,6 +36,11 @@ function iqsim(training_image::AbstractArray,
   @assert path ∈ [:rasterup,:rasterdown,:dilation,:random] "invalid simulation path"
   @assert nreal > 0 "invalid number of realizations"
 
+  # GPU checks
+  if gpu
+    @assert all([size(training_image)...] .> 1) "GPU support for 3D training images only"
+  end
+
   # soft data checks
   if soft ≠ nothing
     @assert isa(soft, SoftData) || isa(soft, AbstractArray{SoftData})
