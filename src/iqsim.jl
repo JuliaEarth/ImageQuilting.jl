@@ -87,6 +87,12 @@ function iqsim(training_image::AbstractArray,
                               (ny - (ntiley-1)overlapy)*
                               (nz - (ntilez-1)overlapz)
 
+  # warn in case of 1-voxel overlaps
+  if any([tplsizex, tplsizey, tplsizez] .>  1 &
+         [overlapx, overlapy, overlapz] .== 1)
+    warn("1-voxel overlaps. Check template/overlap configuration.")
+  end
+
   # hard data in grid format
   hardgrid = []; preset = []; activated = []
   if hard ≠ nothing
