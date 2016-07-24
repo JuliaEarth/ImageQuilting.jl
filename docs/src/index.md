@@ -103,9 +103,9 @@ Masked grids are a special case of hard data conditioning where inactive voxels 
 
 `training_image` can also have inactive voxels marked with `NaN`. Convolution results are only looked up in active regions.
 
-# Citing
+# Citation
 
-For citing the sofware, please use:
+For citing this software, please use:
 
 ```latex
 Paper comping up...

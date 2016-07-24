@@ -88,8 +88,8 @@ function iqsim(training_image::AbstractArray,
                               (nz - (ntilez-1)overlapz)
 
   # warn in case of 1-voxel overlaps
-  if any([tplsizex, tplsizey, tplsizez] .>  1 &
-         [overlapx, overlapy, overlapz] .== 1)
+  if any(([tplsizex, tplsizey, tplsizez] .>  1) &
+         ([overlapx, overlapy, overlapz] .== 1))
     warn("1-voxel overlaps. Check template/overlap configuration.")
   end
 

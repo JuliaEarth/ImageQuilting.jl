@@ -41,4 +41,4 @@ using CLFFT # force compilation
 Pkg.test("CLFFT")
 ```
 
-If the tests are successful, the installation is complete. Pass in the option `gpu=true` to `iqsim` for computations with GPU.
+If the tests are successful, the installation is complete. Pass in the option `gpu=true` to `iqsim` for computations with the GPU.
