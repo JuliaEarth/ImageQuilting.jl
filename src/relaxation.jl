@@ -12,7 +12,7 @@
 ## ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-function relaxation(distance::AbstractArray, softdistance::AbstractArray, cutoff::Real)
+function relaxation(distance::AbstractArray, auxdistances::AbstractArray, cutoff::Real)
   # patterns enabled in the training image
   enabled = !isinf(distance); npatterns = sum(enabled)
 
@@ -20,18 +20,21 @@ function relaxation(distance::AbstractArray, softdistance::AbstractArray, cutoff
   dbsize = all(distance[enabled] .== 0) ? npatterns : ceil(Int, cutoff*npatterns)
   overlapdb = selectperm(distance[:], 1:dbsize)
 
-  # candidates in accordance with soft data
-  softdbs = map(d -> sortperm(d[:]), softdistance)
+  # candidates in accordance with auxiliary data
+  softdistance = copy(auxdistances)
+  softdb = fill(Int[], length(softdistance))
 
-  τₛ = .1 * (dbsize / npatterns)
   patterndb = []
+  τₛ = .1 * (dbsize / npatterns)
   while true
     softdbsize = ceil(Int, τₛ*npatterns)
 
     patterndb = overlapdb
-    for n=1:length(softdbs)
-      softdb = softdbs[n][1:softdbsize]
-      patterndb = quick_intersect(patterndb, softdb, length(distance))
+    for n=1:length(softdistance)
+      softdistance[n][softdb[n]] = Inf
+      softdb[n] = [softdb[n]; selectperm(softdistance[n][:], 1:softdbsize-length(softdb[n]))]
+
+      patterndb = quick_intersect(patterndb, softdb[n], length(distance))
 
       isempty(patterndb) && break
     end
