@@ -2,4 +2,4 @@ julia 0.4
 Combinatorics
 StatsBase
 Images
-LightGraphs 0.5.2
+LightGraphs 0.6.1
