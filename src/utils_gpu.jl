@@ -61,11 +61,18 @@ function basic_kernels(ctx)
 end
 
 function clfftpad(A::AbstractArray)
-  res = Int[]
+  v = clfft.version()
+
+  # clFFT releases support powers of 2, 3, 5, ...
+  radices = [2,3,5]
+  v ≥ v"2.8.0"  && push!(radices, 7)
+  v ≥ v"2.12.0" && push!(radices, 11, 13)
+
+  result = Int[]
   for s in size(A)
     fs = keys(factor(s))
-    if fs ⊆ [2,3,5,7,11,13]
-      push!(res, 0)
+    if fs ⊆ radices
+      push!(result, 0)
     else
       # Try a closer number that has prime factors of 2 and 3.
       # Use the next power of 2 (say N) to get multiple new
@@ -77,9 +84,9 @@ function clfftpad(A::AbstractArray)
       candidates = candidates[candidates .> s]
       n = minimum(candidates)
 
-      push!(res, n - s)
+      push!(result, n - s)
     end
   end
 
-  res
+  result
 end
