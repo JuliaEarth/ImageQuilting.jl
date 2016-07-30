@@ -21,13 +21,14 @@ function relaxation(distance::AbstractArray, auxdistances::AbstractArray, cutoff
   overlapdb = selectperm(distance[:], 1:dbsize)
 
   # candidates in accordance with auxiliary data
-  softdistance = copy(auxdistances)
-  softdb = fill(Int[], length(softdistance))
+  naux = length(auxdistances)
+  softdb = fill(Int[], naux)
 
   patterndb = []
-  τₛ = .1 * (dbsize / npatterns)
+  softdistance = copy(auxdistances)
+  frac = .1 * (dbsize / npatterns)
   while true
-    softdbsize = ceil(Int, τₛ*npatterns)
+    softdbsize = ceil(Int, frac*npatterns)
 
     patterndb = overlapdb
     for n=1:length(softdistance)
@@ -40,7 +41,7 @@ function relaxation(distance::AbstractArray, auxdistances::AbstractArray, cutoff
     end
 
     !isempty(patterndb) && break
-    τₛ = min(τₛ + .1, 1)
+    frac = min(frac + .1, 1)
   end
 
   patterndb
