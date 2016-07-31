@@ -25,7 +25,7 @@ function relaxation(distance::AbstractArray, auxdistances::AbstractArray, cutoff
   softdb = fill(Int[], naux)
 
   patterndb = []
-  softdistance = copy(auxdistances)
+  softdistance = [copy(auxdistances[i]) for i=1:naux]
   frac = .1 * (dbsize / npatterns)
   while true
     softdbsize = ceil(Int, frac*npatterns)
