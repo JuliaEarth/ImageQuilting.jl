@@ -12,6 +12,8 @@
 ## ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+__precompile__()
+
 module ImageQuilting
 
 using Base: @nexprs, @nloops, @nref
