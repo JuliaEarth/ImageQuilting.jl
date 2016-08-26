@@ -136,13 +136,9 @@ function iqsim(training_image::AbstractArray,
     end
     rastered[!activated] = false
 
-    simulated = preset | rastered
-
-    # path must be non-empty or data must be available
+    # grid must contain active voxels
     any_activated = any(activated[1:gridsizex,1:gridsizey,1:gridsizez])
-    any_simulated = any(simulated[1:gridsizex,1:gridsizey,1:gridsizez])
     @assert any_activated "simulation grid has no active voxel"
-    @assert any_simulated "path must visit at least one tile in the absence of data"
   end
 
   # always work with floating point
@@ -295,21 +291,21 @@ function iqsim(training_image::AbstractArray,
       # disable dataevents that contain inactive voxels
       distance[disabled] = Inf
 
-      # compute soft and hard distances
+      # compute hard and soft distances
       auxdistances = []
-      for n=1:length(softTI)
-        softdev = softgrid[n][iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-        D = convdist(Any[softTI[n]], Any[softdev])
+      if hard ≠ nothing && any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
+        harddev = hardgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+        hsimplex = categorical ? simplex_transform(harddev, nvertices) : Any[harddev]
+        D = convdist(simplexTI, hsimplex, weights=preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
 
         # disable dataevents that contain inactive voxels
         D[disabled] = Inf
 
         push!(auxdistances, D)
       end
-      if hard ≠ nothing && any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
-        harddev = hardgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-        hsimplex = categorical ? simplex_transform(harddev, nvertices) : Any[harddev]
-        D = convdist(simplexTI, hsimplex, weights=preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
+      for n=1:length(softTI)
+        softdev = softgrid[n][iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+        D = convdist(Any[softTI[n]], Any[softdev])
 
         # disable dataevents that contain inactive voxels
         D[disabled] = Inf
@@ -363,234 +359,21 @@ function iqsim(training_image::AbstractArray,
       debug && (cutgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = M)
     end
 
-    # prepare tiles with hard data for inpainting
-    erased = []
+    # hard data and shape correction
     if hard ≠ nothing
-      erased = falses(nx, ny, nz)
-      for (i,j,k) in datum
-        # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
-        iₛ = (i-1)spacingx + 1
-        jₛ = (j-1)spacingy + 1
-        kₛ = (k-1)spacingz + 1
-        iₑ = iₛ + tplsizex - 1
-        jₑ = jₛ + tplsizey - 1
-        kₑ = kₛ + tplsizez - 1
-
-        simdev = simgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-        harddev = hardgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-        hardloc = preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-
-        if simdev[hardloc] != harddev[hardloc]
-          erased[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = true
-        end
-      end
-
-      simgrid[erased] = 0
       simgrid[preset] = hardgrid[preset]
+      simgrid[!activated] = NaN
+      debug && (cutgrid[!activated] = NaN)
     end
 
     # throw away voxels that are outside of the grid
     simgrid = simgrid[1:gridsizex,1:gridsizey,1:gridsizez]
 
-    # do the same for boundary cut, but only after saving voxel reuse
+    # do the same for boundary cut after saving voxel reuse
     debug && push!(voxelreuse, sum(cutgrid)/overlap_volume)
     debug && (cutgrid = cutgrid[1:gridsizex,1:gridsizey,1:gridsizez])
 
-    #-----------------------------------------------------------------
-
-    # simulate remaining voxels
-    if hard ≠ nothing
-      tplx, tply, tplz = tplsizex, tplsizey, tplsizez
-
-      simulated = preset | (rastered & !erased)
-
-      # throw away voxels that are outside of the grid
-      simulated = simulated[1:gridsizex,1:gridsizey,1:gridsizez]
-      activated = activated[1:gridsizex,1:gridsizey,1:gridsizez]
-
-      # simulation frontier
-      dilated = dilate(simulated, [1,2,3]) & activated
-      frontier = find(dilated - simulated)
-
-      # initialize confidence map
-      Cmap = map(Float64, simulated)
-
-      while !isempty(frontier)
-        visited = 0
-
-        # update confidence in the frontier
-        for vox in frontier
-          # tile center is given by (iᵥ,jᵥ,kᵥ)
-          iᵥ, jᵥ, kᵥ = ind2sub(size(simgrid), vox)
-
-          # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
-          iₛ = max(iᵥ - (tplx-1)÷2, 1)
-          jₛ = max(jᵥ - (tply-1)÷2, 1)
-          kₛ = max(kᵥ - (tplz-1)÷2, 1)
-          iₑ = min(iᵥ + tplx÷2, gridsizex)
-          jₑ = min(jᵥ + tply÷2, gridsizey)
-          kₑ = min(kᵥ + tplz÷2, gridsizez)
-
-          confdev = Cmap[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-          booldev = simulated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-
-          Cmap[vox] = sum(confdev[booldev]) / (tplx*tply*tplz)
-        end
-
-        # isophote map
-        G = ndgradients(simgrid, frontier)
-        N = ndgradients(simulated, frontier)
-        Dmap = vec(abs(sum(G.*N, 2)))
-        Dmap /= maximum(Dmap)
-
-        # data-driven visiting order
-        permvec = sortperm(Cmap[frontier].*Dmap, rev=true)
-        frontier = frontier[permvec]
-
-        if any([tplx,tply,tplz] .> 1)
-          # disable tiles in the training image if they contain inactive voxels
-          disabledₜ = copy(NaNTI)
-          for i=1:tplx÷2
-            disabledₜ = dilate(disabledₜ, [1])
-          end
-          for j=1:tply÷2
-            disabledₜ = dilate(disabledₜ, [2])
-          end
-          for k=1:tplz÷2
-            disabledₜ = dilate(disabledₜ, [3])
-          end
-
-          # scan training image
-          for vox in frontier
-            # tile center is given by (iᵥ,jᵥ,kᵥ)
-            iᵥ, jᵥ, kᵥ = ind2sub(size(simgrid), vox)
-
-            # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
-            iₛ = iᵥ - (tplx-1)÷2
-            jₛ = jᵥ - (tply-1)÷2
-            kₛ = kᵥ - (tplz-1)÷2
-            iₑ = iₛ + tplx - 1
-            jₑ = jₛ + tply - 1
-            kₑ = kₛ + tplz - 1
-
-            if all(0 .< [iₛ,jₛ,kₛ]) && all([iₑ,jₑ,kₑ] .≤ [size(simgrid)...]) && !simulated[vox]
-              # mark location as visited
-              visited += 1
-
-              # voxel-centered dataevent
-              simdev = simgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-              simplexdev = categorical ? simplex_transform(simdev, nvertices) : Any[simdev]
-
-              # on/off dataevent
-              booldev = simulated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-
-              # compute the distance between the simulation dataevent
-              # and all patterns in the training image
-              distance = convdist(simplexTI, simplexdev, weights=booldev, inner=false)
-
-              # disable dataevents that contain inactive voxels
-              distance[disabledₜ] = Inf
-
-              # compute soft and hard distances
-              auxdistances = []
-              for n=1:length(softTI)
-                softdev = softgrid[n][iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-                D = convdist(Any[softTI[n]], Any[softdev], weights=booldev, inner=false)
-
-                # disable dataevents that contain inactive voxels
-                D[disabledₜ] = Inf
-
-                push!(auxdistances, D)
-              end
-              if hard ≠ nothing && any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
-                harddev = hardgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-                hsimplex = categorical ? simplex_transform(harddev, nvertices) : Any[harddev]
-                D = convdist(simplexTI, hsimplex, weights=preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ], inner=false)
-
-                # disable dataevents that contain inactive voxels
-                D[disabledₜ] = Inf
-
-                push!(auxdistances, D)
-              end
-
-              # current pattern database
-              patterndb = isempty(auxdistances) ? find(distance .≤ (1+tol)minimum(distance)) :
-                                                  relaxation(distance, auxdistances, tol)
-              patternprobs = tau_model(patterndb, distance, auxdistances)
-
-              # pick a pattern at random from the database
-              idx = sample(patterndb, weights(patternprobs))
-              iᵦ, jᵦ, kᵦ = ind2sub(size(distance), idx)
-
-              # tile top left corner is given by (Is,Js,Ks)
-              Is = iᵦ - (tplx-1)÷2
-              Js = jᵦ - (tply-1)÷2
-              Ks = kᵦ - (tplz-1)÷2
-
-              # pad training image dataevent
-              TIdev = zeros(tplx, tply, tplz)
-              valid = falses(tplx, tply, tplz)
-              for δi=1:tplx, δj=1:tply, δk=1:tplz
-                i, j, k = Is+δi-1, Js+δj-1, Ks+δk-1
-                if all(0 .< [i,j,k] .≤ [size(TI)...]) && !NaNTI[i,j,k]
-                  TIdev[δi,δj,δk] = TI[i,j,k]
-                  valid[δi,δj,δk] = true
-                end
-              end
-
-              # voxels to be simulated
-              M = valid & activated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] & !simulated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-
-              # paste highlighted portion onto simulation grid
-              simgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = M.*TIdev + !M.*simdev
-
-              # simulation progress
-              simulated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] |= M
-            end
-          end
-        else
-          # copy a neighbor voxel from simulation grid
-          for vox in frontier
-            # mark location as visited
-            visited += 1
-
-            # tile center is given by (iᵥ,jᵥ,kᵥ)
-            iᵥ, jᵥ, kᵥ = ind2sub(size(simgrid), vox)
-
-            # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
-            iₛ, jₛ, kₛ = max(iᵥ-1, 1), max(jᵥ-1, 1), max(kᵥ-1, 1)
-            iₑ, jₑ, kₑ = min(iᵥ+1, gridsizex), min(jᵥ+1, gridsizey), min(kᵥ+1, gridsizez)
-
-            # voxel-centered dataevent
-            simdev = simgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-
-            # pick a voxel in the simulated neighborhood at random
-            neighborhood = find(activated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] & simulated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
-            idx = neighborhood[rand(1:length(neighborhood))]
-
-            # copy it
-            simgrid[iᵥ,jᵥ,kᵥ] = simdev[idx]
-            simulated[iᵥ,jᵥ,kᵥ] = true
-          end
-        end
-
-        if visited == 0
-          # reduce the template size and proceed
-          idx = indmax([tplz,tply,tplx])
-          idx == 3 && (tplx = max(tplx-1,1))
-          idx == 2 && (tply = max(tply-1,1))
-          idx == 1 && (tplz = max(tplz-1,1))
-        end
-
-        dilated = dilate(simulated, [1,2,3]) & activated
-        frontier = find(dilated - simulated)
-      end
-
-      # arbitrarily shaped simulation grid
-      simgrid[!activated] = NaN
-      debug && (cutgrid[!activated] = NaN)
-    end
-
+    # save and continue
     push!(realizations, simgrid)
     debug && push!(boundarycuts, cutgrid)
   end

@@ -77,22 +77,6 @@ reals = iqsim(TI, 10, 10, 10, size(TI)..., hard=data, soft=trend)
 @test reals[1][1,1,1] == 10
 @test all(reals[1][2:end] .== 1)
 
-# last voxels may be simulated by copying neighbors
-TI = ones(20,20,1)
-data = HardData()
-for i=1:20, j=1:20
-  if i == 20 && j == 20
-    # skip
-  elseif i == 20 && j == 19
-    push!(data, (i,j,1)=>10)
-  else
-    push!(data, (i,j,1)=>NaN)
-  end
-end
-reals = iqsim(TI, 10, 10, 1, size(TI)..., hard=data)
-@test reals[1][20,20,1] == 10
-@test reals[1][20,19,1] == 10
-
 # boundary cut in 3D
 TI = ones(20,20,20)
 for cut in [:dijkstra,:boykov]

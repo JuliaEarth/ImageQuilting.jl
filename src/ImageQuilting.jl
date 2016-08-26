@@ -38,7 +38,6 @@ end
 include("utils.jl")
 include("utils_gpu.jl")
 include("datatypes.jl")
-include("ndgradients.jl")
 include("imfilter_gpu.jl")
 include("relaxation.jl")
 include("tau_model.jl")
