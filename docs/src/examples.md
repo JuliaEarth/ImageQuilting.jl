@@ -12,6 +12,7 @@ reals = iqsim(TI, 62, 62, 1, size(TI)..., nreal=3)
 TI = training_image("StoneWall")
 reals, cuts, voxs = iqsim(TI, 13, 13, 1, size(TI)..., nreal=3, debug=true)
 ```
+![Unconditional simulation](images/unconditional.png)
 
 # Hard data
 
@@ -33,3 +34,4 @@ data = SoftData(G(truth), G)
 
 reals = iqsim(TI, 27, 27, 1, size(truth)..., soft=data, nreal=3)
 ```
+![Soft data conditioning](images/soft.png)
