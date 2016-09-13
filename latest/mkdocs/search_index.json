@@ -47,7 +47,7 @@
         }, 
         {
             "location": "/examples/", 
-            "text": "Consider installing the \nGeoStatsImages.jl\n package.\n\n\n\n\nUnconditional\n\n\nusing ImageQuilting\nusing GeoStatsImages\n\nTI = training_image(\nStrebelle\n)\nreals = iqsim(TI, 62, 62, 1, size(TI)..., nreal=3)\n\nTI = training_image(\nStoneWall\n)\nreals, cuts, voxs = iqsim(TI, 13, 13, 1, size(TI)..., nreal=3, debug=true)\n\n\n\n\n\n\nHard data\n\n\nTODO\n\n\n\n\nSoft data\n\n\nusing ImageQuilting\nusing GeoStatsImages\nusing Images: imfilter_gaussian\n\nTI = training_image(\nWalkerLake\n)\ntruth = training_image(\nWalkerLakeTruth\n)\n\nG(m) = imfilter_gaussian(m, [10,10,0])\n\ndata = SoftData(G(truth), G)\n\nreals = iqsim(TI, 27, 27, 1, size(truth)..., soft=data, nreal=3)", 
+            "text": "Consider installing the \nGeoStatsImages.jl\n package.\n\n\n\n\nUnconditional\n\n\nusing ImageQuilting\nusing GeoStatsImages\n\nTI = training_image(\nStrebelle\n)\nreals = iqsim(TI, 62, 62, 1, size(TI)..., nreal=3)\n\nTI = training_image(\nStoneWall\n)\nreals, cuts, voxs = iqsim(TI, 13, 13, 1, size(TI)..., nreal=3, debug=true)\n\n\n\n\n\n\n\n\nHard data\n\n\nTODO\n\n\n\n\nSoft data\n\n\nusing ImageQuilting\nusing GeoStatsImages\nusing Images: imfilter_gaussian\n\nTI = training_image(\nWalkerLake\n)\ntruth = training_image(\nWalkerLakeTruth\n)\n\nG(m) = imfilter_gaussian(m, [10,10,0])\n\ndata = SoftData(G(truth), G)\n\nreals = iqsim(TI, 27, 27, 1, size(truth)..., soft=data, nreal=3)", 
             "title": "Examples"
         }, 
         {

@@ -153,6 +153,7 @@ TI = training_image(&quot;StoneWall&quot;)
 reals, cuts, voxs = iqsim(TI, 13, 13, 1, size(TI)..., nreal=3, debug=true)
 </code></pre>
 
+<p><img alt="Unconditional simulation" src="../images/unconditional.png" /></p>
 <p><a id='Hard-data-1'></a></p>
 <h1 id="hard-data">Hard data</h1>
 <p>TODO</p>
@@ -170,7 +171,9 @@ G(m) = imfilter_gaussian(m, [10,10,0])
 data = SoftData(G(truth), G)
 
 reals = iqsim(TI, 27, 27, 1, size(truth)..., soft=data, nreal=3)
-</code></pre></div>
+</code></pre>
+
+<p><img alt="Soft data conditioning" src="../images/soft.png" /></p></div>
         </div>
 
         <footer class="col-md-12">
