@@ -23,6 +23,8 @@ using LightGraphs
 
 if VERSION > v"0.5-"
   using Combinatorics: nthperm!
+else
+  global view = slice
 end
 
 try # optional dependencies
