@@ -20,7 +20,7 @@ reals = iqsim(TI, 10, 10, 1, size(TI)..., soft=SoftData(trend, x -> x), tol=1)
 # hard data is honored everywhere
 TI = ones(20,20,20)
 obs = rand(size(TI))
-data = HardData([(i,j,k)=>obs[i,j,k] for i=1:20, j=1:20, k=1:20])
+data = HardData((i,j,k)=>obs[i,j,k] for i=1:20, j=1:20, k=1:20)
 reals = iqsim(TI, 10, 10, 10, size(TI)..., hard=data)
 @test reals[1] == obs
 
@@ -51,7 +51,7 @@ reals = iqsim(TI, 10, 10, 10, size(TI)..., categorical=true)
 TI = ones(20,20,20)
 TI[:,5,:] = NaN
 trend = SoftData(ones(TI), x -> ones(TI))
-shape = HardData([(i,j,k)=>NaN for i=1:20, j=5, k=1:20])
+shape = HardData((i,j,k)=>NaN for i=1:20, j=5, k=1:20)
 reals = iqsim(TI, 10, 10, 10, size(TI)..., hard=shape)
 @test all(isnan(reals[1][:,5,:]))
 @test all(reals[1][:,1:4,:] .== 1)

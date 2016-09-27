@@ -27,7 +27,7 @@ function simplex_transform(img::AbstractArray, nvertices::Integer)
   vertices = [zeros(ncoords) vertices]
   idx = map(Int, img + 1)
 
-  result = cell(ncoords)
+  result = Array{Any}(ncoords)
   for i=1:ncoords
     coords = similar(img)
     coords[:] = vertices[i,idx[:]]

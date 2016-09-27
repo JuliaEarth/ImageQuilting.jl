@@ -42,7 +42,7 @@ function dijkstra_cut(A1::AbstractArray, A2::AbstractArray, dir::Symbol)
   end
 
   # forward accumulation along 2D square (last slice of the cube)
-  zslice = slice(E,:,:,mz)
+  zslice = view(E,:,:,mz)
   for j=2:my
     zslice[1,j] += minimum(zslice[1:2,j-1])
     for i=2:mx-1
@@ -53,7 +53,7 @@ function dijkstra_cut(A1::AbstractArray, A2::AbstractArray, dir::Symbol)
 
   # backward search along last slice
   idx = indmin(zslice[:,my])
-  mslice = slice(M,:,:,mz)
+  mslice = view(M,:,:,mz)
   mslice[1:idx,my] = trues(idx)
   idxvec = zeros(Int, my); idxvec[my] = idx # keep track of indexes
   width = isodd(mx) ? mx+1 : mx # avoid zig-zag artifact
@@ -71,7 +71,7 @@ function dijkstra_cut(A1::AbstractArray, A2::AbstractArray, dir::Symbol)
 
   # backward search along cube
   for j=1:my
-    yslice = slice(E,:,j,:)
+    yslice = view(E,:,j,:)
     idx = idxvec[j]
     for k=mz-1:-1:1
       for i=1:width

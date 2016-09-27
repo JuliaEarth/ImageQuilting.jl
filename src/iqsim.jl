@@ -24,7 +24,7 @@ function iqsim(training_image::AbstractArray,
   global GPU = gpu ? gpu_setup() : nothing
 
   # use all CPU cores in FFT
-  FFTW.set_num_threads(CPU_CORES)
+  FFTW.set_num_threads(Sys.CPU_CORES)
 
   # sanity checks
   @assert ndims(training_image) == 3 "training image is not 3D (add ghost dimension for 2D)"

@@ -32,7 +32,7 @@ function tau_model(events::AbstractVector{Int}, D₁::AbstractArray, Dₙ::Abstr
   idx = mapslices(sortperm, D, 1)
   for j=1:nsources
     r = 0; prevdist = -Inf
-    for i in slice(idx,:,j)
+    for i in view(idx,:,j)
       D[i,j] > prevdist && (r += 1)
       prevdist = D[i,j]
       D[i,j] = r
