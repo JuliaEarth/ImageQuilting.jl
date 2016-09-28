@@ -209,7 +209,7 @@ function iqsim(training_image::AbstractArray,
 
   # for each realization we have:
   boundarycuts = [] # boundary cut
-  voxelreuse = [] # voxel reuse
+  voxelreuse = Float64[] # voxel reuse
 
   for real=1:nreal
     # allocate memory for current simulation
