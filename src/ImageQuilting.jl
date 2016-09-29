@@ -20,6 +20,7 @@ using Base: @nexprs, @nloops, @nref
 using Images: imfilter_fft, padarray, dilate
 using Combinatorics: nthperm!
 using StatsBase: sample, weights
+using Primes: factor
 using LightGraphs
 
 # optional dependencies
