@@ -18,22 +18,21 @@ module ImageQuilting
 
 using Base: @nexprs, @nloops, @nref
 using Images: imfilter_fft, padarray, dilate
+using Combinatorics: nthperm!
 using StatsBase: sample, weights
 using LightGraphs
 
-if VERSION > v"0.5-"
-  using Combinatorics: nthperm!
-else
-  global view = slice
-end
-
-try # optional dependencies
+# optional dependencies
+try
   using OpenCL
-  using CLFFT
-  global cl = OpenCL
-  global clfft = CLFFT
 catch
   global cl = nothing
+end
+
+try
+  using CLFFT
+  global clfft = CLFFT
+catch
   global clfft = nothing
 end
 
