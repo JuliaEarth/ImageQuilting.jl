@@ -50,7 +50,7 @@ function imfilter_gpu{T<:Real,K<:Real,N}(img::AbstractArray{T,N}, kern::Abstract
   # compute ifft(fft(A).*fft(kern))
   clfft.enqueue_transform(p, :forward, [queue], bufA, nothing)
   clfft.enqueue_transform(p, :forward, [queue], bufkrn, nothing)
-  cl.call(queue, mult_kernel, length(A), nothing, bufA, bufkrn, bufRES)
+  queue(mult_kernel, length(A), nothing, bufA, bufkrn, bufRES)
   clfft.enqueue_transform(p, :backward, [queue], bufRES, nothing)
 
   # get result back
