@@ -17,7 +17,7 @@ function iqsim(training_image::AbstractArray,
                gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
                overlapx=1/6, overlapy=1/6, overlapz=1/6,
                soft=nothing, hard=nothing, tol=.1,
-               cut=:dijkstra, path=:rasterup, categorical=false,
+               cut=:boykov, path=:rasterup, categorical=false,
                nreal=1, gpu=false, debug=false)
 
   # GPU setup
