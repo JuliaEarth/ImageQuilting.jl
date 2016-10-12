@@ -86,7 +86,8 @@ end
 
 # mean voxel reuse is in range [0,1]
 TI = rand(20,20,20)
-@test 0 ≤ meanvoxreuse(TI, 10, 10, 10, nreal=1) ≤ 1
+μ, σ = voxelreuse(TI, 10, 10, 10, nreal=1)
+@test 0 ≤ μ ≤ 1
 
 # multiple realizations with hard data
 TI = ones(20,20,20)

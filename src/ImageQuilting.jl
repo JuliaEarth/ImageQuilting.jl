@@ -46,13 +46,13 @@ include("tau_model.jl")
 include("dijkstra_cut.jl")
 include("boykov_kolmogorov_cut.jl")
 include("simplex_transform.jl")
-include("mean_voxel_reuse.jl")
+include("voxel_reuse.jl")
 include("iqsim.jl")
 
 export
   # functions
   iqsim,
-  meanvoxreuse,
+  voxelreuse,
 
   # types
   SoftData,

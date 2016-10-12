@@ -12,10 +12,10 @@
 ## ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-function meanvoxreuse(training_image::AbstractArray,
-                      tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
-                      overlapx=1/6, overlapy=1/6, overlapz=1/6,
-                      nreal=10, cut=:boykov, categorical=false, gpu=false)
+function voxelreuse(training_image::AbstractArray,
+                    tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
+                    overlapx=1/6, overlapy=1/6, overlapz=1/6,
+                    nreal=10, cut=:boykov, categorical=false, gpu=false)
 
   # calculate the overlap from given percentage
   ovx = ceil(Int, overlapx * tplsizex)
@@ -37,5 +37,8 @@ function meanvoxreuse(training_image::AbstractArray,
                      overlapx=overlapx, overlapy=overlapy, overlapz=overlapz,
                      nreal=nreal, cut=cut, gpu=gpu, categorical=categorical, debug=true)
 
-  mean(voxs)
+  μ = mean(voxs)
+  σ = std(voxs, mean=μ)
+
+  μ, σ
 end
