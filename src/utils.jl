@@ -40,7 +40,7 @@ function convdist(Xs::AbstractArray, masks::AbstractArray; weights=nothing, inne
   sum(result)
 end
 
-function genpath(extent::NTuple{3,Integer}, kind::Symbol, datum=Set())
+function genpath(extent::NTuple{3,Integer}, kind::Symbol, datum=[])
   path = Int[]
 
   if kind == :rasterup

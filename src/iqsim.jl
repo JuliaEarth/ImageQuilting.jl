@@ -113,7 +113,7 @@ function iqsim(training_image::AbstractArray,
   end
 
   # keep track of hard data and inactive voxels
-  skipped = Set(); datum = Set(); rastered = []
+  skipped = Set(); datum = []; rastered = []
   if hard ≠ nothing
     rastered = falses(nx, ny, nz)
     for k=1:ntilez, j=1:ntiley, i=1:ntilex
@@ -301,7 +301,9 @@ function iqsim(training_image::AbstractArray,
         # disable dataevents that contain inactive voxels
         D[disabled] = Inf
 
-        push!(auxdistances, D)
+        # swap overlap and hard distances
+        push!(auxdistances, distance)
+        distance = D
       end
       for n=1:length(softTI)
         softdev = softgrid[n][iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
