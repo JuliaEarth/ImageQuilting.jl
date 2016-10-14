@@ -78,6 +78,8 @@ function genpath(extent::NTuple{3,Integer}, kind::Symbol, datum=[])
   if kind == :datum
     @assert !isempty(datum) "datum path cannot be generated without data"
 
+    shuffle!(datum)
+
     grid = falses(extent)
     for (i,j,k) in datum
       pivot = sub2ind(extent, i,j,k)
