@@ -34,7 +34,7 @@ reals = iqsim(training_image::AbstractArray,
               overlapx=1/6, overlapy=1/6, overlapz=1/6,
               soft=nothing, hard=nothing, tol=.1,
               cut=:boykov, path=:rasterup, categorical=false,
-              nreal=1, gpu=false, debug=false)
+              nreal=1, gpu=false, debug=false, showprogress=false)
 ```
 
 where:
@@ -57,6 +57,7 @@ where:
 * `nreal` is the number of realizations
 * `gpu` tells whether to use the GPU or the CPU
 * `debug` tells whether to export or not the boundary cuts and voxel reuse
+* `showprogress` tells whether to show or not estimated time duration
 
 The main output `reals` consists of a list of 3D realizations that can be indexed with
 `reals[1], reals[2], ..., reals[nreal]`. If `debug=true`, additional output is generated:

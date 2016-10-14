@@ -22,6 +22,7 @@ using Combinatorics: nthperm!
 using StatsBase: sample, weights
 using Primes: factor
 using LightGraphs
+using ProgressMeter
 
 # optional dependencies
 try

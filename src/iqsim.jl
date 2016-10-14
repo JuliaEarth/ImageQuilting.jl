@@ -18,7 +18,7 @@ function iqsim(training_image::AbstractArray,
                overlapx=1/6, overlapy=1/6, overlapz=1/6,
                soft=nothing, hard=nothing, tol=.1,
                cut=:boykov, path=:rasterup, categorical=false,
-               nreal=1, gpu=false, debug=false)
+               nreal=1, gpu=false, debug=false, showprogress=false)
 
   # GPU setup
   global GPU = gpu ? gpu_setup() : nothing
@@ -211,6 +211,9 @@ function iqsim(training_image::AbstractArray,
   boundarycuts = [] # boundary cut
   voxelreuse = Float64[] # voxel reuse
 
+  # show progress and estimated time duration
+  showprogress && (progress = Progress(nreal, color=:black))
+
   for real=1:nreal
     # allocate memory for current simulation
     simgrid = zeros(nx, ny, nz)
@@ -378,6 +381,9 @@ function iqsim(training_image::AbstractArray,
     # save and continue
     push!(realizations, simgrid)
     debug && push!(boundarycuts, cutgrid)
+
+    # update progress bar
+    showprogress && next!(progress)
   end
 
   debug ? (realizations, boundarycuts, voxelreuse) : realizations
