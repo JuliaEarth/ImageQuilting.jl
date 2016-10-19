@@ -4,7 +4,7 @@ using Base.Test
 # the output of a homogeneous image is also homogeneous
 TI = ones(20,20,20)
 reals = iqsim(TI, 10, 10, 10, size(TI)...)
-@test reals[1] == ones(TI)
+@test reals[1] == TI
 
 # categories are obtained from training image only
 ncateg = 3; TI = rand(RandomDevice(), 0:ncateg, 20, 20, 20)
@@ -105,5 +105,4 @@ end
 
 # datum is visited first if present
 path = ImageQuilting.genpath((10,10,10), :datum, [(1,1,1),(10,10,10)])
-@test path[1] == 1
-@test path[2] == 1000
+@test path[1:2] == [1,1000] || path[1:2] == [1000,1]
