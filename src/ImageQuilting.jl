@@ -12,7 +12,10 @@
 ## ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-__precompile__()
+# Julia doesn't support optional dependencies yet. We have
+# to disable precompilation in order to avoid issues with
+# missing components at runtime.
+__precompile__(false)
 
 module ImageQuilting
 
