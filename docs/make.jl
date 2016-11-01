@@ -5,5 +5,5 @@ makedocs()
 deploydocs(
   deps  = Deps.pip("mkdocs"),
   repo  = "github.com/juliohm/ImageQuilting.jl.git",
-  julia = "release"
+  julia = "0.5"
 )
