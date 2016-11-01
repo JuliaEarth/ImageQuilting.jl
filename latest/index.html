@@ -179,8 +179,8 @@
               gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
               overlapx=1/6, overlapy=1/6, overlapz=1/6,
               soft=nothing, hard=nothing, tol=.1,
-              cut=:dijkstra, path=:rasterup, categorical=false,
-              nreal=1, gpu=false, debug=false)
+              cut=:boykov, path=:rasterup, categorical=false,
+              nreal=1, gpu=false, debug=false, showprogress=false)
 </code></pre>
 
 <p>where:</p>
@@ -202,6 +202,7 @@
 <li><code>nreal</code> is the number of realizations</li>
 <li><code>gpu</code> tells whether to use the GPU or the CPU</li>
 <li><code>debug</code> tells whether to export or not the boundary cuts and voxel reuse</li>
+<li><code>showprogress</code> tells whether to show or not estimated time duration</li>
 </ul>
 <p>The main output <code>reals</code> consists of a list of 3D realizations that can be indexed with <code>reals[1], reals[2], ..., reals[nreal]</code>. If <code>debug=true</code>, additional output is generated:</p>
 <pre><code class="julia">reals, cuts, voxs = iqsim(..., debug=true)
@@ -209,13 +210,13 @@
 
 <p><code>cuts[i]</code> is the boundary cut for <code>reals[i]</code> and <code>voxs[i]</code> is the associated voxel reuse.</p>
 <p>A helper function is also provided for the fast approximation of the <em>mean voxel reuse</em>:</p>
-<pre><code class="julia">mvr = meanvoxreuse(training_image::AbstractArray,
-                   tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
-                   overlapx=1/6, overlapy=1/6, overlapz=1/6,
-                   nreal=10, cut=:boykov, categorical=false, gpu=false)
+<pre><code class="julia">mean, std = voxelreuse(training_image::AbstractArray,
+                       tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
+                       overlapx=1/6, overlapy=1/6, overlapz=1/6,
+                       nreal=10, cut=:boykov, categorical=false, gpu=false)
 </code></pre>
 
-<p>with <code>mvr</code> in the interval [0,1]. The approximation gets better as <code>nreal</code> is made larger.</p>
+<p>with <code>mean</code> in the interval [0,1]. The approximation gets better as <code>nreal</code> is made larger.</p>
 <p><a id='Soft-data-1'></a></p>
 <h2 id="soft-data">Soft data</h2>
 <p>Given 3D <code>data</code> at least as large as the simulation size and a <code>transform</code> such that <code>transform(training_image)</code> is comparable with <code>data</code>, the <code>SoftData(data, transform)</code> instance can be passed to <code>iqsim</code> for local relaxation:</p>
@@ -225,7 +226,7 @@
 <p><a id='Hard-data-1'></a></p>
 <h2 id="hard-data">Hard data</h2>
 <p>Voxels can be assigned values that will be honored by the simulation. <code>HardData()</code> is a dictionary of locations and associated values specified by the user:</p>
-<pre><code class="julia">well = HardData([(i,j,k)=&gt;value(i,j,k) for i=10, j=10, k=1:100])
+<pre><code class="julia">well = HardData((i,j,k)=&gt;value(i,j,k) for i=10, j=10, k=1:100)
 iqsim(..., hard=well)
 </code></pre>
 
