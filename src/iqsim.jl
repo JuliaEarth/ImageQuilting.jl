@@ -364,6 +364,9 @@ function iqsim(training_image::AbstractArray,
       debug && (cutgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = M)
     end
 
+    # save voxel reuse
+    debug && push!(voxelreuse, sum(cutgrid)/overlap_volume)
+
     # hard data and shape correction
     if hard ≠ nothing
       simgrid[preset] = hardgrid[preset]
@@ -373,9 +376,6 @@ function iqsim(training_image::AbstractArray,
 
     # throw away voxels that are outside of the grid
     simgrid = simgrid[1:gridsizex,1:gridsizey,1:gridsizez]
-
-    # do the same for boundary cut after saving voxel reuse
-    debug && push!(voxelreuse, sum(cutgrid)/overlap_volume)
     debug && (cutgrid = cutgrid[1:gridsizex,1:gridsizey,1:gridsizez])
 
     # save and continue

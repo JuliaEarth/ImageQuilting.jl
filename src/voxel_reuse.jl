@@ -35,7 +35,7 @@ function voxelreuse(training_image::AbstractArray,
   _, _, voxs = iqsim(training_image, tplsizex, tplsizey, tplsizez,
                      gridsizex, gridsizey, gridsizez,
                      overlapx=overlapx, overlapy=overlapy, overlapz=overlapz,
-                     nreal=nreal, cut=cut, gpu=gpu, categorical=categorical, debug=true)
+                     nreal=nreal, cut=cut, categorical=categorical, gpu=gpu, debug=true)
 
   μ = mean(voxs)
   σ = std(voxs, mean=μ)
