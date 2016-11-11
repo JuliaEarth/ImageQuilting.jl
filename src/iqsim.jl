@@ -17,14 +17,14 @@ function iqsim(training_image::AbstractArray,
                gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
                overlapx=1/6, overlapy=1/6, overlapz=1/6,
                soft=nothing, hard=nothing, tol=.1,
-               cut=:boykov, path=:rasterup, categorical=false,
-               nreal=1, gpu=false, debug=false, showprogress=false)
+               cut=:boykov, path=:rasterup, categorical=false, nreal=1,
+               threads=Sys.CPU_CORES, gpu=false, debug=false, showprogress=false)
 
   # GPU setup
   global GPU = gpu ? gpu_setup() : nothing
 
   # use all CPU cores in FFT
-  FFTW.set_num_threads(Sys.CPU_CORES)
+  FFTW.set_num_threads(threads)
 
   # sanity checks
   @assert ndims(training_image) == 3 "training image is not 3D (add ghost dimension for 2D)"

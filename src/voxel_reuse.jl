@@ -15,7 +15,8 @@
 function voxelreuse(training_image::AbstractArray,
                     tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
                     overlapx=1/6, overlapy=1/6, overlapz=1/6,
-                    nreal=10, cut=:boykov, categorical=false, gpu=false)
+                    cut=:boykov, categorical=false, nreal=10,
+                    threads=Sys.CPU_CORES, gpu=false)
 
   # calculate the overlap from given percentage
   ovx = ceil(Int, overlapx * tplsizex)
@@ -35,7 +36,8 @@ function voxelreuse(training_image::AbstractArray,
   _, _, voxs = iqsim(training_image, tplsizex, tplsizey, tplsizez,
                      gridsizex, gridsizey, gridsizez,
                      overlapx=overlapx, overlapy=overlapy, overlapz=overlapz,
-                     nreal=nreal, cut=cut, categorical=categorical, gpu=gpu, debug=true)
+                     cut=cut, categorical=categorical, nreal=nreal,
+                     threads=threads, gpu=gpu, debug=true)
 
   μ = mean(voxs)
   σ = std(voxs, mean=μ)

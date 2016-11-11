@@ -28,13 +28,13 @@ For even faster computation with GPUs, please follow the instructions in [GPU su
 # Usage
 
 ```julia
-reals = iqsim(training_image::AbstractArray,
-              tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
-              gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
-              overlapx=1/6, overlapy=1/6, overlapz=1/6,
-              soft=nothing, hard=nothing, tol=.1,
-              cut=:boykov, path=:rasterup, categorical=false,
-              nreal=1, gpu=false, debug=false, showprogress=false)
+function iqsim(training_image::AbstractArray,
+               tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
+               gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
+               overlapx=1/6, overlapy=1/6, overlapz=1/6,
+               soft=nothing, hard=nothing, tol=.1,
+               cut=:boykov, path=:rasterup, categorical=false, nreal=1,
+               threads=Sys.CPU_CORES, gpu=false, debug=false, showprogress=false)
 ```
 
 where:
@@ -55,6 +55,7 @@ where:
 * `path` is the simulation path (:rasterup, :rasterdown, :dilation or :random)
 * `categorical` informs whether the image is categorical or continuous
 * `nreal` is the number of realizations
+* `threads` is the number of threads for the FFT (default to all CPU cores)
 * `gpu` tells whether to use the GPU or the CPU
 * `debug` tells whether to export or not the boundary cuts and voxel reuse
 * `showprogress` tells whether to show or not estimated time duration
@@ -71,10 +72,11 @@ reals, cuts, voxs = iqsim(..., debug=true)
 A helper function is also provided for the fast approximation of the *mean voxel reuse*:
 
 ```julia
-mean, std = voxelreuse(training_image::AbstractArray,
-                       tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
-                       overlapx=1/6, overlapy=1/6, overlapz=1/6,
-                       nreal=10, cut=:boykov, categorical=false, gpu=false)
+function voxelreuse(training_image::AbstractArray,
+                    tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
+                    overlapx=1/6, overlapy=1/6, overlapz=1/6,
+                    cut=:boykov, categorical=false, nreal=10,
+                    threads=Sys.CPU_CORES, gpu=false)
 ```
 
 with `mean` in the interval [0,1]. The approximation gets better as `nreal` is made larger.
