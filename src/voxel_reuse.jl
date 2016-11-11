@@ -16,7 +16,7 @@ function voxelreuse(training_image::AbstractArray,
                     tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
                     overlapx=1/6, overlapy=1/6, overlapz=1/6,
                     cut=:boykov, categorical=false, nreal=10,
-                    threads=Sys.CPU_CORES, gpu=false)
+                    threads=CPU_PHYSICAL_CORES, gpu=false)
 
   # calculate the overlap from given percentage
   ovx = ceil(Int, overlapx * tplsizex)

@@ -12,6 +12,10 @@
 ## ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+# CPU specs
+computer = topology_load()
+const CPU_PHYSICAL_CORES = histmap(computer)[:Core]
+
 function get_imfilter_impl(GPU)
   if GPU ≠ nothing
     imfilter_gpu

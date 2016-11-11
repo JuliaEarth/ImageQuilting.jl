@@ -18,7 +18,7 @@ function iqsim(training_image::AbstractArray,
                overlapx=1/6, overlapy=1/6, overlapz=1/6,
                soft=nothing, hard=nothing, tol=.1,
                cut=:boykov, path=:rasterup, categorical=false, nreal=1,
-               threads=Sys.CPU_CORES, gpu=false, debug=false, showprogress=false)
+               threads=CPU_PHYSICAL_CORES, gpu=false, debug=false, showprogress=false)
 
   # GPU setup
   global GPU = gpu ? gpu_setup() : nothing
