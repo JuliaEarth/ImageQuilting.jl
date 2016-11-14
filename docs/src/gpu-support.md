@@ -4,8 +4,8 @@
 
 Two external dependencies need to be manually installed:
 
-1. OpenCL driver
-2. clFFT C++ library
+* OpenCL driver
+* clFFT C++ library
 
 ## Installing OpenCL driver
 
