@@ -154,7 +154,22 @@ reals, cuts, voxs = iqsim(TI, 13, 13, 1, size(TI)..., nreal=3, debug=true)
 <p><img alt="Unconditional simulation" src="../images/unconditional.png" /></p>
 <p><a id='Hard-data-1'></a></p>
 <h1 id="hard-data">Hard data</h1>
-<p>TODO</p>
+<pre><code class="julia">using ImageQuilting
+using GeoStatsImages
+
+TI = training_image(&quot;Strebelle&quot;)
+
+data = HardData()
+push!(data, (50,50,1)=&gt;1)
+push!(data, (190,50,1)=&gt;0)
+push!(data, (150,170,1)=&gt;1)
+push!(data, (150,190,1)=&gt;1)
+
+reals, cuts, voxs = iqsim(TI, 30, 30, 1, size(TI)..., hard=data, debug=true)
+</code></pre>
+
+<p><img alt="Hard data conditioning" src="../images/hard.gif" /></p>
+<p><img alt="Hard data conditioning" src="../images/hard.png" /></p>
 <p><a id='Soft-data-1'></a></p>
 <h1 id="soft-data">Soft data</h1>
 <pre><code class="julia">using ImageQuilting
