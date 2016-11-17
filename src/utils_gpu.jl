@@ -21,6 +21,8 @@ end
 
 function gpu_setup()
   @assert cl ≠ nothing "OpenCL.jl not installed, cannot use GPU"
+  @assert clfft ≠ nothing "CLFFT.jl not installed, cannot use GPU"
+
   gpus = cl.devices(:gpu)
   @assert !isempty(gpus) "GPU not found, make sure drivers are installed"
 
