@@ -112,3 +112,14 @@ end
   μ, σ = voxelreuse(TI, 10, 10, 10, nreal=1)
   @test 0 ≤ μ ≤ 1
 end
+
+if ImageQuilting.cl ≠ nothing && ImageQuilting.clfft ≠ nothing
+  @testset "GPU" begin
+    # CPU and GPU give same results
+    TI = ones(20,20,20)
+    TI[10:end,:,:] = 2
+    srand(0); realscpu = iqsim(TI, 10, 10, 10, size(TI)..., gpu=false)
+    srand(0); realsgpu = iqsim(TI, 10, 10, 10, size(TI)..., gpu=true)
+    @test realscpu[1] == realsgpu[1]
+  end
+end
