@@ -23,25 +23,32 @@ function gpu_setup()
   @assert cl ≠ nothing "OpenCL.jl not installed, cannot use GPU"
   @assert clfft ≠ nothing "CLFFT.jl not installed, cannot use GPU"
 
-  gpus = cl.devices(:gpu)
-  @assert !isempty(gpus) "GPU not found, make sure drivers are installed"
+  devs = cl.devices(:gpu)
+  if isempty(devs)
+    warn("GPU not found, falling back to other OpenCL devices")
+    devs = cl.devices()
+  end
+  @assert !isempty(devs) "OpenCL device not found, make sure drivers are installed"
 
-  gpu = []
-  gpunames = map(d -> d[:platform][:name], gpus)
-  for vendor in ["NVIDIA","AMD","Intel"], (idx,name) in enumerate(gpunames)
+  dev = []
+  devnames = map(d -> d[:platform][:name], devs)
+  for vendor in ["NVIDIA","AMD","Intel"], (idx,name) in enumerate(devnames)
     if contains(name, vendor)
-      gpu = gpus[idx]
+      dev = devs[idx]
       break
     end
   end
 
-  info("using GPU $(gpu[:name])")
+  devtype = uppercase(string(dev[:device_type]))
+  devname = dev[:name]
 
-  ctx = cl.Context(gpu)
+  info("using $devtype $devname")
+
+  ctx = cl.Context(dev)
   queue = cl.CmdQueue(ctx)
   mult_kernel = basic_kernels(ctx)
 
-  GPUmeta(gpu, ctx, queue, mult_kernel)
+  GPUmeta(dev, ctx, queue, mult_kernel)
 end
 
 function basic_kernels(ctx)
