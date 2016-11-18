@@ -172,13 +172,13 @@
 <p>For even faster computation with GPUs, please follow the instructions in <a href="gpu-support/">GPU support</a>.</p>
 <p><a id='Usage-1'></a></p>
 <h1 id="usage">Usage</h1>
-<pre><code class="julia">function iqsim(training_image::AbstractArray,
-               tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
-               gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
-               overlapx=1/6, overlapy=1/6, overlapz=1/6,
-               soft=nothing, hard=nothing, tol=.1,
-               cut=:boykov, path=:rasterup, categorical=false, nreal=1,
-               threads=CPU_PHYSICAL_CORES, gpu=false, debug=false, showprogress=false)
+<pre><code class="julia">reals = iqsim(training_image::AbstractArray,
+              tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
+              gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
+              overlapx=1/6, overlapy=1/6, overlapz=1/6,
+              soft=nothing, hard=nothing, tol=.1,
+              cut=:boykov, path=:rasterup, categorical=false, nreal=1,
+              threads=CPU_PHYSICAL_CORES, gpu=false, debug=false, showprogress=false)
 </code></pre>
 
 <p>where:</p>
@@ -209,14 +209,14 @@
 
 <p><code>cuts[i]</code> is the boundary cut for <code>reals[i]</code> and <code>voxs[i]</code> is the associated voxel reuse.</p>
 <p>A helper function is also provided for the fast approximation of the <em>mean voxel reuse</em>:</p>
-<pre><code class="julia">function voxelreuse(training_image::AbstractArray,
-                    tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
-                    overlapx=1/6, overlapy=1/6, overlapz=1/6,
-                    cut=:boykov, categorical=false, nreal=10,
-                    threads=CPU_PHYSICAL_CORES, gpu=false)
+<pre><code class="julia">mean, dev = voxelreuse(training_image::AbstractArray,
+                       tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
+                       overlapx=1/6, overlapy=1/6, overlapz=1/6,
+                       cut=:boykov, categorical=false, nreal=10,
+                       threads=CPU_PHYSICAL_CORES, gpu=false)
 </code></pre>
 
-<p>with <code>mean</code> in the interval [0,1]. The approximation gets better as <code>nreal</code> is made larger.</p>
+<p>with <code>mean</code> in the interval [0,1] and <code>dev</code> the standard deviation. The approximation gets better as <code>nreal</code> is made larger.</p>
 <p><a id='Soft-data-1'></a></p>
 <h2 id="soft-data">Soft data</h2>
 <p>Given 3D <code>data</code> at least as large as the simulation size and a <code>transform</code> such that <code>transform(training_image)</code> is comparable with <code>data</code>, the <code>SoftData(data, transform)</code> instance can be passed to <code>iqsim</code> for local relaxation:</p>
@@ -289,5 +289,5 @@ iqsim(..., hard=well)
 
 <!--
 MkDocs version : 0.16.0
-Build Date UTC : 2016-11-17 23:09:42
+Build Date UTC : 2016-11-18 05:13:41
 -->
