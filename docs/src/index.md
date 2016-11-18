@@ -28,13 +28,13 @@ For even faster computation with GPUs, please follow the instructions in [GPU su
 # Usage
 
 ```julia
-function iqsim(training_image::AbstractArray,
-               tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
-               gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
-               overlapx=1/6, overlapy=1/6, overlapz=1/6,
-               soft=nothing, hard=nothing, tol=.1,
-               cut=:boykov, path=:rasterup, categorical=false, nreal=1,
-               threads=CPU_PHYSICAL_CORES, gpu=false, debug=false, showprogress=false)
+reals = iqsim(training_image::AbstractArray,
+              tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
+              gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
+              overlapx=1/6, overlapy=1/6, overlapz=1/6,
+              soft=nothing, hard=nothing, tol=.1,
+              cut=:boykov, path=:rasterup, categorical=false, nreal=1,
+              threads=CPU_PHYSICAL_CORES, gpu=false, debug=false, showprogress=false)
 ```
 
 where:
@@ -72,14 +72,15 @@ reals, cuts, voxs = iqsim(..., debug=true)
 A helper function is also provided for the fast approximation of the *mean voxel reuse*:
 
 ```julia
-function voxelreuse(training_image::AbstractArray,
-                    tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
-                    overlapx=1/6, overlapy=1/6, overlapz=1/6,
-                    cut=:boykov, categorical=false, nreal=10,
-                    threads=CPU_PHYSICAL_CORES, gpu=false)
+mean, dev = voxelreuse(training_image::AbstractArray,
+                       tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
+                       overlapx=1/6, overlapy=1/6, overlapz=1/6,
+                       cut=:boykov, categorical=false, nreal=10,
+                       threads=CPU_PHYSICAL_CORES, gpu=false)
 ```
 
-with `mean` in the interval [0,1]. The approximation gets better as `nreal` is made larger.
+with `mean` in the interval [0,1] and `dev` the standard deviation. The approximation
+gets better as `nreal` is made larger.
 
 ## Soft data
 
