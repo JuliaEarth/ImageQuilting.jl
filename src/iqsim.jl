@@ -17,7 +17,7 @@ function iqsim(training_image::AbstractArray,
                gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
                overlapx=1/6, overlapy=1/6, overlapz=1/6,
                soft=nothing, hard=nothing, tol=.1,
-               cut=:boykov, path=:rasterup, categorical=false, nreal=1,
+               cut=:boykov, path=:rasterup, simplex=false, nreal=1,
                threads=CPU_PHYSICAL_CORES, gpu=false, debug=false, showprogress=false)
 
   # GPU setup
@@ -149,7 +149,7 @@ function iqsim(training_image::AbstractArray,
 
   # perform simplex transform
   simplexTI = [TI]; nvertices = 1
-  if categorical
+  if simplex
     categories = Set(TI[!NaNTI])
     ncategories = nvertices = length(categories) - 1
 
@@ -250,42 +250,42 @@ function iqsim(training_image::AbstractArray,
       distance = zeros(mₜ-tplsizex+1, nₜ-tplsizey+1, pₜ-tplsizez+1)
       if overlapx > 1 && (i-1,j,k) ∈ pasted
         ovx = simdev[1:overlapx,:,:]
-        xsimplex = categorical ? simplex_transform(ovx, nvertices) : [ovx]
+        xsimplex = simplex ? simplex_transform(ovx, nvertices) : [ovx]
 
         D = convdist(simplexTI, xsimplex)
         distance += D[1:mₜ-tplsizex+1,:,:]
       end
       if overlapx > 1 && (i+1,j,k) ∈ pasted
         ovx = simdev[spacingx+1:end,:,:]
-        xsimplex = categorical ? simplex_transform(ovx, nvertices) : [ovx]
+        xsimplex = simplex ? simplex_transform(ovx, nvertices) : [ovx]
 
         D = convdist(simplexTI, xsimplex)
         distance += D[spacingx+1:end,:,:]
       end
       if overlapy > 1 && (i,j-1,k) ∈ pasted
         ovy = simdev[:,1:overlapy,:]
-        ysimplex = categorical ? simplex_transform(ovy, nvertices) : [ovy]
+        ysimplex = simplex ? simplex_transform(ovy, nvertices) : [ovy]
 
         D = convdist(simplexTI, ysimplex)
         distance += D[:,1:nₜ-tplsizey+1,:]
       end
       if overlapy > 1 && (i,j+1,k) ∈ pasted
         ovy = simdev[:,spacingy+1:end,:]
-        ysimplex = categorical ? simplex_transform(ovy, nvertices) : [ovy]
+        ysimplex = simplex ? simplex_transform(ovy, nvertices) : [ovy]
 
         D = convdist(simplexTI, ysimplex)
         distance += D[:,spacingy+1:end,:]
       end
       if overlapz > 1 && (i,j,k-1) ∈ pasted
         ovz = simdev[:,:,1:overlapz]
-        zsimplex = categorical ? simplex_transform(ovz, nvertices) : [ovz]
+        zsimplex = simplex ? simplex_transform(ovz, nvertices) : [ovz]
 
         D = convdist(simplexTI, zsimplex)
         distance += D[:,:,1:pₜ-tplsizez+1]
       end
       if overlapz > 1 && (i,j,k+1) ∈ pasted
         ovz = simdev[:,:,spacingz+1:end]
-        zsimplex = categorical ? simplex_transform(ovz, nvertices) : [ovz]
+        zsimplex = simplex ? simplex_transform(ovz, nvertices) : [ovz]
 
         D = convdist(simplexTI, zsimplex)
         distance += D[:,:,spacingz+1:end]
@@ -298,7 +298,7 @@ function iqsim(training_image::AbstractArray,
       auxdistances = []
       if hard ≠ nothing && any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
         harddev = hardgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-        hsimplex = categorical ? simplex_transform(harddev, nvertices) : [harddev]
+        hsimplex = simplex ? simplex_transform(harddev, nvertices) : [harddev]
         D = convdist(simplexTI, hsimplex, weights=preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
 
         # disable dataevents that contain inactive voxels

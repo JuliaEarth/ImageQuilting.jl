@@ -9,7 +9,7 @@ using Base.Test
 
   # categories are obtained from training image only
   ncateg = 3; TI = rand(RandomDevice(), 0:ncateg, 20, 20, 20)
-  reals = iqsim(TI, 10, 10, 10, size(TI)..., categorical=true)
+  reals = iqsim(TI, 10, 10, 10, size(TI)..., simplex=true)
   @test Set(reals[1]) ⊆ Set(TI)
 end
 
@@ -67,7 +67,7 @@ end
   reals = iqsim(TI, 10, 10, 10, size(TI)...)
   @test reals[1] == ones(TI)
   TI[1,5] = 0
-  reals = iqsim(TI, 10, 10, 10, size(TI)..., categorical=true)
+  reals = iqsim(TI, 10, 10, 10, size(TI)..., simplex=true)
   @test reals[1] == ones(TI)
 
   # masked domain and masked training image

@@ -33,7 +33,7 @@ reals = iqsim(training_image::AbstractArray,
               gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
               overlapx=1/6, overlapy=1/6, overlapz=1/6,
               soft=nothing, hard=nothing, tol=.1,
-              cut=:boykov, path=:rasterup, categorical=false, nreal=1,
+              cut=:boykov, path=:rasterup, simplex=false, nreal=1,
               threads=CPU_PHYSICAL_CORES, gpu=false, debug=false, showprogress=false)
 ```
 
@@ -50,15 +50,15 @@ where:
 * `overlapx`,`overlapy`,`overlapz` is the percentage of overlap
 * `soft` is an instance of `SoftData` or an array of such instances
 * `hard` is an instance of `HardData`
-* `tol` is the tolerance in (0,1]
+* `tol` is the initial relaxation tolerance in (0,1]
 * `cut` is the cut algorithm (:dijkstra or :boykov)
 * `path` is the simulation path (:rasterup, :rasterdown, :dilation or :random)
-* `categorical` informs whether the image is categorical or continuous
+* `simplex` informs whether to apply or not the simplex transform to the image
 * `nreal` is the number of realizations
 * `threads` is the number of threads for the FFT (default to all CPU cores)
-* `gpu` tells whether to use the GPU or the CPU
-* `debug` tells whether to export or not the boundary cuts and voxel reuse
-* `showprogress` tells whether to show or not estimated time duration
+* `gpu` informs whether to use the GPU or the CPU
+* `debug` informs whether to export or not the boundary cuts and voxel reuse
+* `showprogress` informs whether to show or not estimated time duration
 
 The main output `reals` consists of a list of 3D realizations that can be indexed with
 `reals[1], reals[2], ..., reals[nreal]`. If `debug=true`, additional output is generated:
@@ -75,7 +75,7 @@ A helper function is also provided for the fast approximation of the *mean voxel
 mean, dev = voxelreuse(training_image::AbstractArray,
                        tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
                        overlapx=1/6, overlapy=1/6, overlapz=1/6,
-                       cut=:boykov, categorical=false, nreal=10,
+                       cut=:boykov, simplex=false, nreal=10,
                        threads=CPU_PHYSICAL_CORES, gpu=false)
 ```
 
@@ -106,6 +106,8 @@ iqsim(..., hard=well)
 Masked grids are a special case of hard data conditioning where inactive voxels are marked with the value `NaN`. The algorithm handles this hard data differently as it shouldn't be considered in the pattern similarity calculations.
 
 `training_image` can also have inactive voxels marked with `NaN`. Convolution results are only looked up in active regions.
+
+For understanding how these concepts are used, please consult [Examples](examples.md).
 
 # Citation
 
