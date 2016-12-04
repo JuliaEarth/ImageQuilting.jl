@@ -256,42 +256,42 @@ function iqsim(training_image::AbstractArray,
         xsimplex = simplex ? simplex_transform(ovx, nvertices) : [ovx]
 
         D = convdist(simplexTI, xsimplex)
-        distance += view(D,1:mₜ-tplsizex+1,:,:)
+        broadcast!(+, distance, distance, view(D,1:mₜ-tplsizex+1,:,:))
       end
       if overlapx > 1 && (i+1,j,k) ∈ pasted
         ovx = view(simdev,spacingx+1:tplsizex,:,:)
         xsimplex = simplex ? simplex_transform(ovx, nvertices) : [ovx]
 
         D = convdist(simplexTI, xsimplex)
-        distance += view(D,spacingx+1:mₜ-overlapx+1,:,:)
+        broadcast!(+, distance, distance, view(D,spacingx+1:mₜ-overlapx+1,:,:))
       end
       if overlapy > 1 && (i,j-1,k) ∈ pasted
         ovy = view(simdev,:,1:overlapy,:)
         ysimplex = simplex ? simplex_transform(ovy, nvertices) : [ovy]
 
         D = convdist(simplexTI, ysimplex)
-        distance += view(D,:,1:nₜ-tplsizey+1,:)
+        broadcast!(+, distance, distance, view(D,:,1:nₜ-tplsizey+1,:))
       end
       if overlapy > 1 && (i,j+1,k) ∈ pasted
         ovy = view(simdev,:,spacingy+1:tplsizey,:)
         ysimplex = simplex ? simplex_transform(ovy, nvertices) : [ovy]
 
         D = convdist(simplexTI, ysimplex)
-        distance += view(D,:,spacingy+1:nₜ-overlapy+1,:)
+        broadcast!(+, distance, distance, view(D,:,spacingy+1:nₜ-overlapy+1,:))
       end
       if overlapz > 1 && (i,j,k-1) ∈ pasted
         ovz = view(simdev,:,:,1:overlapz)
         zsimplex = simplex ? simplex_transform(ovz, nvertices) : [ovz]
 
         D = convdist(simplexTI, zsimplex)
-        distance += view(D,:,:,1:pₜ-tplsizez+1)
+        broadcast!(+, distance, distance, view(D,:,:,1:pₜ-tplsizez+1))
       end
       if overlapz > 1 && (i,j,k+1) ∈ pasted
         ovz = view(simdev,:,:,spacingz+1:tplsizez)
         zsimplex = simplex ? simplex_transform(ovz, nvertices) : [ovz]
 
         D = convdist(simplexTI, zsimplex)
-        distance += view(D,:,:,spacingz+1:pₜ-overlapz+1)
+        broadcast!(+, distance, distance, view(D,:,:,spacingz+1:pₜ-overlapz+1))
       end
 
       # disable dataevents that contain inactive voxels
