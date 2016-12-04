@@ -30,13 +30,16 @@ function convdist(Xs::AbstractArray, masks::AbstractArray; weights=nothing, inne
   # choose among imfilter implementations
   imfilter_impl = get_imfilter_impl(GPU)
 
+  # default to uniform weights
+  weights == nothing && (weights = ones(masks[1]))
+
   result = []
   for (X, mask) in zip(Xs, masks)
-    weights = weights ≠ nothing ? weights : ones(mask)
+    wmask = weights.*mask
 
-    A² = imfilter_impl(X.^2, weights.*ones(mask), padding)
-    AB = imfilter_impl(X, weights.*mask, padding)
-    B² = sum((weights.*mask).^2)
+    A² = imfilter_impl(X.^2, weights, padding)
+    AB = imfilter_impl(X, wmask, padding)
+    B² = sumabs2(wmask)
 
     push!(result, abs(A² - 2AB + B²))
   end

@@ -90,7 +90,7 @@ function iqsim(training_image::AbstractArray,
   # warn in case of 1-voxel overlaps
   if any(([tplsizex, tplsizey, tplsizez] .>  1) &
          ([overlapx, overlapy, overlapz] .== 1))
-    warn("1-voxel overlaps. Check template/overlap configuration.")
+    warn("Overlaps with only 1 voxel. Check template/overlap configuration.")
   end
 
   # hard data in grid format
@@ -214,6 +214,9 @@ function iqsim(training_image::AbstractArray,
   # show progress and estimated time duration
   showprogress && (progress = Progress(nreal, color=:black))
 
+  # preallocate memory for distance calculations
+  distance = Array(Float64, mₜ-tplsizex+1, nₜ-tplsizey+1, pₜ-tplsizez+1)
+
   for real=1:nreal
     # allocate memory for current simulation
     simgrid = zeros(nx, ny, nz)
@@ -244,51 +247,51 @@ function iqsim(training_image::AbstractArray,
       kₑ = kₛ + tplsizez - 1
 
       # current simulation dataevent
-      simdev = simgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+      simdev = view(simgrid, iₛ:iₑ,jₛ:jₑ,kₛ:kₑ)
 
       # compute overlap distance
-      distance = zeros(mₜ-tplsizex+1, nₜ-tplsizey+1, pₜ-tplsizez+1)
+      distance[:] = 0
       if overlapx > 1 && (i-1,j,k) ∈ pasted
-        ovx = simdev[1:overlapx,:,:]
+        ovx = view(simdev,1:overlapx,:,:)
         xsimplex = simplex ? simplex_transform(ovx, nvertices) : [ovx]
 
         D = convdist(simplexTI, xsimplex)
-        distance += D[1:mₜ-tplsizex+1,:,:]
+        distance += view(D,1:mₜ-tplsizex+1,:,:)
       end
       if overlapx > 1 && (i+1,j,k) ∈ pasted
-        ovx = simdev[spacingx+1:end,:,:]
+        ovx = view(simdev,spacingx+1:tplsizex,:,:)
         xsimplex = simplex ? simplex_transform(ovx, nvertices) : [ovx]
 
         D = convdist(simplexTI, xsimplex)
-        distance += D[spacingx+1:end,:,:]
+        distance += view(D,spacingx+1:mₜ-overlapx+1,:,:)
       end
       if overlapy > 1 && (i,j-1,k) ∈ pasted
-        ovy = simdev[:,1:overlapy,:]
+        ovy = view(simdev,:,1:overlapy,:)
         ysimplex = simplex ? simplex_transform(ovy, nvertices) : [ovy]
 
         D = convdist(simplexTI, ysimplex)
-        distance += D[:,1:nₜ-tplsizey+1,:]
+        distance += view(D,:,1:nₜ-tplsizey+1,:)
       end
       if overlapy > 1 && (i,j+1,k) ∈ pasted
-        ovy = simdev[:,spacingy+1:end,:]
+        ovy = view(simdev,:,spacingy+1:tplsizey,:)
         ysimplex = simplex ? simplex_transform(ovy, nvertices) : [ovy]
 
         D = convdist(simplexTI, ysimplex)
-        distance += D[:,spacingy+1:end,:]
+        distance += view(D,:,spacingy+1:nₜ-overlapy+1,:)
       end
       if overlapz > 1 && (i,j,k-1) ∈ pasted
-        ovz = simdev[:,:,1:overlapz]
+        ovz = view(simdev,:,:,1:overlapz)
         zsimplex = simplex ? simplex_transform(ovz, nvertices) : [ovz]
 
         D = convdist(simplexTI, zsimplex)
-        distance += D[:,:,1:pₜ-tplsizez+1]
+        distance += view(D,:,:,1:pₜ-tplsizez+1)
       end
       if overlapz > 1 && (i,j,k+1) ∈ pasted
-        ovz = simdev[:,:,spacingz+1:end]
+        ovz = view(simdev,:,:,spacingz+1:tplsizez)
         zsimplex = simplex ? simplex_transform(ovz, nvertices) : [ovz]
 
         D = convdist(simplexTI, zsimplex)
-        distance += D[:,:,spacingz+1:end]
+        distance += view(D,:,:,spacingz+1:pₜ-overlapz+1)
       end
 
       # disable dataevents that contain inactive voxels
@@ -328,37 +331,37 @@ function iqsim(training_image::AbstractArray,
       iᵦ, jᵦ, kᵦ = ind2sub(size(distance), idx)
 
       # selected training image dataevent
-      TIdev = TI[iᵦ:iᵦ+tplsizex-1,jᵦ:jᵦ+tplsizey-1,kᵦ:kᵦ+tplsizez-1]
+      TIdev = view(TI,iᵦ:iᵦ+tplsizex-1,jᵦ:jᵦ+tplsizey-1,kᵦ:kᵦ+tplsizez-1)
 
       # boundary cut mask
       M = falses(simdev)
       if overlapx > 1 && (i-1,j,k) ∈ pasted
-        A = simdev[1:overlapx,:,:]; B = TIdev[1:overlapx,:,:]
+        A = view(simdev,1:overlapx,:,:); B = view(TIdev,1:overlapx,:,:)
         M[1:overlapx,:,:] |= boundary_cut(A, B, :x)
       end
       if overlapx > 1 && (i+1,j,k) ∈ pasted
-        A = simdev[spacingx+1:end,:,:]; B = TIdev[spacingx+1:end,:,:]
-        M[spacingx+1:end,:,:] |= flipdim(boundary_cut(flipdim(A, 1), flipdim(B, 1), :x), 1)
+        A = view(simdev,spacingx+1:tplsizex,:,:); B = view(TIdev,spacingx+1:tplsizex,:,:)
+        M[spacingx+1:tplsizex,:,:] |= flipdim(boundary_cut(flipdim(A, 1), flipdim(B, 1), :x), 1)
       end
       if overlapy > 1 && (i,j-1,k) ∈ pasted
-        A = simdev[:,1:overlapy,:]; B = TIdev[:,1:overlapy,:]
+        A = view(simdev,:,1:overlapy,:); B = view(TIdev,:,1:overlapy,:)
         M[:,1:overlapy,:] |= boundary_cut(A, B, :y)
       end
       if overlapy > 1 && (i,j+1,k) ∈ pasted
-        A = simdev[:,spacingy+1:end,:]; B = TIdev[:,spacingy+1:end,:]
-        M[:,spacingy+1:end,:] |= flipdim(boundary_cut(flipdim(A, 2), flipdim(B, 2), :y), 2)
+        A = view(simdev,:,spacingy+1:tplsizey,:); B = view(TIdev,:,spacingy+1:tplsizey,:)
+        M[:,spacingy+1:tplsizey,:] |= flipdim(boundary_cut(flipdim(A, 2), flipdim(B, 2), :y), 2)
       end
       if overlapz > 1 && (i,j,k-1) ∈ pasted
-        A = simdev[:,:,1:overlapz]; B = TIdev[:,:,1:overlapz]
+        A = view(simdev,:,:,1:overlapz); B = view(TIdev,:,:,1:overlapz)
         M[:,:,1:overlapz] |= boundary_cut(A, B, :z)
       end
       if overlapz > 1 && (i,j,k+1) ∈ pasted
-        A = simdev[:,:,spacingz+1:end]; B = TIdev[:,:,spacingz+1:end]
-        M[:,:,spacingz+1:end] |= flipdim(boundary_cut(flipdim(A, 3), flipdim(B, 3), :z), 3)
+        A = view(simdev,:,:,spacingz+1:tplsizez); B = view(TIdev,:,:,spacingz+1:tplsizez)
+        M[:,:,spacingz+1:tplsizez] |= flipdim(boundary_cut(flipdim(A, 3), flipdim(B, 3), :z), 3)
       end
 
-      # paste contributions from simulation grid and training image
-      simgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = M.*simdev + !M.*TIdev
+      # paste quilted pattern from training image
+      simdev[!M] = TIdev[!M]
 
       # save boundary cut
       debug && (cutgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = M)
@@ -375,8 +378,8 @@ function iqsim(training_image::AbstractArray,
     end
 
     # throw away voxels that are outside of the grid
-    simgrid = simgrid[1:gridsizex,1:gridsizey,1:gridsizez]
-    debug && (cutgrid = cutgrid[1:gridsizex,1:gridsizey,1:gridsizez])
+    simgrid = view(simgrid,1:gridsizex,1:gridsizey,1:gridsizez)
+    debug && (cutgrid = view(cutgrid,1:gridsizex,1:gridsizey,1:gridsizez))
 
     # save and continue
     push!(realizations, simgrid)
