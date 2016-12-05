@@ -58,8 +58,8 @@ function boykov_kolmogorov_cut(A::AbstractArray, B::AbstractArray, dir::Symbol)
     ∇zₐ[:,:,mz] = ∇zₐ[:,:,mz-1]
     ∇zᵦ[:,:,mz] = ∇zᵦ[:,:,mz-1]
   end
-  ∇xₐ = abs(∇xₐ); ∇yₐ = abs(∇yₐ); ∇zₐ = abs(∇zₐ)
-  ∇xᵦ = abs(∇xᵦ); ∇yᵦ = abs(∇yᵦ); ∇zᵦ = abs(∇zᵦ)
+  map!(abs, ∇xₐ); map!(abs, ∇yₐ); map!(abs, ∇zₐ)
+  map!(abs, ∇xᵦ); map!(abs, ∇yᵦ); map!(abs, ∇zᵦ)
 
   # add source and sink terminals
   s = nvox + 1; t = nvox + 2
