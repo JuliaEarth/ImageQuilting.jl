@@ -34,15 +34,15 @@ function boykov_kolmogorov_cut(A::AbstractArray, B::AbstractArray, dir::Symbol)
   # compute gradients
   ∇xₐ = similar(E); ∇yₐ = similar(E); ∇zₐ = similar(E)
   ∇xᵦ = similar(E); ∇yᵦ = similar(E); ∇zᵦ = similar(E)
-  for i=1:mx-1, j=1:my, k=1:mz
+  for k=1:mz, j=1:my, i=1:mx-1
     ∇xₐ[i,j,k] = A[i+1,j,k] - A[i,j,k]
     ∇xᵦ[i,j,k] = B[i+1,j,k] - B[i,j,k]
   end
-  for i=1:mx, j=1:my-1, k=1:mz
+  for k=1:mz, j=1:my-1, i=1:mx
     ∇yₐ[i,j,k] = A[i,j+1,k] - A[i,j,k]
     ∇yᵦ[i,j,k] = B[i,j+1,k] - B[i,j,k]
   end
-  for i=1:mx, j=1:my, k=1:mz-1
+  for k=1:mz-1, j=1:my, i=1:mx
     ∇zₐ[i,j,k] = A[i,j,k+1] - A[i,j,k]
     ∇zᵦ[i,j,k] = B[i,j,k+1] - B[i,j,k]
   end
