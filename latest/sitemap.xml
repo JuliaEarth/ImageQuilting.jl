@@ -11,6 +11,14 @@
 
     
     <url>
+     <loc>/concepts/</loc>
+     <lastmod>2016-12-15</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
      <loc>/examples/</loc>
      <lastmod>2016-12-15</lastmod>
      <changefreq>daily</changefreq>
@@ -28,13 +36,19 @@
     
         
     <url>
+     <loc>/about/author/</loc>
+     <lastmod>2016-12-15</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
      <loc>/about/license/</loc>
      <lastmod>2016-12-15</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>/about/author/</loc>
+     <loc>/about/citation/</loc>
      <lastmod>2016-12-15</lastmod>
      <changefreq>daily</changefreq>
     </url>

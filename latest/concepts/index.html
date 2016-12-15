@@ -8,7 +8,7 @@
   
   <meta name="author" content="Júlio Hoffimann Mendes">
   <link rel="shortcut icon" href="../img/favicon.ico">
-  <title>GPU support - ImageQuilting.jl</title>
+  <title>Concepts - ImageQuilting.jl</title>
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
   <link rel="stylesheet" href="../css/theme.css" type="text/css" />
@@ -18,9 +18,9 @@
   
   <script>
     // Current page data
-    var mkdocs_page_name = "GPU support";
-    var mkdocs_page_input_path = "gpu-support.md";
-    var mkdocs_page_url = "/gpu-support/";
+    var mkdocs_page_name = "Concepts";
+    var mkdocs_page_input_path = "concepts.md";
+    var mkdocs_page_url = "/concepts/";
   </script>
   
   <script src="../js/jquery-2.1.1.min.js"></script>
@@ -55,8 +55,21 @@
 <li>
           
             <li>
-    <li class="toctree-l1 ">
-        <a class="" href="../concepts/">Concepts</a>
+    <li class="toctree-l1 current">
+        <a class="current" href="./">Concepts</a>
+        
+            <ul>
+            
+                <li class="toctree-l3"><a href="#soft-data">Soft data</a></li>
+                
+            
+                <li class="toctree-l3"><a href="#hard-data">Hard data</a></li>
+                
+            
+                <li class="toctree-l3"><a href="#masked-grids">Masked grids</a></li>
+                
+            
+            </ul>
         
     </li>
 <li>
@@ -69,18 +82,8 @@
 <li>
           
             <li>
-    <li class="toctree-l1 current">
-        <a class="current" href="./">GPU support</a>
-        
-            <ul>
-            
-                <li class="toctree-l3"><a href="#installing-opencl-driver">Installing OpenCL driver</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#installing-clfft-c-library">Installing clFFT C++ library</a></li>
-                
-            
-            </ul>
+    <li class="toctree-l1 ">
+        <a class="" href="../gpu-support/">GPU support</a>
         
     </li>
 <li>
@@ -136,10 +139,10 @@
     
       
     
-    <li>GPU support</li>
+    <li>Concepts</li>
     <li class="wy-breadcrumbs-aside">
       
-        <a href="https://github.com/juliohm/ImageQuilting.jl/edit/master/docs/gpu-support.md"
+        <a href="https://github.com/juliohm/ImageQuilting.jl/edit/master/docs/concepts.md"
           class="icon icon-github"> Edit on GitHub</a>
       
     </li>
@@ -149,42 +152,24 @@
           <div role="main">
             <div class="section">
               
-                <blockquote>
-<p><strong>Disclaimer:</strong> GPGPU is one of the most unportable corners in the programming world. Although I did make use of <a href="https://www.khronos.org/opencl">OpenCL</a> in this package, drivers for graphics cards are problematic and vendors such as NVIDIA do not officially support widely known operating systems.</p>
-</blockquote>
-<p>Two external dependencies need to be manually installed:</p>
-<ul>
-<li>OpenCL driver</li>
-<li>clFFT C++ library</li>
-</ul>
-<p><a id='Installing-OpenCL-driver-1'></a></p>
-<h2 id="installing-opencl-driver">Installing OpenCL driver</h2>
-<p>The choice of the OpenCL driver is dependent on the graphics card you have. Find what is the model of your graphics card and download the appropriate driver from the links below:</p>
-<ul>
-<li><a href="https://software.intel.com/en-us/articles/opencl-drivers">Intel</a></li>
-<li><a href="http://support.amd.com/en-us/download">AMD</a></li>
-<li><a href="http://www.nvidia.com/Download/index.aspx">NVIDIA</a></li>
-</ul>
-<p>If you are on Linux like myself, check the repositories of your distribution for a more straightforward installation. If you have a recent Intel graphics card, consider the open source <a href="https://www.freedesktop.org/wiki/Software/Beignet">Beignet driver</a> also available in some distributions (e.g. AUR repos in Arch Linux).</p>
-<p>To make sure that everything is working properly, install the <code>OpenCL.jl</code> package in Julia and run the tests:</p>
-<pre><code class="julia">Pkg.add(&quot;OpenCL&quot;)
-
-using OpenCL # force compilation
-Pkg.test(&quot;OpenCL&quot;)
+                <p>Below are the concepts implemented in this package. For understanding how these concepts are used, please consult <a href="../examples/">Examples</a>.</p>
+<p><a id='Soft-data-1'></a></p>
+<h1 id="soft-data">Soft data</h1>
+<p>Given 3D <code>data</code> at least as large as the simulation size and a <code>transform</code> such that <code>transform(training_image)</code> is comparable with <code>data</code>, the <code>SoftData(data, transform)</code> instance can be passed to <code>iqsim</code> for local relaxation:</p>
+<pre><code class="julia">iqsim(..., soft=SoftData(seismic, blur))
 </code></pre>
 
-<p>If the tests are successful, proceed to the next section.</p>
-<p><a id='Installing-clFFT-C-library-1'></a></p>
-<h2 id="installing-clfft-c-library">Installing clFFT C++ library</h2>
-<p>Download and install the <a href="https://github.com/clMathLibraries/clFFT/releases">pre-built binaries</a>. If you are on Linux, you can also check the repositories of your distribution.</p>
-<p>Install the <code>CLFFT.jl</code> package in Julia and run the tests:</p>
-<pre><code class="julia">Pkg.add(&quot;CLFFT&quot;)
-
-using CLFFT # force compilation
-Pkg.test(&quot;CLFFT&quot;)
+<p><a id='Hard-data-1'></a></p>
+<h1 id="hard-data">Hard data</h1>
+<p>Voxels can be assigned values that will be honored by the simulation. <code>HardData()</code> is a dictionary of locations and associated values specified by the user:</p>
+<pre><code class="julia">well = HardData((i,j,k)=&gt;value(i,j,k) for i=10, j=10, k=1:100)
+iqsim(..., hard=well)
 </code></pre>
 
-<p>If the tests are successful, the installation is complete. Pass in the option <code>gpu=true</code> to <code>iqsim</code> for computations with the GPU.</p>
+<p><a id='Masked-grids-1'></a></p>
+<h1 id="masked-grids">Masked grids</h1>
+<p>Masked grids are a special case of hard data conditioning where inactive voxels are marked with the value <code>NaN</code>. The algorithm handles this hard data differently as it shouldn't be considered in the pattern similarity calculations.</p>
+<p><code>training_image</code> can also have inactive voxels marked with <code>NaN</code>. Convolution results are only looked up in active regions.</p>
               
             </div>
           </div>
@@ -192,10 +177,10 @@ Pkg.test(&quot;CLFFT&quot;)
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../about/author/" class="btn btn-neutral float-right" title="Author">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../examples/" class="btn btn-neutral float-right" title="Examples">Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
-        <a href="../examples/" class="btn btn-neutral" title="Examples"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href=".." class="btn btn-neutral" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
       
     </div>
   
@@ -223,10 +208,10 @@ Pkg.test(&quot;CLFFT&quot;)
           <a href="https://github.com/juliohm/ImageQuilting.jl" class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
-        <span><a href="../examples/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+        <span><a href=".." style="color: #fcfcfc;">&laquo; Previous</a></span>
       
       
-        <span style="margin-left: 15px"><a href="../about/author/" style="color: #fcfcfc">Next &raquo;</a></span>
+        <span style="margin-left: 15px"><a href="../examples/" style="color: #fcfcfc">Next &raquo;</a></span>
       
     </span>
 </div>

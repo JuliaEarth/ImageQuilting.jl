@@ -64,17 +64,15 @@
             
                 <li class="toctree-l3"><a href="#usage">Usage</a></li>
                 
-                    <li><a class="toctree-l4" href="#soft-data">Soft data</a></li>
-                
-                    <li><a class="toctree-l4" href="#hard-data">Hard data</a></li>
-                
-                    <li><a class="toctree-l4" href="#masked-grids">Masked grids</a></li>
-                
-            
-                <li class="toctree-l3"><a href="#citation">Citation</a></li>
-                
             
             </ul>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="concepts/">Concepts</a>
         
     </li>
 <li>
@@ -100,6 +98,13 @@
         
             
     <li class="toctree-l1 ">
+        <a class="" href="about/author/">Author</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
         <a class="" href="about/license/">License</a>
         
     </li>
@@ -107,7 +112,7 @@
         
             
     <li class="toctree-l1 ">
-        <a class="" href="about/author/">Author</a>
+        <a class="" href="about/citation/">Citation</a>
         
     </li>
 
@@ -217,29 +222,6 @@
 </code></pre>
 
 <p>with <code>mean</code> in the interval [0,1] and <code>dev</code> the standard deviation. The approximation gets better as <code>nreal</code> is made larger.</p>
-<p><a id='Soft-data-1'></a></p>
-<h2 id="soft-data">Soft data</h2>
-<p>Given 3D <code>data</code> at least as large as the simulation size and a <code>transform</code> such that <code>transform(training_image)</code> is comparable with <code>data</code>, the <code>SoftData(data, transform)</code> instance can be passed to <code>iqsim</code> for local relaxation:</p>
-<pre><code class="julia">iqsim(..., soft=SoftData(seismic, blur))
-</code></pre>
-
-<p><a id='Hard-data-1'></a></p>
-<h2 id="hard-data">Hard data</h2>
-<p>Voxels can be assigned values that will be honored by the simulation. <code>HardData()</code> is a dictionary of locations and associated values specified by the user:</p>
-<pre><code class="julia">well = HardData((i,j,k)=&gt;value(i,j,k) for i=10, j=10, k=1:100)
-iqsim(..., hard=well)
-</code></pre>
-
-<p><a id='Masked-grids-1'></a></p>
-<h2 id="masked-grids">Masked grids</h2>
-<p>Masked grids are a special case of hard data conditioning where inactive voxels are marked with the value <code>NaN</code>. The algorithm handles this hard data differently as it shouldn't be considered in the pattern similarity calculations.</p>
-<p><code>training_image</code> can also have inactive voxels marked with <code>NaN</code>. Convolution results are only looked up in active regions.</p>
-<p>For understanding how these concepts are used, please consult <a href="examples/">Examples</a>.</p>
-<p><a id='Citation-1'></a></p>
-<h1 id="citation">Citation</h1>
-<p>For citing this software, please use:</p>
-<pre><code class="latex">Paper comping up...
-</code></pre>
               
             </div>
           </div>
@@ -247,7 +229,7 @@ iqsim(..., hard=well)
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="examples/" class="btn btn-neutral float-right" title="Examples">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="concepts/" class="btn btn-neutral float-right" title="Concepts">Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
     </div>
@@ -277,7 +259,7 @@ iqsim(..., hard=well)
       
       
       
-        <span style="margin-left: 15px"><a href="examples/" style="color: #fcfcfc">Next &raquo;</a></span>
+        <span style="margin-left: 15px"><a href="concepts/" style="color: #fcfcfc">Next &raquo;</a></span>
       
     </span>
 </div>
@@ -290,5 +272,5 @@ iqsim(..., hard=well)
 
 <!--
 MkDocs version : 0.16.0
-Build Date UTC : 2016-12-15 09:52:18
+Build Date UTC : 2016-12-15 13:46:37
 -->
