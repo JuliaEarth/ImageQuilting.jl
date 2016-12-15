@@ -1,5 +1,3 @@
-# License
-
 Copyright (c) 2015, Júlio Hoffimann Mendes <juliohm@stanford.edu>
 
 Permission to use, copy, modify, and/or distribute this software for any

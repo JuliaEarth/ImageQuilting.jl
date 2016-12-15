@@ -1,5 +1,3 @@
-# GPU installation
-
 > **Disclaimer:** GPGPU is one of the most unportable corners in the programming world. Although I did make use of [OpenCL](https://www.khronos.org/opencl) in this package, drivers for graphics cards are problematic and vendors such as NVIDIA do not officially support widely known operating systems.
 
 Two external dependencies need to be manually installed:
