@@ -2,6 +2,10 @@ Consider installing the [GeoStatsImages.jl](https://github.com/juliohm/GeoStatsI
 
 # Unconditional
 
+An example of unconditional simulation (i.e. simulation without data).
+This is the original Efros-Freeman algorithm for texture synthesis with a
+few additional options.
+
 ```julia
 using ImageQuilting
 using GeoStatsImages
@@ -15,6 +19,10 @@ reals, cuts, voxs = iqsim(TI, 13, 13, 1, size(TI)..., nreal=3, debug=true)
 ![Unconditional simulation](images/unconditional.png)
 
 # Hard data
+
+Hard data (i.e. point data) can be honored during simulation. This can be useful
+when images represent a spatial property of a physical domain. For example, the
+subsurface of the Earth is only known with certainty at a few well locations.
 
 ```julia
 using ImageQuilting
@@ -35,6 +43,10 @@ reals, cuts, voxs = iqsim(TI, 30, 30, 1, size(TI)..., hard=data, debug=true)
 ![Hard data conditioning](images/hard.png)
 
 # Soft data
+
+Sometimes it is also useful to incorporate auxiliary variables defined in the
+domain, which can guide the selection of patterns in the training image. This
+example shows how to achieve this texture transfer efficiently.
 
 ```julia
 using ImageQuilting
