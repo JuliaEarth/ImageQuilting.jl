@@ -79,5 +79,5 @@ mean, dev = voxelreuse(training_image::AbstractArray,
                        threads=CPU_PHYSICAL_CORES, gpu=false)
 ```
 
-with `mean` in the interval [0,1] and `dev` the standard deviation. The approximation
+with `mean` in the interval ``[0,1]`` and `dev` the standard deviation. The approximation
 gets better as `nreal` is made larger.
