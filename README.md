@@ -34,11 +34,14 @@ Please refer to the official documentation:
 [![Stable Documentation](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliohm.github.io/ImageQuilting.jl/stable)
 [![Latest Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://juliohm.github.io/ImageQuilting.jl/latest)
 
-REFERENCES
-----------
+CITATION
+--------
 
-Efros, A.; Freeman, W. T., 2001. Image Quilting for Texture Synthesis and Transfer. [[DOWNLOAD](http://graphics.cs.cmu.edu/people/efros/research/quilting.html)]
-
-Kwatra, V.; Schodl, A.; Essa, I.; Turk, G.; Bobick, A., 2003. Graphcut Textures: Image and Video Synthesis using Graph Cuts. [[DOWNLOAD](http://www.cc.gatech.edu/~turk/my_papers/graph_cuts.pdf)]
-
-Crimisini, P. P. A; Toyama, K., 2003. Object Removal by Exemplar-Based Inpainting. [[DOWNLOAD](http://research.microsoft.com/pubs/67273/criminisi_cvpr2003.pdf)]
+```latex
+@ARTICLE{Hoffimann2017,
+  title={Stochastic Simulation by Image Quilting of Deterministic Process-based Geological Models},
+  author={J{\'u}lio Hoffimann and C{\'e}line Scheidt and Adrian Barford and Jef Caers},
+  journal={Computers \& Geosciences},
+  year={2017}
+}
+```
