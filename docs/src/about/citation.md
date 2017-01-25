@@ -1,4 +1,4 @@
-For citing this software, please use:
+Below is the BibTeX entry for citation:
 
 ```latex
 @ARTICLE{Hoffimann2017,
