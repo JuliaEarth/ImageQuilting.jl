@@ -92,7 +92,7 @@
         }, 
         {
             "location": "/about/citation/", 
-            "text": "For citing this software, please use:\n\n\n@ARTICLE{Hoffimann2017,\n  title={Stochastic Simulation by Image Quilting of Deterministic Process-based Geological Models},\n  author={J{\\'u}lio Hoffimann and C{\\'e}line Scheidt and Adrian Barford and Jef Caers},\n  journal={Computers \\\n Geosciences},\n  year={2017}\n}", 
+            "text": "Below is the BibTeX entry for citation:\n\n\n@ARTICLE{Hoffimann2017,\n  title={Stochastic Simulation by Image Quilting of Deterministic Process-based Geological Models},\n  author={J{\\'u}lio Hoffimann and C{\\'e}line Scheidt and Adrian Barford and Jef Caers},\n  journal={Computers \\\n Geosciences},\n  year={2017}\n}", 
             "title": "Citation"
         }
     ]
