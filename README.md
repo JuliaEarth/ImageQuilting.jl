@@ -9,14 +9,6 @@ A Julia package for fast 3D image quilting simulation.
 
 ![3D Quilting Animation](docs/src/images/quilting.gif)
 
-Features
---------
-
-* Masked grids
-* Hard data conditioning
-* Soft data conditioning
-* Fast computation with GPUs
-
 Installation
 ------------
 

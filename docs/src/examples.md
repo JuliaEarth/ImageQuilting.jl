@@ -1,6 +1,8 @@
-Consider installing the [GeoStatsImages.jl](https://github.com/juliohm/GeoStatsImages.jl) package.
+!!! note
 
-# Unconditional
+    Consider installing the [GeoStatsImages.jl](https://github.com/juliohm/GeoStatsImages.jl) package.
+
+## Unconditional
 
 An example of unconditional simulation (i.e. simulation without data).
 This is the original Efros-Freeman algorithm for texture synthesis with a
@@ -18,7 +20,7 @@ reals, cuts, voxs = iqsim(TI, 13, 13, 1, size(TI)..., nreal=3, debug=true)
 ```
 ![Unconditional simulation](images/unconditional.png)
 
-# Hard data
+## Hard data
 
 Hard data (i.e. point data) can be honored during simulation. This can be useful
 when images represent a spatial property of a physical domain. For example, the
@@ -42,7 +44,7 @@ reals, cuts, voxs = iqsim(TI, 30, 30, 1, size(TI)..., hard=data, debug=true)
 
 ![Hard data conditioning](images/hard.png)
 
-# Soft data
+## Soft data
 
 Sometimes it is also useful to incorporate auxiliary variables defined in the
 domain, which can guide the selection of patterns in the training image. This
