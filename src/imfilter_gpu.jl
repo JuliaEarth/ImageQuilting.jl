@@ -26,7 +26,8 @@ function imfilter_gpu{T<:Real,K<:Real,N}(img::AbstractArray{T,N}, kern::Abstract
   postpad = Int[div(size(kern,i),   2) for i = 1:N]
   fullpad = Int[nextprod([2,3], size(img,i) + prepad[i] + postpad[i]) - size(img, i) - prepad[i] for i = 1:N]
 
-  A = border == "inner" ? img : padarray(img, prepad, fullpad, border, Complex64(0))
+  A = border == "inner" ? img : padarray(img, Pad(Symbol(border), prepad, fullpad))
+  A = parent(A)
 
   # OpenCL FFT expects powers of 2, 3, 5, 7, 11 or 13
   paddings = clfftpad(A)

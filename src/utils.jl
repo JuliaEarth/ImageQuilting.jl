@@ -44,7 +44,10 @@ function convdist(Xs::AbstractArray, masks::AbstractArray; weights=nothing, inne
     push!(result, abs(A² - 2AB + B²))
   end
 
-  sum(result)
+  D = sum(result)
+
+  # always return a plain simple Array
+  parent(D)
 end
 
 function genpath(extent::NTuple{3,Integer}, kind::Symbol, datum=[])
