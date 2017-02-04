@@ -19,12 +19,12 @@ __precompile__(false)
 
 module ImageQuilting
 
+using Images
+using LightGraphs
 using Base: @nexprs, @nloops, @nref
-using Images: imfilter_fft, padarray, dilate
 using Combinatorics: nthperm!
 using StatsBase: sample, weights
 using Primes: factor
-using LightGraphs
 using ProgressMeter: Progress, next!
 using Hwloc: topology_load, histmap
 
@@ -45,6 +45,7 @@ end
 include("utils.jl")
 include("utils_gpu.jl")
 include("datatypes.jl")
+include("imfilter_cpu.jl")
 include("imfilter_gpu.jl")
 include("relaxation.jl")
 include("tau_model.jl")

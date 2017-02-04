@@ -20,7 +20,7 @@ function get_imfilter_impl(GPU)
   if GPU ≠ nothing
     imfilter_gpu
   else
-    imfilter_fft
+    imfilter_cpu
   end
 end
 

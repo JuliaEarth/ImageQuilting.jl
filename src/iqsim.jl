@@ -182,7 +182,8 @@ function iqsim(training_image::AbstractArray,
       mx, my, mz = size(aux.data)
       lx = min(mx,nx); ly = min(my,ny); lz = min(mz,nz)
 
-      auxpad = padarray(aux.data, [0,0,0], [nx-lx,ny-ly,nz-lz], "symmetric")
+      auxpad = padarray(aux.data, Pad(:symmetric, [0,0,0], [nx-lx,ny-ly,nz-lz]))
+      auxpad = parent(auxpad)
       auxpad[isnan(auxpad)] = 0
 
       push!(softgrid, auxpad)
@@ -256,42 +257,42 @@ function iqsim(training_image::AbstractArray,
         xsimplex = simplex ? simplex_transform(ovx, nvertices) : [ovx]
 
         D = convdist(simplexTI, xsimplex)
-        broadcast!(+, distance, distance, view(D,1:mₜ-tplsizex+1,:,:))
+        broadcast!(+, distance, distance, view(parent(D),1:mₜ-tplsizex+1,:,:))
       end
       if overlapx > 1 && (i+1,j,k) ∈ pasted
         ovx = view(simdev,spacingx+1:tplsizex,:,:)
         xsimplex = simplex ? simplex_transform(ovx, nvertices) : [ovx]
 
         D = convdist(simplexTI, xsimplex)
-        broadcast!(+, distance, distance, view(D,spacingx+1:mₜ-overlapx+1,:,:))
+        broadcast!(+, distance, distance, view(parent(D),spacingx+1:mₜ-overlapx+1,:,:))
       end
       if overlapy > 1 && (i,j-1,k) ∈ pasted
         ovy = view(simdev,:,1:overlapy,:)
         ysimplex = simplex ? simplex_transform(ovy, nvertices) : [ovy]
 
         D = convdist(simplexTI, ysimplex)
-        broadcast!(+, distance, distance, view(D,:,1:nₜ-tplsizey+1,:))
+        broadcast!(+, distance, distance, view(parent(D),:,1:nₜ-tplsizey+1,:))
       end
       if overlapy > 1 && (i,j+1,k) ∈ pasted
         ovy = view(simdev,:,spacingy+1:tplsizey,:)
         ysimplex = simplex ? simplex_transform(ovy, nvertices) : [ovy]
 
         D = convdist(simplexTI, ysimplex)
-        broadcast!(+, distance, distance, view(D,:,spacingy+1:nₜ-overlapy+1,:))
+        broadcast!(+, distance, distance, view(parent(D),:,spacingy+1:nₜ-overlapy+1,:))
       end
       if overlapz > 1 && (i,j,k-1) ∈ pasted
         ovz = view(simdev,:,:,1:overlapz)
         zsimplex = simplex ? simplex_transform(ovz, nvertices) : [ovz]
 
         D = convdist(simplexTI, zsimplex)
-        broadcast!(+, distance, distance, view(D,:,:,1:pₜ-tplsizez+1))
+        broadcast!(+, distance, distance, view(parent(D),:,:,1:pₜ-tplsizez+1))
       end
       if overlapz > 1 && (i,j,k+1) ∈ pasted
         ovz = view(simdev,:,:,spacingz+1:tplsizez)
         zsimplex = simplex ? simplex_transform(ovz, nvertices) : [ovz]
 
         D = convdist(simplexTI, zsimplex)
-        broadcast!(+, distance, distance, view(D,:,:,spacingz+1:pₜ-overlapz+1))
+        broadcast!(+, distance, distance, view(parent(D),:,:,spacingz+1:pₜ-overlapz+1))
       end
 
       # disable dataevents that contain inactive voxels
@@ -303,6 +304,7 @@ function iqsim(training_image::AbstractArray,
         harddev = hardgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
         hsimplex = simplex ? simplex_transform(harddev, nvertices) : [harddev]
         D = convdist(simplexTI, hsimplex, weights=preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
+        D = parent(D)
 
         # disable dataevents that contain inactive voxels
         D[disabled] = Inf
@@ -314,6 +316,7 @@ function iqsim(training_image::AbstractArray,
       for n=1:length(softTI)
         softdev = softgrid[n][iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
         D = convdist([softTI[n]], [softdev])
+        D = parent(D)
 
         # disable dataevents that contain inactive voxels
         D[disabled] = Inf
