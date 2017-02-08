@@ -53,12 +53,12 @@ example shows how to achieve this texture transfer efficiently.
 ```julia
 using ImageQuilting
 using GeoStatsImages
-using Images: imfilter_gaussian
+using Images
 
 TI = training_image("WalkerLake")
 truth = training_image("WalkerLakeTruth")
 
-G(m) = imfilter_gaussian(m, [10,10,0])
+G(m) = imfilter(m, KernelFactors.IIRGaussian([10,10,0]))
 
 data = SoftData(G(truth), G)
 
