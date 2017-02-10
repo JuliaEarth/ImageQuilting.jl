@@ -26,7 +26,7 @@ end
   tmin == nothing && (tmin = 7)
   tmax == nothing && (tmax = min(100, minimum(extent[idx])))
 
-  @assert tmin > 1 "tmin must be greater than 1"
+  @assert tmin > 0 "tmin must be positive"
   @assert tmin < tmax "tmin must be smaller than tmax"
 
   # save support as an array
