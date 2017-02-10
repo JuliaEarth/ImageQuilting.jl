@@ -36,32 +36,32 @@ end
   μs, σs = mapreuse(vr.img, ts, nreal)
 
   # highlight the optimum template range
-  tplrange = []
   @series begin
     rank = sortperm(μs, rev=true)
     best = ts[rank[1:min(5,length(ts))]]
     xmin, xmax = minimum(best), maximum(best)
 
-    reference = minimum(μs - σs)
-    ymin = max(0., reference - .1)
+    reference = μs[1] - σs[1]
+    ymin = max(0., reference - .05)
     ymax = ymin + .008
 
-    seriestype := :shape
-    primary := false
-    fillalpha := .5
-
     tplrange = [xmin, xmax]
+
+    seriestype := :shape
+    linewidth := 0
+    fillalpha := .5
+    label --> "Optimum range: $tplrange"
 
     [xmin, xmax, xmax, xmin], [ymin, ymin, ymax, ymax]
   end
 
   seriestype := :path
+  primary := false
   ribbon := σs
   fillalpha := .5
   xlim := (0, tmax)
   xlabel --> "Template size"
   ylabel --> "Voxel reuse"
-  label --> "Optimum range: $tplrange"
 
   ts, μs
 end
