@@ -4,5 +4,6 @@ StatsBase
 Primes
 Images 0.7.0
 LightGraphs 0.6.1
+RecipesBase
 ProgressMeter
 Hwloc

@@ -21,6 +21,7 @@ module ImageQuilting
 
 using Images
 using LightGraphs
+using RecipesBase
 using Base: @nexprs, @nloops, @nref
 using Combinatorics: nthperm!
 using StatsBase: sample, weights
@@ -45,6 +46,7 @@ end
 include("utils.jl")
 include("utils_gpu.jl")
 include("datatypes.jl")
+include("plot_recipes.jl")
 include("imfilter_cpu.jl")
 include("imfilter_gpu.jl")
 include("relaxation.jl")
@@ -62,6 +64,7 @@ export
 
   # types
   SoftData,
-  HardData
+  HardData,
+  VoxelReuse
 
 end
