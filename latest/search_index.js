@@ -37,7 +37,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Usage",
     "category": "section",
-    "text": "reals = iqsim(training_image::AbstractArray,\n              tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,\n              gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;\n              overlapx=1/6, overlapy=1/6, overlapz=1/6,\n              soft=nothing, hard=nothing, tol=.1,\n              cut=:boykov, path=:rasterup, simplex=false, nreal=1,\n              threads=CPU_PHYSICAL_CORES, gpu=false, debug=false, showprogress=false)where:requiredtraining_image can be any 3D array (add ghost dimension for 2D)\ntplsizex,tplsizey,tplsizez is the template size\ngridsizex,gridsizey,gridsizez is the simulation sizeoptionaloverlapx,overlapy,overlapz is the percentage of overlap\nsoft is an instance of SoftData or an array of such instances\nhard is an instance of HardData\ntol is the initial relaxation tolerance in (0,1]\ncut is the cut algorithm (:dijkstra or :boykov)\npath is the simulation path (:rasterup, :rasterdown, :dilation or :random)\nsimplex informs whether to apply or not the simplex transform to the image\nnreal is the number of realizations\nthreads is the number of threads for the FFT (default to all CPU cores)\ngpu informs whether to use the GPU or the CPU\ndebug informs whether to export or not the boundary cuts and voxel reuse\nshowprogress informs whether to show or not estimated time durationThe main output reals consists of a list of 3D realizations that can be indexed with reals[1], reals[2], ..., reals[nreal]. If debug=true, additional output is generated:reals, cuts, voxs = iqsim(..., debug=true)cuts[i] is the boundary cut for reals[i] and voxs[i] is the associated voxel reuse.A helper function is also provided for the fast approximation of the mean voxel reuse:mean, dev = voxelreuse(training_image::AbstractArray,\n                       tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;\n                       overlapx=1/6, overlapy=1/6, overlapz=1/6,\n                       cut=:boykov, simplex=false, nreal=10,\n                       threads=CPU_PHYSICAL_CORES, gpu=false)with mean in the interval 01 and dev the standard deviation. The approximation gets better as nreal is made larger."
+    "text": "reals = iqsim(training_image::AbstractArray,\n              tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,\n              gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;\n              overlapx=1/6, overlapy=1/6, overlapz=1/6,\n              soft=nothing, hard=nothing, tol=.1,\n              cut=:boykov, path=:rasterup, simplex=false, nreal=1,\n              threads=CPU_PHYSICAL_CORES, gpu=false, debug=false, showprogress=false)where:requiredtraining_image can be any 3D array (add ghost dimension for 2D)\ntplsizex,tplsizey,tplsizez is the template size\ngridsizex,gridsizey,gridsizez is the simulation sizeoptionaloverlapx,overlapy,overlapz is the percentage of overlap\nsoft is an instance of SoftData or an array of such instances\nhard is an instance of HardData\ntol is the initial relaxation tolerance in (0,1]\ncut is the cut algorithm (:dijkstra or :boykov)\npath is the simulation path (:rasterup, :rasterdown, :dilation or :random)\nsimplex informs whether to apply or not the simplex transform to the image\nnreal is the number of realizations\nthreads is the number of threads for the FFT (default to all CPU cores)\ngpu informs whether to use the GPU or the CPU\ndebug informs whether to export or not the boundary cuts and voxel reuse\nshowprogress informs whether to show or not estimated time durationThe main output reals consists of a list of 3D realizations that can be indexed with reals[1], reals[2], ..., reals[nreal]. If debug=true, additional output is generated:reals, cuts, voxs = iqsim(..., debug=true)cuts[i] is the boundary cut for reals[i] and voxs[i] is the associated voxel reuse.In addition, this package provides utility functions for template design in image quilting. For more details, please refer to the Voxel reuse section."
 },
 
 {
@@ -102,6 +102,30 @@ var documenterSearchIndex = {"docs": [
     "title": "Soft data",
     "category": "section",
     "text": "Sometimes it is also useful to incorporate auxiliary variables defined in the domain, which can guide the selection of patterns in the training image. This example shows how to achieve this texture transfer efficiently.using ImageQuilting\nusing GeoStatsImages\nusing Images\n\nTI = training_image(\"WalkerLake\")\ntruth = training_image(\"WalkerLakeTruth\")\n\nG(m) = imfilter(m, KernelFactors.IIRGaussian([10,10,0]))\n\ndata = SoftData(G(truth), G)\n\nreals = iqsim(TI, 27, 27, 1, size(truth)..., soft=data, nreal=3)(Image: Soft data conditioning)"
+},
+
+{
+    "location": "voxel-reuse.html#",
+    "page": "Voxel reuse",
+    "title": "Voxel reuse",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "voxel-reuse.html#Helper-function-1",
+    "page": "Voxel reuse",
+    "title": "Helper function",
+    "category": "section",
+    "text": "A helper function is provided for the fast approximation of the mean voxel reuse:mean, dev = voxelreuse(training_image::AbstractArray,\n                       tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;\n                       overlapx=1/6, overlapy=1/6, overlapz=1/6,\n                       cut=:boykov, simplex=false, nreal=10,\n                       threads=CPU_PHYSICAL_CORES, gpu=false)with mean in the interval 01 and dev the standard deviation. The approximation gets better as nreal is made larger."
+},
+
+{
+    "location": "voxel-reuse.html#Plot-recipe-1",
+    "page": "Voxel reuse",
+    "title": "Plot recipe",
+    "category": "section",
+    "text": "A plot recipe is provided for template design in image quilting. In order to plot the voxel reuse of a training image, install Plots.jl and any of its supported backends (e.g. PyPlot.jl):Pkg.add(\"Plots\")\nPkg.add(\"PyPlot\")The example below uses training images from the GeoStatsImages.jl package:using ImageQuilting\nusing GeoStatsImages\nusing Plots\n\nTI₁ = training_image(\"Strebelle\")\nTI₂ = training_image(\"StoneWall\")\n\nplot(VoxelReuse(TI₁), label=\"Strebelle\")\nplot!(VoxelReuse(TI₂), label=\"StoneWall\")(Image: Voxel reuse plot)"
 },
 
 {
