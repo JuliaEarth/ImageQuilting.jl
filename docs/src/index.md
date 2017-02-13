@@ -73,15 +73,5 @@ reals, cuts, voxs = iqsim(..., debug=true)
 
 `cuts[i]` is the boundary cut for `reals[i]` and `voxs[i]` is the associated voxel reuse.
 
-A helper function is also provided for the fast approximation of the *mean voxel reuse*:
-
-```julia
-mean, dev = voxelreuse(training_image::AbstractArray,
-                       tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
-                       overlapx=1/6, overlapy=1/6, overlapz=1/6,
-                       cut=:boykov, simplex=false, nreal=10,
-                       threads=CPU_PHYSICAL_CORES, gpu=false)
-```
-
-with `mean` in the interval ``[0,1]`` and `dev` the standard deviation. The approximation
-gets better as `nreal` is made larger.
+In addition, this package provides utility functions for template design in image quilting.
+For more details, please refer to the [Voxel reuse](voxel-reuse.md) section.

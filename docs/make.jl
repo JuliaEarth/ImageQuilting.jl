@@ -8,6 +8,7 @@ makedocs(
     "Home" => "index.md",
     "Concepts" => "concepts.md",
     "Examples" => "examples.md",
+    "Voxel reuse" => "voxel-reuse.md",
     "GPU support" => "gpu-support.md",
     "About" => [
       "Author" => "about/author.md",
