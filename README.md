@@ -7,10 +7,6 @@ ImageQuilting.jl
 |:-----------------:|:----------------:|
 | [![docs-stable][docs-stable-img]][docs-stable-url] [![docs-latest][docs-latest-img]][docs-latest-url] | [![travis][travis-img]][travis-url] [![julia-pkg][julia-pkg-img]][julia-pkg-url] [![codecov][codecov-img]][codecov-url] |
 
-[![Build Status](https://travis-ci.org/juliohm/ImageQuilting.jl.svg?branch=master)](https://travis-ci.org/juliohm/ImageQuilting.jl)
-[![ImageQuilting](http://pkg.julialang.org/badges/ImageQuilting_0.5.svg)](http://pkg.julialang.org/?pkg=ImageQuilting)
-[![Coverage Status](https://codecov.io/gh/juliohm/ImageQuilting.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/juliohm/ImageQuilting.jl)
-
 ![3D Quilting Animation](docs/src/images/quilting.gif)
 
 Installation
