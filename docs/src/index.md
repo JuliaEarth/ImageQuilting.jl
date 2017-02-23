@@ -1,6 +1,6 @@
 ## Overview
 
-A Julia package for fast 3D image quilting simulation.
+*A Julia package for fast 3D image quilting simulation.*
 
 [![Build Status](https://travis-ci.org/juliohm/ImageQuilting.jl.svg?branch=master)](https://travis-ci.org/juliohm/ImageQuilting.jl)
 [![ImageQuilting](http://pkg.julialang.org/badges/ImageQuilting_0.5.svg)](http://pkg.julialang.org/?pkg=ImageQuilting)
