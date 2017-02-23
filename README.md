@@ -24,6 +24,13 @@ Documentation
 - [**STABLE**][docs-stable-url] &mdash; **most recently tagged version of the documentation.**
 - [**LATEST**][docs-latest-url] &mdash; *in-development version of the documentation.*
 
+Contributing
+------------
+
+Contributions are very welcome, as a feature requests and suggestions.
+
+Please [open an issue](https://github.com/juliohm/ImageQuilting.jl/issues) if you encounter any problems.
+
 CITATION
 --------
 
