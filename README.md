@@ -5,7 +5,7 @@ ImageQuilting.jl
 
 | **Documentation** | **Build Status** |
 |:-----------------:|:----------------:|
-| [![docs-stable][docs-stable-img]][docs-stable-url] [![docs-latest][docs-latest-img]][docs-latest-url] | [![travis][travis-img]][travis-url] [![julia-pkg][julia-pkg-img]][julia-pkg-url] [![codecov][codecov-img]][codecov-url] |
+| [![][docs-stable-img]][docs-stable-url] [![][docs-latest-img]][docs-latest-url] | [![][travis-img]][travis-url] [![][julia-pkg-img]][julia-pkg-url] [![][codecov-img]][codecov-url] |
 
 ![3D Quilting Animation](docs/src/images/quilting.gif)
 
