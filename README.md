@@ -3,9 +3,7 @@ ImageQuilting.jl
 
 *A Julia package for fast 3D image quilting simulation.*
 
-| **Documentation** | **Build Status** |
-|:-----------------:|:----------------:|
-| [![][docs-stable-img]][docs-stable-url] [![][docs-latest-img]][docs-latest-url] | [![][travis-img]][travis-url] [![][julia-pkg-img]][julia-pkg-url] [![][codecov-img]][codecov-url] |
+[![][travis-img]][travis-url] [![][julia-pkg-img]][julia-pkg-url] [![][codecov-img]][codecov-url] [![][docs-stable-img]][docs-stable-url] [![][docs-latest-img]][docs-latest-url]
 
 ![3D Quilting Animation](docs/src/images/quilting.gif)
 
