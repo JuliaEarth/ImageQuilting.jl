@@ -1,5 +1,9 @@
 using ImageQuilting
+using Plots; gr()
+using VisualRegressionTests
 using Base.Test
+
+datadir = joinpath(Pkg.dir("ImageQuilting"),"test","data")
 
 @testset "Basic checks" begin
   # the output of a homogeneous image is also homogeneous
@@ -111,6 +115,25 @@ end
   TI = rand(20,20,20)
   μ, σ = voxelreuse(TI, 10, 10, 10, nreal=1)
   @test 0 ≤ μ ≤ 1
+end
+
+@testset "Visual tests" begin
+  # voxel reuse plot for stripe training image
+  function plot_voxel_stripe(fname)
+    srand(2017)
+    TI = zeros(50, 50, 1)
+    TI[:,1:5:50] = 1
+    TI[:,1:6:50] = 1
+    TI[:,1:7:50] = 1
+    plot(VoxelReuse(TI))
+    png(fname)
+  end
+  refimg = joinpath(datadir,"voxel_stripe.png")
+
+  # uncomment to update reference image
+  #plot_voxel_stripe(refimg)
+
+  @test test_images(VisualTest(plot_voxel_stripe, refimg), popup=false) |> success
 end
 
 if ImageQuilting.cl ≠ nothing && ImageQuilting.clfft ≠ nothing
