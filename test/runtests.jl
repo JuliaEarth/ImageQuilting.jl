@@ -120,11 +120,11 @@ end
 @testset "Visual tests" begin
   # voxel reuse plot for stripe training image
   function plot_voxel_stripe(fname)
-    srand(2017)
-    TI = zeros(50, 50, 1)
-    TI[:,1:5:50] = 1
-    TI[:,1:6:50] = 1
-    TI[:,1:7:50] = 1
+    srand(2017); N = 30
+    TI = zeros(N, N, 1)
+    TI[:,1:5:N] = 1
+    TI[:,1:6:N] = 1
+    TI[:,1:7:N] = 1
     plot(VoxelReuse(TI))
     png(fname)
   end
