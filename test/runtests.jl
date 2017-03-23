@@ -1,4 +1,5 @@
 using ImageQuilting
+using GeoStatsImages
 using Plots; gr()
 using VisualRegressionTests
 using Base.Test
@@ -118,22 +119,23 @@ end
 end
 
 @testset "Visual tests" begin
-  # voxel reuse plot for stripe training image
-  function plot_voxel_stripe(fname)
-    srand(2017); N = 30
-    TI = zeros(N, N, 1)
-    TI[:,1:5:N] = 1
-    TI[:,1:6:N] = 1
-    TI[:,1:7:N] = 1
+  # voxel reuse plot
+  function plot_voxel_reuse(TIname, fname)
+    srand(2017)
+    TI = training_image(TIname)[1:20,1:20,:]
     plot(VoxelReuse(TI))
     png(fname)
   end
-  refimg = joinpath(datadir,"voxel_stripe.png")
 
-  # uncomment to update reference image
-  #plot_voxel_stripe(refimg)
+  for TIname in ["StoneWall","WalkerLake"]
+    plot_voxel_TI(fname) = plot_voxel_reuse(TIname, fname)
+    refimg = joinpath(datadir, "Voxel"*TIname*".png")
 
-  @test test_images(VisualTest(plot_voxel_stripe, refimg), popup=false) |> success
+    # uncomment to update reference image
+    #plot_voxel_TI(refimg)
+
+    @test test_images(VisualTest(plot_voxel_TI, refimg), popup=false) |> success
+  end
 end
 
 if ImageQuilting.cl ≠ nothing && ImageQuilting.clfft ≠ nothing
