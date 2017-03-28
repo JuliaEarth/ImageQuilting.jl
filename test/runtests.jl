@@ -130,8 +130,26 @@ end
 
     # uncomment to update reference image
     #plot_voxel_reuse(refimg)
-
     @test test_images(VisualTest(plot_voxel_reuse, refimg), popup=false) |> success
+  end
+
+  for TIname in ["Strebelle","StoneWall"]
+    function plot_reals(fname)
+      srand(2017)
+      TI = training_image(TIname)
+      reals = iqsim(TI, 30, 30, 1, size(TI)..., nreal=4)
+      ps = []
+      for real in reals
+        push!(ps, heatmap(real[:,:,1]))
+      end
+      plot(ps...)
+      png(fname)
+    end
+    refimg = joinpath(datadir, "Reals"*TIname*".png")
+
+    # uncomment to update reference image
+    #plot_reals(refimg)
+    @test test_images(VisualTest(plot_reals, refimg), popup=false) |> success
   end
 end
 
