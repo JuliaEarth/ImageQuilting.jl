@@ -119,22 +119,19 @@ end
 end
 
 @testset "Visual tests" begin
-  # voxel reuse plot
-  function plot_voxel_reuse(TIname, fname)
-    srand(2017)
-    TI = training_image(TIname)[1:20,1:20,:]
-    plot(VoxelReuse(TI))
-    png(fname)
-  end
-
   for TIname in ["StoneWall","WalkerLake"]
-    plot_voxel_TI(fname) = plot_voxel_reuse(TIname, fname)
+    function plot_voxel_reuse(fname)
+      srand(2017)
+      TI = training_image(TIname)[1:20,1:20,:]
+      plot(VoxelReuse(TI))
+      png(fname)
+    end
     refimg = joinpath(datadir, "Voxel"*TIname*".png")
 
     # uncomment to update reference image
-    #plot_voxel_TI(refimg)
+    #plot_voxel_reuse(refimg)
 
-    @test test_images(VisualTest(plot_voxel_TI, refimg), popup=false) |> success
+    @test test_images(VisualTest(plot_voxel_reuse, refimg), popup=false) |> success
   end
 end
 
