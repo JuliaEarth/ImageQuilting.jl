@@ -136,8 +136,8 @@ end
   for TIname in ["Strebelle","StoneWall"]
     function plot_reals(fname)
       srand(2017)
-      TI = training_image(TIname)[1:50,1:50,:]
-      reals = iqsim(TI, 30, 30, 1, size(TI)..., nreal=4)
+      TI = training_image(TIname)
+      reals = iqsim(TI, 60, 60, 1, size(TI)..., nreal=4, showprogress=true)
       ps = []
       for real in reals
         push!(ps, heatmap(real[:,:,1]))
