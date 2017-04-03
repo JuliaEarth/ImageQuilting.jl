@@ -13,7 +13,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Overview",
     "category": "section",
-    "text": "A Julia package for fast 3D image quilting simulation.(Image: Build Status) (Image: ImageQuilting) (Image: Coverage Status)This package implements an extension to the famous Efros-Freeman algorithm for texture synthesis and transfer. Unlike the original algorithm, our method can handle 3D grids and pre-existing point-data very efficiently (the fastest in the literature). For more details, please refer to our paper in Citation.(Image: 3D Quilting Animation)"
+    "text": "A Julia package for fast 3D image quilting simulation.(Image: Build Status) (Image: ImageQuilting) (Image: Coverage Status)This package implements an extension to the famous Efros-Freeman algorithm for texture synthesis and transfer in computer vision. Unlike the original algorithm developed for 2D images, our method can also handle 3D masked grids and pre-existing point-data very efficiently (the fastest in the literature). For more details, please refer to our paper in Citation.(Image: 3D Quilting Animation)"
 },
 
 {
@@ -37,7 +37,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Usage",
     "category": "section",
-    "text": "reals = iqsim(training_image::AbstractArray,\n              tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,\n              gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;\n              overlapx=1/6, overlapy=1/6, overlapz=1/6,\n              soft=nothing, hard=nothing, tol=.1,\n              cut=:boykov, path=:rasterup, simplex=false, nreal=1,\n              threads=CPU_PHYSICAL_CORES, gpu=false, debug=false, showprogress=false)where:requiredtraining_image can be any 3D array (add ghost dimension for 2D)\ntplsizex,tplsizey,tplsizez is the template size\ngridsizex,gridsizey,gridsizez is the simulation sizeoptionaloverlapx,overlapy,overlapz is the percentage of overlap\nsoft is an instance of SoftData or an array of such instances\nhard is an instance of HardData\ntol is the initial relaxation tolerance in (0,1]\ncut is the cut algorithm (:dijkstra or :boykov)\npath is the simulation path (:rasterup, :rasterdown, :dilation or :random)\nsimplex informs whether to apply or not the simplex transform to the image\nnreal is the number of realizations\nthreads is the number of threads for the FFT (default to all CPU cores)\ngpu informs whether to use the GPU or the CPU\ndebug informs whether to export or not the boundary cuts and voxel reuse\nshowprogress informs whether to show or not estimated time durationThe main output reals consists of a list of 3D realizations that can be indexed with reals[1], reals[2], ..., reals[nreal]. If debug=true, additional output is generated:reals, cuts, voxs = iqsim(..., debug=true)cuts[i] is the boundary cut for reals[i] and voxs[i] is the associated voxel reuse.A helper function is also provided for the fast approximation of the mean voxel reuse:mean, dev = voxelreuse(training_image::AbstractArray,\n                       tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;\n                       overlapx=1/6, overlapy=1/6, overlapz=1/6,\n                       cut=:boykov, simplex=false, nreal=10,\n                       threads=CPU_PHYSICAL_CORES, gpu=false)with mean in the interval 01 and dev the standard deviation. The approximation gets better as nreal is made larger."
+    "text": "reals = iqsim(training_image::AbstractArray,\n              tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,\n              gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;\n              overlapx=1/6, overlapy=1/6, overlapz=1/6,\n              soft=nothing, hard=nothing, tol=.1,\n              cut=:boykov, path=:rasterup, simplex=false, nreal=1,\n              threads=CPU_PHYSICAL_CORES, gpu=false, debug=false, showprogress=false)where:requiredtraining_image can be any 3D array (add ghost dimension for 2D)\ntplsizex,tplsizey,tplsizez is the template size\ngridsizex,gridsizey,gridsizez is the simulation sizeoptionaloverlapx,overlapy,overlapz is the percentage of overlap\nsoft is an instance of SoftData or an array of such instances\nhard is an instance of HardData\ntol is the initial relaxation tolerance in (0,1]\ncut is the cut algorithm (:dijkstra or :boykov)\npath is the simulation path (:rasterup, :rasterdown, :dilation or :random)\nsimplex informs whether to apply or not the simplex transform to the image\nnreal is the number of realizations\nthreads is the number of threads for the FFT (default to all CPU cores)\ngpu informs whether to use the GPU or the CPU\ndebug informs whether to export or not the boundary cuts and voxel reuse\nshowprogress informs whether to show or not estimated time durationThe main output reals consists of a list of 3D realizations that can be indexed with reals[1], reals[2], ..., reals[nreal]. If debug=true, additional output is generated:reals, cuts, voxs = iqsim(..., debug=true)cuts[i] is the boundary cut for reals[i] and voxs[i] is the associated voxel reuse.In addition, this package provides utility functions for template design in image quilting. For more details, please refer to the Voxel reuse section."
 },
 
 {
@@ -101,7 +101,31 @@ var documenterSearchIndex = {"docs": [
     "page": "Examples",
     "title": "Soft data",
     "category": "section",
-    "text": "Sometimes it is also useful to incorporate auxiliary variables defined in the domain, which can guide the selection of patterns in the training image. This example shows how to achieve this texture transfer efficiently.using ImageQuilting\nusing GeoStatsImages\nusing Images: imfilter_gaussian\n\nTI = training_image(\"WalkerLake\")\ntruth = training_image(\"WalkerLakeTruth\")\n\nG(m) = imfilter_gaussian(m, [10,10,0])\n\ndata = SoftData(G(truth), G)\n\nreals = iqsim(TI, 27, 27, 1, size(truth)..., soft=data, nreal=3)(Image: Soft data conditioning)"
+    "text": "Sometimes it is also useful to incorporate auxiliary variables defined in the domain, which can guide the selection of patterns in the training image. This example shows how to achieve this texture transfer efficiently.using ImageQuilting\nusing GeoStatsImages\nusing Images\n\nTI = training_image(\"WalkerLake\")\ntruth = training_image(\"WalkerLakeTruth\")\n\nG(m) = imfilter(m, KernelFactors.IIRGaussian([10,10,0]))\n\ndata = SoftData(G(truth), G)\n\nreals = iqsim(TI, 27, 27, 1, size(truth)..., soft=data, nreal=3)(Image: Soft data conditioning)"
+},
+
+{
+    "location": "voxel-reuse.html#",
+    "page": "Voxel reuse",
+    "title": "Voxel reuse",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "voxel-reuse.html#Helper-function-1",
+    "page": "Voxel reuse",
+    "title": "Helper function",
+    "category": "section",
+    "text": "A helper function is provided for the fast approximation of the mean voxel reuse:mean, dev = voxelreuse(training_image::AbstractArray,\n                       tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;\n                       overlapx=1/6, overlapy=1/6, overlapz=1/6,\n                       cut=:boykov, simplex=false, nreal=10,\n                       threads=CPU_PHYSICAL_CORES, gpu=false)with mean in the interval 01 and dev the standard deviation. The approximation gets better as nreal is made larger."
+},
+
+{
+    "location": "voxel-reuse.html#Plot-recipe-1",
+    "page": "Voxel reuse",
+    "title": "Plot recipe",
+    "category": "section",
+    "text": "A plot recipe is provided for template design in image quilting. In order to plot the voxel reuse of a training image, install Plots.jl and any of its supported backends (e.g. PyPlot.jl):Pkg.add(\"Plots\")\nPkg.add(\"PyPlot\")The example below uses training images from the GeoStatsImages.jl package:using ImageQuilting\nusing GeoStatsImages\nusing Plots\n\nTI₁ = training_image(\"Strebelle\")\nTI₂ = training_image(\"StoneWall\")\n\nplot(VoxelReuse(TI₁), label=\"Strebelle\")\nplot!(VoxelReuse(TI₂), label=\"StoneWall\")(Image: Voxel reuse plot)"
 },
 
 {
@@ -125,7 +149,15 @@ var documenterSearchIndex = {"docs": [
     "page": "GPU support",
     "title": "Installing clFFT C++ library",
     "category": "section",
-    "text": "Download and install the pre-built binaries. If you are on Linux, you can also check the repositories of your distribution.Install the CLFFT.jl package in Julia and run the tests:Pkg.add(\"CLFFT\")\n\nusing CLFFT # force compilation\nPkg.test(\"CLFFT\")If the tests are successful, the installation is complete. Pass in the option gpu=true to iqsim for computations with the GPU."
+    "text": "Download and install the pre-built binaries. If you are on Linux, you can also check the repositories of your distribution.Install the CLFFT.jl package in Julia and run the tests:Pkg.add(\"CLFFT\")\n\nusing CLFFT # force compilation\nPkg.test(\"CLFFT\")If the tests are successful, the installation is complete."
+},
+
+{
+    "location": "gpu-support.html#Testing-GPU-implementation-1",
+    "page": "GPU support",
+    "title": "Testing GPU implementation",
+    "category": "section",
+    "text": "Run the tests to make sure that the GPU implementation is working as expected:using ImageQuilting # force compilation\nPkg.test(\"ImageQuilting\")Pass in the option gpu=true to iqsim for computations with the GPU."
 },
 
 {
@@ -141,7 +173,7 @@ var documenterSearchIndex = {"docs": [
     "page": "License",
     "title": "License",
     "category": "page",
-    "text": "Copyright (c) 2015, Júlio Hoffimann Mendes <juliohm@stanford.edu>\n\nPermission to use, copy, modify, and/or distribute this software for any\npurpose with or without fee is hereby granted, provided that the above\ncopyright notice and this permission notice appear in all copies.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\" AND THE AUTHOR DISCLAIMS ALL WARRANTIES\nWITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF\nMERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR\nANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES\nWHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN\nACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF\nOR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE."
+    "text": "The ImageQuilting.jl package is licensed under the ISC License:Copyright (c) 2015, Júlio Hoffimann Mendes <juliohm@stanford.edu>\n\nPermission to use, copy, modify, and/or distribute this software for any\npurpose with or without fee is hereby granted, provided that the above\ncopyright notice and this permission notice appear in all copies.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\" AND THE AUTHOR DISCLAIMS ALL WARRANTIES\nWITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF\nMERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR\nANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES\nWHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN\nACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF\nOR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE."
 },
 
 {
@@ -149,7 +181,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Citation",
     "title": "Citation",
     "category": "page",
-    "text": "Below is the BibTeX entry for citation:@ARTICLE{Hoffimann2017,\n  title={Stochastic Simulation by Image Quilting of Deterministic Process-based Geological Models},\n  author={J{\\'u}lio Hoffimann and C{\\'e}line Scheidt and Adrian Barford and Jef Caers},\n  journal={Computers \\& Geosciences},\n  year={2017}\n}"
+    "text": "Below is the BibTeX entry for citation:@ARTICLE{Hoffimann2017,\n  title={Stochastic Simulation by Image Quilting of Deterministic Process-based Geological Models},\n  author={J{\\'u}lio Hoffimann and C{\\'e}line Scheidt and Adrian Barfod and Jef Caers},\n  journal={Computers \\& Geosciences},\n  year={2017}\n}"
 },
 
 ]}
