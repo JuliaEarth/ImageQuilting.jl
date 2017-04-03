@@ -4,7 +4,7 @@ using Plots; gr()
 using VisualRegressionTests
 using Base.Test
 
-datadir = joinpath(Pkg.dir("ImageQuilting"),"test","data")
+datadir = joinpath(dirname(@__FILE__),"data")
 
 @testset "Basic checks" begin
   # the output of a homogeneous image is also homogeneous
