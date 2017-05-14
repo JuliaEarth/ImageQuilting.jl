@@ -1,4 +1,4 @@
-Below is the BibTeX entry for citation:
+If you find ImageQuilting.jl useful in your work, please consider citing the following paper:
 
 ```latex
 @ARTICLE{Hoffimann2017,

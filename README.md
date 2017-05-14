@@ -32,7 +32,7 @@ Please [open an issue](https://github.com/juliohm/ImageQuilting.jl/issues) if yo
 CITATION
 --------
 
-Below is the BibTeX entry for citation:
+If you find ImageQuilting.jl useful in your work, please consider citing the following paper:
 
 ```latex
 @ARTICLE{Hoffimann2017,
