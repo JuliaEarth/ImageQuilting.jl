@@ -45,7 +45,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Concepts",
     "title": "Concepts",
     "category": "page",
-    "text": "Below are the concepts implemented in this package. For understanding how these concepts are used, please consult Examples."
+    "text": "Below are the concepts implemented in this package. For understanding how these concepts are used, please consult the Examples section."
 },
 
 {
