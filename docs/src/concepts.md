@@ -1,5 +1,5 @@
 Below are the concepts implemented in this package. For understanding how these concepts
-are used, please consult [Examples](examples.md).
+are used, please consult the [Examples](examples.md) section.
 
 ## Soft data
 
@@ -27,4 +27,5 @@ Masked grids are a special case of hard data conditioning where inactive voxels 
 marked with the value `NaN`. The algorithm handles this hard data differently as it
 shouldn't be considered in the pattern similarity calculations.
 
-`training_image` can also have inactive voxels marked with `NaN`. Convolution results are only looked up in active regions.
+`training_image` can also have inactive voxels marked with `NaN`. Convolution results
+are only looked up in active regions.
