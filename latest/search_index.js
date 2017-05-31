@@ -181,7 +181,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Citation",
     "title": "Citation",
     "category": "page",
-    "text": "If you find ImageQuilting.jl useful in your work, please consider citing the following paper:@ARTICLE{Hoffimann2017,\n  title={Stochastic Simulation by Image Quilting of Process-based Geological Models},\n  author={J{\\'u}lio Hoffimann and C{\\'e}line Scheidt and Adrian Barfod and Jef Caers},\n  journal={Computers \\& Geosciences},\n  year={2017}\n}"
+    "text": "If you find ImageQuilting.jl useful in your work, please consider citing the following paper:@ARTICLE{Hoffimann2017,\n  title={Stochastic Simulation by Image Quilting of Process-based Geological Models},\n  ISSN={0098-3004},\n  url={http://dx.doi.org/10.1016/j.cageo.2017.05.012},\n  DOI={10.1016/j.cageo.2017.05.012},\n  journal={Computers \\& Geosciences},\n  publisher={Elsevier BV},\n  author={Hoffimann, J{\\'u}lio and Scheidt, C{\\'e}line and Barfod, Adrian and Caers, Jef},\n  year={2017},\n  month={May}\n}"
 },
 
 ]}
