@@ -118,38 +118,38 @@ end
   @test 0 ≤ μ ≤ 1
 end
 
-@testset "Visual tests" begin
-  for TIname in ["StoneWall","WalkerLake"]
-    function plot_voxel_reuse(fname)
-      srand(2017)
-      TI = training_image(TIname)[1:20,1:20,:]
-      plot(VoxelReuse(TI))
-      png(fname)
-    end
-    refimg = joinpath(datadir, "Voxel"*TIname*".png")
-
-    # uncomment to update reference image
-    #plot_voxel_reuse(refimg)
-    @test test_images(VisualTest(plot_voxel_reuse, refimg), popup=false) |> success
-  end
-
-  for TIname in ["Strebelle","StoneWall"]
-    function plot_reals(fname)
-      srand(2017)
-      TI = training_image(TIname)[1:50,1:50,:]
-      reals = iqsim(TI, 30, 30, 1, size(TI)..., nreal=4)
-      ps = []
-      for real in reals
-        push!(ps, heatmap(real[:,:,1]))
+if get(ENV, "TRAVIS", "not-found") == "not-found"
+  @testset "Visual tests" begin
+    for TIname in ["StoneWall","WalkerLake"]
+      function plot_voxel_reuse(fname)
+        srand(2017)
+        TI = training_image(TIname)[1:20,1:20,:]
+        plot(VoxelReuse(TI))
+        png(fname)
       end
-      plot(ps...)
-      png(fname)
-    end
-    refimg = joinpath(datadir, "Reals"*TIname*".png")
+      refimg = joinpath(datadir, "Voxel"*TIname*".png")
 
-    # uncomment to update reference image
-    #plot_reals(refimg)
-    @test test_images(VisualTest(plot_reals, refimg), popup=false) |> success
+      test_images(VisualTest(plot_voxel_reuse, refimg), popup=true)
+      @test true
+    end
+
+    for TIname in ["Strebelle","StoneWall"]
+      function plot_reals(fname)
+        srand(2017)
+        TI = training_image(TIname)[1:50,1:50,:]
+        reals = iqsim(TI, 30, 30, 1, size(TI)..., nreal=4)
+        ps = []
+        for real in reals
+          push!(ps, heatmap(real[:,:,1]))
+        end
+        plot(ps...)
+        png(fname)
+      end
+      refimg = joinpath(datadir, "Reals"*TIname*".png")
+
+      test_images(VisualTest(plot_reals, refimg), popup=true)
+      @test true
+    end
   end
 end
 
