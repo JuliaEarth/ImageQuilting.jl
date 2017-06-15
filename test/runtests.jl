@@ -4,6 +4,7 @@ using Plots; gr()
 using VisualRegressionTests
 using Base.Test
 
+istravis = "TRAVIS" ∈ keys(ENV)
 datadir = joinpath(dirname(@__FILE__),"data")
 
 @testset "Basic checks" begin
@@ -118,7 +119,7 @@ end
   @test 0 ≤ μ ≤ 1
 end
 
-if get(ENV, "TRAVIS", "not-found") == "not-found"
+if !istravis || (istravis && ENV["TRAVIS_OS_NAME"] == "linux")
   @testset "Visual tests" begin
     for TIname in ["StoneWall","WalkerLake"]
       function plot_voxel_reuse(fname)
@@ -129,8 +130,7 @@ if get(ENV, "TRAVIS", "not-found") == "not-found"
       end
       refimg = joinpath(datadir, "Voxel"*TIname*".png")
 
-      test_images(VisualTest(plot_voxel_reuse, refimg), popup=true)
-      @test true
+      @test test_images(VisualTest(plot_voxel_reuse, refimg), popup=!istravis) |> success
     end
 
     for TIname in ["Strebelle","StoneWall"]
@@ -147,8 +147,7 @@ if get(ENV, "TRAVIS", "not-found") == "not-found"
       end
       refimg = joinpath(datadir, "Reals"*TIname*".png")
 
-      test_images(VisualTest(plot_reals, refimg), popup=true)
-      @test true
+      @test test_images(VisualTest(plot_reals, refimg), popup=!istravis) |> success
     end
   end
 end
