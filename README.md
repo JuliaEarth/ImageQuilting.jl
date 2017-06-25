@@ -59,7 +59,7 @@ If you find ImageQuilting.jl useful in your work, please consider citing the fol
 [travis-img]: https://travis-ci.org/juliohm/ImageQuilting.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/juliohm/ImageQuilting.jl
 
-[julia-pkg-img]: http://pkg.julialang.org/badges/ImageQuilting_0.5.svg
+[julia-pkg-img]: http://pkg.julialang.org/badges/ImageQuilting_0.6.svg
 [julia-pkg-url]: http://pkg.julialang.org/?pkg=ImageQuilting
 
 [codecov-img]: https://codecov.io/gh/juliohm/ImageQuilting.jl/branch/master/graph/badge.svg
