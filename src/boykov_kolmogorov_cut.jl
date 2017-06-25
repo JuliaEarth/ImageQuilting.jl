@@ -26,7 +26,7 @@ function boykov_kolmogorov_cut(A::AbstractArray, B::AbstractArray, dir::Symbol)
     B = permutedims(B, [3,2,1])
   end
 
-  E = abs(A - B)
+  E = abs.(A - B)
 
   mx, my, mz = size(E)
   nvox = mx*my*mz
@@ -58,8 +58,8 @@ function boykov_kolmogorov_cut(A::AbstractArray, B::AbstractArray, dir::Symbol)
     ∇zₐ[:,:,mz] = ∇zₐ[:,:,mz-1]
     ∇zᵦ[:,:,mz] = ∇zᵦ[:,:,mz-1]
   end
-  map!(abs, ∇xₐ); map!(abs, ∇yₐ); map!(abs, ∇zₐ)
-  map!(abs, ∇xᵦ); map!(abs, ∇yᵦ); map!(abs, ∇zᵦ)
+  map!(abs, ∇xₐ, ∇xₐ); map!(abs, ∇yₐ, ∇yₐ); map!(abs, ∇zₐ, ∇zₐ)
+  map!(abs, ∇xᵦ, ∇xᵦ); map!(abs, ∇yᵦ, ∇yᵦ); map!(abs, ∇zᵦ, ∇zᵦ)
 
   # add source and sink terminals
   s = nvox + 1; t = nvox + 2

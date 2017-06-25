@@ -39,9 +39,9 @@ function convdist(Xs::AbstractArray, masks::AbstractArray; weights=nothing, inne
 
     A² = imfilter_impl(X.^2, weights, padding)
     AB = imfilter_impl(X, wmask, padding)
-    B² = sumabs2(wmask)
+    B² = sum(abs2, wmask)
 
-    push!(result, abs(A² - 2AB + B²))
+    push!(result, abs.(A² - 2AB + B²))
   end
 
   D = sum(result)

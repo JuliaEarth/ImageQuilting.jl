@@ -17,4 +17,4 @@ immutable SoftData
   transform::Function
 end
 
-typealias HardData Dict{NTuple{3,Integer},Real}
+const HardData = Dict{NTuple{3,Integer},Real}

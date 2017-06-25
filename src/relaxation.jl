@@ -14,7 +14,7 @@
 
 function relaxation(distance::AbstractArray, auxdistances::AbstractArray, cutoff::Real)
   # patterns enabled in the training image
-  enabled = !isinf(distance); npatterns = sum(enabled)
+  enabled = .!isinf.(distance); npatterns = sum(enabled)
 
   # candidates with good overlap
   dbsize = all(distance[enabled] .== 0) ? npatterns : ceil(Int, cutoff*npatterns)
@@ -54,5 +54,5 @@ function quick_intersect(A::AbstractVector{Int}, B::AbstractVector{Int},
   bitsA[A] = true
   bitsB[B] = true
 
-  find(bitsA & bitsB)
+  find(bitsA .& bitsB)
 end

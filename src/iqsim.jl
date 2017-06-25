@@ -88,7 +88,7 @@ function iqsim(training_image::AbstractArray,
                               (nz - (ntilez-1)overlapz)
 
   # warn in case of 1-voxel overlaps
-  if any(([tplsizex, tplsizey, tplsizez] .>  1) &
+  if any(([tplsizex, tplsizey, tplsizez] .>  1) .&
          ([overlapx, overlapy, overlapz] .== 1))
     warn("Overlaps with only 1 voxel. Check template/overlap configuration.")
   end
@@ -125,7 +125,7 @@ function iqsim(training_image::AbstractArray,
       jₑ = jₛ + tplsizey - 1
       kₑ = kₛ + tplsizez - 1
 
-      if all(!activated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
+      if all(.!activated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
         push!(skipped, (i,j,k))
       else
         rastered[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = true
@@ -134,7 +134,7 @@ function iqsim(training_image::AbstractArray,
         end
       end
     end
-    rastered[!activated] = false
+    rastered[.!activated] = false
 
     # grid must contain active voxels
     any_activated = any(activated[1:gridsizex,1:gridsizey,1:gridsizez])
@@ -145,12 +145,12 @@ function iqsim(training_image::AbstractArray,
   TI = map(Float64, training_image)
 
   # inactive voxels in the training image
-  NaNTI = isnan(TI); TI[NaNTI] = 0
+  NaNTI = isnan.(TI); TI[NaNTI] = 0
 
   # perform simplex transform
   simplexTI = [TI]; nvertices = 1
   if simplex
-    categories = Set(TI[!NaNTI])
+    categories = Set(TI[.!NaNTI])
     ncategories = nvertices = length(categories) - 1
 
     @assert categories == Set(0:ncategories) "categories should be labeled 1, 2, 3,..."
@@ -183,7 +183,7 @@ function iqsim(training_image::AbstractArray,
       lx = min(mx,nx); ly = min(my,ny); lz = min(mz,nz)
 
       auxpad = padarray(aux.data, Pad(:symmetric, [0,0,0], [nx-lx,ny-ly,nz-lz]))
-      auxpad[isnan(auxpad)] = 0
+      auxpad[isnan.(auxpad)] = 0
 
       push!(softgrid, auxpad)
 
@@ -215,7 +215,7 @@ function iqsim(training_image::AbstractArray,
   showprogress && (progress = Progress(nreal, color=:black))
 
   # preallocate memory for distance calculations
-  distance = Array(Float64, mₜ-tplsizex+1, nₜ-tplsizey+1, pₜ-tplsizez+1)
+  distance = Array{Float64}(mₜ-tplsizex+1, nₜ-tplsizey+1, pₜ-tplsizez+1)
 
   for real=1:nreal
     # allocate memory for current simulation
@@ -337,31 +337,31 @@ function iqsim(training_image::AbstractArray,
       M = falses(simdev)
       if overlapx > 1 && (i-1,j,k) ∈ pasted
         A = view(simdev,1:overlapx,:,:); B = view(TIdev,1:overlapx,:,:)
-        M[1:overlapx,:,:] |= boundary_cut(A, B, :x)
+        M[1:overlapx,:,:] .|= boundary_cut(A, B, :x)
       end
       if overlapx > 1 && (i+1,j,k) ∈ pasted
         A = view(simdev,spacingx+1:tplsizex,:,:); B = view(TIdev,spacingx+1:tplsizex,:,:)
-        M[spacingx+1:tplsizex,:,:] |= flipdim(boundary_cut(flipdim(A, 1), flipdim(B, 1), :x), 1)
+        M[spacingx+1:tplsizex,:,:] .|= flipdim(boundary_cut(flipdim(A, 1), flipdim(B, 1), :x), 1)
       end
       if overlapy > 1 && (i,j-1,k) ∈ pasted
         A = view(simdev,:,1:overlapy,:); B = view(TIdev,:,1:overlapy,:)
-        M[:,1:overlapy,:] |= boundary_cut(A, B, :y)
+        M[:,1:overlapy,:] .|= boundary_cut(A, B, :y)
       end
       if overlapy > 1 && (i,j+1,k) ∈ pasted
         A = view(simdev,:,spacingy+1:tplsizey,:); B = view(TIdev,:,spacingy+1:tplsizey,:)
-        M[:,spacingy+1:tplsizey,:] |= flipdim(boundary_cut(flipdim(A, 2), flipdim(B, 2), :y), 2)
+        M[:,spacingy+1:tplsizey,:] .|= flipdim(boundary_cut(flipdim(A, 2), flipdim(B, 2), :y), 2)
       end
       if overlapz > 1 && (i,j,k-1) ∈ pasted
         A = view(simdev,:,:,1:overlapz); B = view(TIdev,:,:,1:overlapz)
-        M[:,:,1:overlapz] |= boundary_cut(A, B, :z)
+        M[:,:,1:overlapz] .|= boundary_cut(A, B, :z)
       end
       if overlapz > 1 && (i,j,k+1) ∈ pasted
         A = view(simdev,:,:,spacingz+1:tplsizez); B = view(TIdev,:,:,spacingz+1:tplsizez)
-        M[:,:,spacingz+1:tplsizez] |= flipdim(boundary_cut(flipdim(A, 3), flipdim(B, 3), :z), 3)
+        M[:,:,spacingz+1:tplsizez] .|= flipdim(boundary_cut(flipdim(A, 3), flipdim(B, 3), :z), 3)
       end
 
       # paste quilted pattern from training image
-      simdev[!M] = TIdev[!M]
+      simdev[.!M] = TIdev[.!M]
 
       # save boundary cut
       debug && (cutgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = M)
@@ -373,7 +373,7 @@ function iqsim(training_image::AbstractArray,
     # hard data and shape correction
     if hard ≠ nothing
       simgrid[preset] = hardgrid[preset]
-      simgrid[!activated] = NaN
+      simgrid[.!activated] = NaN
       debug && (cutgrid[!activated] = NaN)
     end
 

@@ -15,7 +15,7 @@
 function dijkstra_cut(A1::AbstractArray, A2::AbstractArray, dir::Symbol)
   # permute dimensions so that the algorithm is
   # the same for cuts in x, y and z directions
-  B = abs(A1 - A2)
+  B = abs.(A1 - A2)
   if dir == :x
     B = permutedims(B, [1,2,3])
   elseif dir == :y
