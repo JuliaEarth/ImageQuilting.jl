@@ -5,6 +5,8 @@
 [![Build Status](https://travis-ci.org/juliohm/ImageQuilting.jl.svg?branch=master)](https://travis-ci.org/juliohm/ImageQuilting.jl)
 [![ImageQuilting](http://pkg.julialang.org/badges/ImageQuilting_0.5.svg)](http://pkg.julialang.org/?pkg=ImageQuilting)
 [![Coverage Status](https://coveralls.io/repos/juliohm/ImageQuilting.jl/badge.svg?branch=master)](https://coveralls.io/r/juliohm/ImageQuilting.jl?branch=master)
+[![Stable Documentation](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliohm.github.io/ImageQuilting.jl/stable)
+[![Latest Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://juliohm.github.io/ImageQuilting.jl/latest)
 
 This package implements an extension to the famous Efros-Freeman algorithm for texture synthesis and transfer in computer vision.
 Unlike the original algorithm developed for 2D images, our method can also handle 3D masked grids and pre-existing point-data very

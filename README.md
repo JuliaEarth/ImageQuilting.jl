@@ -50,12 +50,6 @@ If you find ImageQuilting.jl useful in your work, please consider citing the fol
 }
 ```
 
-[docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
-[docs-stable-url]: https://juliohm.github.io/ImageQuilting.jl/stable
-
-[docs-latest-img]: https://img.shields.io/badge/docs-latest-blue.svg
-[docs-latest-url]: https://juliohm.github.io/ImageQuilting.jl/latest
-
 [travis-img]: https://travis-ci.org/juliohm/ImageQuilting.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/juliohm/ImageQuilting.jl
 
@@ -64,3 +58,9 @@ If you find ImageQuilting.jl useful in your work, please consider citing the fol
 
 [codecov-img]: https://codecov.io/gh/juliohm/ImageQuilting.jl/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/juliohm/ImageQuilting.jl
+
+[docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
+[docs-stable-url]: https://juliohm.github.io/ImageQuilting.jl/stable
+
+[docs-latest-img]: https://img.shields.io/badge/docs-latest-blue.svg
+[docs-latest-url]: https://juliohm.github.io/ImageQuilting.jl/latest
