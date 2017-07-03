@@ -256,42 +256,42 @@ function iqsim(training_image::AbstractArray,
         xsimplex = simplex ? simplex_transform(ovx, nvertices) : [ovx]
 
         D = convdist(simplexTI, xsimplex)
-        broadcast!(+, distance, distance, view(D,1:mₜ-tplsizex+1,:,:))
+        distance .+= view(D,1:mₜ-tplsizex+1,:,:)
       end
       if overlapx > 1 && (i+1,j,k) ∈ pasted
         ovx = view(simdev,spacingx+1:tplsizex,:,:)
         xsimplex = simplex ? simplex_transform(ovx, nvertices) : [ovx]
 
         D = convdist(simplexTI, xsimplex)
-        broadcast!(+, distance, distance, view(D,spacingx+1:mₜ-overlapx+1,:,:))
+        distance .+= view(D,spacingx+1:mₜ-overlapx+1,:,:)
       end
       if overlapy > 1 && (i,j-1,k) ∈ pasted
         ovy = view(simdev,:,1:overlapy,:)
         ysimplex = simplex ? simplex_transform(ovy, nvertices) : [ovy]
 
         D = convdist(simplexTI, ysimplex)
-        broadcast!(+, distance, distance, view(D,:,1:nₜ-tplsizey+1,:))
+        distance .+= view(D,:,1:nₜ-tplsizey+1,:)
       end
       if overlapy > 1 && (i,j+1,k) ∈ pasted
         ovy = view(simdev,:,spacingy+1:tplsizey,:)
         ysimplex = simplex ? simplex_transform(ovy, nvertices) : [ovy]
 
         D = convdist(simplexTI, ysimplex)
-        broadcast!(+, distance, distance, view(D,:,spacingy+1:nₜ-overlapy+1,:))
+        distance .+= view(D,:,spacingy+1:nₜ-overlapy+1,:)
       end
       if overlapz > 1 && (i,j,k-1) ∈ pasted
         ovz = view(simdev,:,:,1:overlapz)
         zsimplex = simplex ? simplex_transform(ovz, nvertices) : [ovz]
 
         D = convdist(simplexTI, zsimplex)
-        broadcast!(+, distance, distance, view(D,:,:,1:pₜ-tplsizez+1))
+        distance .+= view(D,:,:,1:pₜ-tplsizez+1)
       end
       if overlapz > 1 && (i,j,k+1) ∈ pasted
         ovz = view(simdev,:,:,spacingz+1:tplsizez)
         zsimplex = simplex ? simplex_transform(ovz, nvertices) : [ovz]
 
         D = convdist(simplexTI, zsimplex)
-        broadcast!(+, distance, distance, view(D,:,:,spacingz+1:pₜ-overlapz+1))
+        distance .+= view(D,:,:,spacingz+1:pₜ-overlapz+1)
       end
 
       # disable dataevents that contain inactive voxels
@@ -374,7 +374,7 @@ function iqsim(training_image::AbstractArray,
     if hard ≠ nothing
       simgrid[preset] = hardgrid[preset]
       simgrid[.!activated] = NaN
-      debug && (cutgrid[!activated] = NaN)
+      debug && (cutgrid[.!activated] = NaN)
     end
 
     # throw away voxels that are outside of the grid
