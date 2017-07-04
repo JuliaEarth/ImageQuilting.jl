@@ -65,3 +65,29 @@ data = SoftData(G(truth), G)
 reals = iqsim(TI, 27, 27, 1, size(truth)..., soft=data, nreal=3)
 ```
 ![Soft data conditioning](images/soft.png)
+
+## Masked grids
+
+Voxels marked with the special symbol `NaN` are treated as inactive. The algorithm
+will skip tiles that only contain inactive voxels to save computation and will
+generate realizations that are consistent with the mask. This is particularly
+useful with complex 3D models that have large inactive portions.
+
+```julia
+using ImageQuilting
+using GeoStatsImages
+
+TI = training_image("Strebelle")
+nx, ny = size(TI)
+
+# skip circle at the center
+r = 100; shape = HardData()
+for i=1:size(TI, 1), j=1:size(TI, 2)
+    if (i-nx÷2)^2 + (j-ny÷2)^2 < radius^2
+        push!(shape, (i,j,1)=>NaN)
+    end
+end
+
+reals = iqsim(TI, 62, 62, 1, size(TI)..., hard=shape, nreal=3)
+```
+![Masked grids](images/masked.png)
