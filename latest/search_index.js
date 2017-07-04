@@ -105,6 +105,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "examples.html#Masked-grids-1",
+    "page": "Examples",
+    "title": "Masked grids",
+    "category": "section",
+    "text": "Voxels marked with the special symbol NaN are treated as inactive. The algorithm will skip tiles that only contain inactive voxels to save computation and will generate realizations that are consistent with the mask. This is particularly useful with complex 3D models that have large inactive portions.using ImageQuilting\nusing GeoStatsImages\n\nTI = training_image(\"Strebelle\")\nnx, ny = size(TI)\n\n# skip circle at the center\nr = 100; shape = HardData()\nfor i=1:size(TI, 1), j=1:size(TI, 2)\n    if (i-nx÷2)^2 + (j-ny÷2)^2 < radius^2\n        push!(shape, (i,j,1)=>NaN)\n    end\nend\n\nreals = iqsim(TI, 62, 62, 1, size(TI)..., hard=shape, nreal=3)(Image: Masked grids)"
+},
+
+{
     "location": "voxel-reuse.html#",
     "page": "Voxel reuse",
     "title": "Voxel reuse",
