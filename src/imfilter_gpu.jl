@@ -64,7 +64,7 @@ function imfilter_gpu{T<:Real,K<:Real,N}(img::AbstractArray{T,N}, kern::Abstract
 
   out = []
   if border == "inner"
-    out = Array(realtype(eltype(AF)), ([size(img)...] - prepad - postpad)...)
+    out = Array{realtype(eltype(AF))}(([size(img)...] - prepad - postpad)...)
     indexesA = ntuple(d->postpad[d]+1:size(img,d)-prepad[d], N)
     copyreal!(out, AF, indexesA)
   else
@@ -78,7 +78,7 @@ end
 
 @generated function reflect{T,N}(A::AbstractArray{T,N})
     quote
-        B = Array(T, size(A))
+        B = Array{T}(size(A))
         @nexprs $N d->(n_d = size(A, d)+1)
         @nloops $N i A d->(j_d = n_d - i_d) begin
             @nref($N, B, j) = @nref($N, A, i)
