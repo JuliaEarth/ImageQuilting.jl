@@ -12,7 +12,7 @@
 ## ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-immutable VoxelReuse
+struct VoxelReuse
   img::AbstractArray
 
   VoxelReuse(img) = ndims(img) == 3 ? new(img) : error("Image must be a 3D array")
