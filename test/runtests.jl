@@ -122,7 +122,7 @@ end
 # right on multiple platforms due to different
 # library versions, therefore we only run them
 # on a single laptop before merging changes
-if ENV["USER"] == "juliohm"
+if "USER" ∈ keys(ENV) && ENV["USER"] == "juliohm"
   @testset "Visual tests" begin
     for TIname in ["StoneWall","WalkerLake"]
       function plot_voxel_reuse(fname)
