@@ -4,7 +4,10 @@ using Plots; gr()
 using VisualRegressionTests
 using Base.Test
 
-datadir = joinpath(dirname(@__FILE__),"data")
+# configuration variables
+islocalhost = "USER" ∈ keys(ENV) && ENV["USER"] == "juliohm"
+istravislinux = "TRAVIS" ∈ keys(ENV) && ENV["TRAVIS_OS_NAME"] == "linux"
+datadir = joinpath(@__DIR__,"data")
 
 @testset "Basic checks" begin
   # the output of a homogeneous image is also homogeneous
@@ -119,10 +122,10 @@ end
 end
 
 # visual regression tests are very hard to get
-# right on multiple platforms due to different
-# library versions, therefore we only run them
-# on a single laptop before merging changes
-if "USER" ∈ keys(ENV) && ENV["USER"] == "juliohm"
+# right given the frequent changes in the Julia
+# plotting packages, therefore we only run them
+# on a local machine and on Travis CI
+if islocalhost || istravislinux
   @testset "Visual tests" begin
     for TIname in ["StoneWall","WalkerLake"]
       function plot_voxel_reuse(fname)
@@ -133,7 +136,7 @@ if "USER" ∈ keys(ENV) && ENV["USER"] == "juliohm"
       end
       refimg = joinpath(datadir, "Voxel"*TIname*".png")
 
-      @test test_images(VisualTest(plot_voxel_reuse, refimg), popup=true) |> success
+      @test test_images(VisualTest(plot_voxel_reuse, refimg), popup=!istravislinux) |> success
     end
 
     for TIname in ["Strebelle","StoneWall"]
@@ -150,7 +153,7 @@ if "USER" ∈ keys(ENV) && ENV["USER"] == "juliohm"
       end
       refimg = joinpath(datadir, "Reals"*TIname*".png")
 
-      @test test_images(VisualTest(plot_reals, refimg), popup=true) |> success
+      @test test_images(VisualTest(plot_reals, refimg), popup=!istravislinux) |> success
     end
   end
 end
