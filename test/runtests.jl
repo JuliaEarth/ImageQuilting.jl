@@ -4,8 +4,11 @@ using Plots; gr()
 using VisualRegressionTests
 using Base.Test
 
-# configuration variables
-islocalhost = "USER" ∈ keys(ENV) && ENV["USER"] == "juliohm"
+# list of maintainers
+maintainers = ["juliohm"]
+
+# environment settings
+ismaintainer = "USER" ∈ keys(ENV) && ENV["USER"] ∈ maintainers
 istravislinux = "TRAVIS" ∈ keys(ENV) && ENV["TRAVIS_OS_NAME"] == "linux"
 datadir = joinpath(@__DIR__,"data")
 
@@ -124,8 +127,8 @@ end
 # visual regression tests are very hard to get
 # right given the frequent changes in the Julia
 # plotting packages, therefore we only run them
-# on a local machine and on Travis CI
-if islocalhost || istravislinux
+# on maintainers machines and on Travis CI
+if ismaintainer || istravislinux
   @testset "Visual tests" begin
     for TIname in ["StoneWall","WalkerLake"]
       function plot_voxel_reuse(fname)
