@@ -50,8 +50,8 @@ If you find ImageQuilting.jl useful in your work, please consider citing the fol
 }
 ```
 
-Research papers and presentations
----------------------------------
+Publications
+------------
 
 - Talk at JuliaCon 2017
 
