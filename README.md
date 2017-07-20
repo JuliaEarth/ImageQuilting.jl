@@ -22,11 +22,6 @@ Documentation
 - [**STABLE**][docs-stable-url] &mdash; **most recently tagged version of the documentation.**
 - [**LATEST**][docs-latest-url] &mdash; *in-development version of the documentation.*
 
-JuliaCon talk
--------------
-
-[![JuliaCon2017](https://img.youtube.com/vi/YJs7jl_Y9yM/0.jpg)](https://www.youtube.com/watch?v=YJs7jl_Y9yM)
-
 Contributing
 ------------
 
@@ -34,7 +29,7 @@ Contributions are very welcome, as are feature requests and suggestions.
 
 Please [open an issue](https://github.com/juliohm/ImageQuilting.jl/issues) if you encounter any problems.
 
-CITATION
+Citation
 --------
 
 If you find ImageQuilting.jl useful in your work, please consider citing the following paper:
@@ -54,6 +49,19 @@ If you find ImageQuilting.jl useful in your work, please consider citing the fol
   month={May}
 }
 ```
+
+Research papers and presentations
+---------------------------------
+
+- Talk at JuliaCon 2017
+
+[![JuliaCon2017](https://img.youtube.com/vi/YJs7jl_Y9yM/0.jpg)](https://www.youtube.com/watch?v=YJs7jl_Y9yM)
+
+- Hoffimann et al. 2017. *Stochastic Simulation by Image Quilting of Process-based Geological Models*
+[:link:](https://www.researchgate.net/publication/317151543_Stochastic_Simulation_by_Image_Quilting_of_Process-based_Geological_Models)
+
+- Hoffimann et al. 2015. *Geostatistical Modeling of Evolving Landscapes by Means of Image Quilting*
+[:link:](https://www.researchgate.net/publication/295902985_Geostatistical_Modeling_of_Evolving_Landscapes_by_Means_of_Image_Quilting)
 
 [travis-img]: https://travis-ci.org/juliohm/ImageQuilting.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/juliohm/ImageQuilting.jl
