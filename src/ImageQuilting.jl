@@ -19,7 +19,8 @@ __precompile__(false)
 
 module ImageQuilting
 
-using Images
+using ImageFiltering
+using ImageMorphology
 using LightGraphs
 using RecipesBase
 using Base: @nexprs, @nloops, @nref

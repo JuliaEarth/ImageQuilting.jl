@@ -2,7 +2,8 @@ julia 0.6
 Combinatorics
 StatsBase
 Primes
-Images 0.7.0
+ImageFiltering
+ImageMorphology
 LightGraphs 0.6.1
 RecipesBase
 ProgressMeter
