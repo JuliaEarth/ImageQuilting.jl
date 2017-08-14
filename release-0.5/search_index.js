@@ -173,7 +173,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Author",
     "title": "Author",
     "category": "page",
-    "text": "Júlio Hoffimann MendesI am a Ph.D. candidate in the Department of Energy Resources Engineering at Stanford University. Below are some ways we can connect:ResearchGate\nLinkedInThis package was inspired by many contributions in the Computer Graphics and Vision community. I acknowledge them for their work and transparent academic writing."
+    "text": "Júlio Hoffimann MendesI am a Ph.D. candidate in the Department of Energy Resources Engineering at Stanford University. You can find more about my research on my website. Below are some ways that we can connect:ResearchGate\nLinkedIn\nGitHub"
 },
 
 {
