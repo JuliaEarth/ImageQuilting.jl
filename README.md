@@ -53,17 +53,17 @@ If you find ImageQuilting.jl useful in your work, please consider citing the fol
 Publications
 ------------
 
-- Barfod et al. 2017. *Hydrostratigraphic modelling using multiple-point statistics and airborne transient electromagnetic methods* [:link:](https://www.researchgate.net/publication/319235285_Hydrostratigraphic_modelling_using_multiple-point_statistics_and_airborne_transient_electromagnetic_methods)
+- Barfod et al. 2017. *Hydrostratigraphic modelling using multiple-point statistics and airborne transient electromagnetic methods* [DOWNLOAD](https://www.researchgate.net/publication/319235285_Hydrostratigraphic_modelling_using_multiple-point_statistics_and_airborne_transient_electromagnetic_methods)
 
 - Talk at JuliaCon 2017
 
 [![JuliaCon2017](https://img.youtube.com/vi/YJs7jl_Y9yM/0.jpg)](https://www.youtube.com/watch?v=YJs7jl_Y9yM)
 
 - Hoffimann et al. 2017. *Stochastic Simulation by Image Quilting of Process-based Geological Models*
-[:link:](https://www.researchgate.net/publication/317151543_Stochastic_Simulation_by_Image_Quilting_of_Process-based_Geological_Models)
+[DOWNLOAD](https://www.researchgate.net/publication/317151543_Stochastic_Simulation_by_Image_Quilting_of_Process-based_Geological_Models)
 
 - Hoffimann et al. 2015. *Geostatistical Modeling of Evolving Landscapes by Means of Image Quilting*
-[:link:](https://www.researchgate.net/publication/295902985_Geostatistical_Modeling_of_Evolving_Landscapes_by_Means_of_Image_Quilting)
+[DOWNLOAD](https://www.researchgate.net/publication/295902985_Geostatistical_Modeling_of_Evolving_Landscapes_by_Means_of_Image_Quilting)
 
 [travis-img]: https://travis-ci.org/juliohm/ImageQuilting.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/juliohm/ImageQuilting.jl
