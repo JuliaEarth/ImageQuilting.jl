@@ -53,6 +53,8 @@ If you find ImageQuilting.jl useful in your work, please consider citing the fol
 Publications
 ------------
 
+- Barfod et al. 2017. *Hydrostratigraphic modelling using multiple-point statistics and airborne transient electromagnetic methods* [:link:](https://www.researchgate.net/publication/319235285_Hydrostratigraphic_modelling_using_multiple-point_statistics_and_airborne_transient_electromagnetic_methods)
+
 - Talk at JuliaCon 2017
 
 [![JuliaCon2017](https://img.youtube.com/vi/YJs7jl_Y9yM/0.jpg)](https://www.youtube.com/watch?v=YJs7jl_Y9yM)
