@@ -134,7 +134,7 @@ if ismaintainer || istravislinux
       function plot_voxel_reuse(fname)
         srand(2017)
         TI = training_image(TIname)[1:20,1:20,:]
-        plot(VoxelReuse(TI))
+        voxelreuseplot(TI)
         png(fname)
       end
       refimg = joinpath(datadir, "Voxel"*TIname*".png")

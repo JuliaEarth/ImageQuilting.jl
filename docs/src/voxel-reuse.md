@@ -17,11 +17,11 @@ gets better as `nreal` is made larger.
 
 A plot recipe is provided for template design in image quilting. In order to plot the voxel
 reuse of a training image, install [Plots.jl](https://github.com/JuliaPlots/Plots.jl) and
-any of its supported backends (e.g. [PyPlot.jl](https://github.com/JuliaPy/PyPlot.jl)):
+any of its supported backends (e.g. [GR.jl](https://github.com/jheinen/GR.jl)):
 
 ```julia
 Pkg.add("Plots")
-Pkg.add("PyPlot")
+Pkg.add("GR")
 ```
 
 The example below uses training images from the
@@ -35,7 +35,7 @@ using Plots
 TI₁ = training_image("Strebelle")
 TI₂ = training_image("StoneWall")
 
-plot(VoxelReuse(TI₁), label="Strebelle")
-plot!(VoxelReuse(TI₂), label="StoneWall")
+voxelreuseplot(TI₁, label="Strebelle")
+voxelreuseplot!(TI₂, label="StoneWall")
 ```
 ![Voxel reuse plot](images/voxelreuse.png)

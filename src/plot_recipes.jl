@@ -12,14 +12,16 @@
 ## ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-struct VoxelReuse
-  img::AbstractArray
+@userplot VoxelReusePlot
 
-  VoxelReuse(img) = ndims(img) == 3 ? new(img) : error("Image must be a 3D array")
-end
+@recipe function f(vr::VoxelReusePlot; tmin=nothing, tmax=nothing, nreal=10)
+  # get input image
+  img = vr.args[1]
 
-@recipe function f(vr::VoxelReuse; tmin=nothing, tmax=nothing, nreal=10)
-  extent = size(vr.img)
+  @assert ndims(img) == 3 "image is not 3D (add ghost dimension for 2D)"
+
+  # image extent
+  extent = size(img)
   idx = [extent...] .> 1
 
   # default support
@@ -33,7 +35,7 @@ end
   ts = collect(tmin:tmax)
 
   # compute voxel reuse
-  μs, σs = mapreuse(vr.img, ts, nreal)
+  μs, σs = mapreuse(img, ts, nreal)
 
   # highlight the optimum template range
   @series begin
