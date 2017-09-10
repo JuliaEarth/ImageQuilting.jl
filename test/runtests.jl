@@ -1,8 +1,11 @@
 using ImageQuilting
 using GeoStatsImages
 using Plots; gr()
-using VisualRegressionTests
 using Base.Test
+using VisualRegressionTests
+
+# setup GR backend for Travis CI
+ENV["GKSwstype"] = "100"
 
 # list of maintainers
 maintainers = ["juliohm"]
