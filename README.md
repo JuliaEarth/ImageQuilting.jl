@@ -1,3 +1,9 @@
+## News
+ImageQuilting.jl can now be used as one of the many solvers in the
+[GeoStats.jl](https://github.com/juliohm/GeoStats.jl) framework.
+For more information, please type `?ImgQuilt` in the Julia prompt
+after loading the package.
+
 ImageQuilting.jl
 ================
 
