@@ -56,13 +56,10 @@ function solve_single(problem::SimulationProblem, var::Symbol, solver::ImgQuilt)
   # sanity checks
   @assert pdomain isa RegularGrid "ImgQuilt solver only supports regular grids"
   @assert ndims(pdomain) ∈ [2,3] "Number of dimensions must be 2 or 3"
+  @assert var ∈ keys(solver.params) "Parameters for variable `$var` not found"
 
   # get user parameters
-  if var in keys(solver.params)
-    varparams = solver.params[var]
-  else
-    varparams = ImgQuiltParam()
-  end
+  varparams = solver.params[var]
 
   # add ghost dimension to simulation grid if necessary
   sz = ndims(pdomain) == 2 ? (size(pdomain)..., 1) : size(pdomain)

@@ -177,16 +177,19 @@ if ImageQuilting.cl ≠ nothing && ImageQuilting.clfft ≠ nothing
 end
 
 @testset "GeoStats.jl API" begin
+  geodata = GeoDataFrame(DataFrames.DataFrame(x=[25.,50.,75.], y=[25.,75.,50.], variable=[1.,0.,1.]), [:x,:y])
   grid = RegularGrid{Float64}(100,100)
-  problem = SimulationProblem(grid, :variable => Float64, 3)
+  problem = SimulationProblem(geodata, grid, :variable, 3)
 
   TI = training_image("Strebelle")
   solver = ImgQuilt(:variable => @NT(TI=TI, template=(30,30,1)))
 
   srand(2017)
   solution = solve(problem, solver)
-
   @test keys(solution.realizations) ⊆ [:variable]
+
+  incomplete_solver = ImgQuilt()
+  @test_throws AssertionError solve(problem, incomplete_solver)
 
   if ismaintainer || istravislinux
     function plot_solution(fname)
