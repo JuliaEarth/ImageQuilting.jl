@@ -5,7 +5,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Home",
     "category": "page",
-    "text": ""
+    "text": "note: News\nImageQuilting.jl can now be used as one of the many solvers in the GeoStats.jl framework. For more information, please type ?ImgQuilt in the Julia prompt after loading the package."
 },
 
 {
