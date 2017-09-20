@@ -44,6 +44,10 @@ catch
   global clfft = nothing
 end
 
+# GeoStats.jl interface
+importall GeoStatsBase
+using GeoStatsDevTools
+
 include("utils.jl")
 include("utils_gpu.jl")
 include("datatypes.jl")
@@ -58,14 +62,18 @@ include("simplex_transform.jl")
 include("voxel_reuse.jl")
 include("iqsim.jl")
 
+include("geostats_api.jl")
+
 export
   # functions
   iqsim,
   voxelreuse,
 
-  # types
+  # data types
   SoftData,
   HardData,
-  VoxelReuse
+
+  # geostats solver
+  ImgQuilt
 
 end
