@@ -5,7 +5,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Home",
     "category": "page",
-    "text": ""
+    "text": "note: News\nImageQuilting.jl can now be used as one of the many solvers in the GeoStats.jl framework. For more information, please type ?ImgQuilt in the Julia prompt after loading the package."
 },
 
 {
@@ -133,7 +133,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Voxel reuse",
     "title": "Plot recipe",
     "category": "section",
-    "text": "A plot recipe is provided for template design in image quilting. In order to plot the voxel reuse of a training image, install Plots.jl and any of its supported backends (e.g. PyPlot.jl):Pkg.add(\"Plots\")\nPkg.add(\"PyPlot\")The example below uses training images from the GeoStatsImages.jl package:using ImageQuilting\nusing GeoStatsImages\nusing Plots\n\nTI₁ = training_image(\"Strebelle\")\nTI₂ = training_image(\"StoneWall\")\n\nplot(VoxelReuse(TI₁), label=\"Strebelle\")\nplot!(VoxelReuse(TI₂), label=\"StoneWall\")(Image: Voxel reuse plot)"
+    "text": "A plot recipe is provided for template design in image quilting. In order to plot the voxel reuse of a training image, install Plots.jl and any of its supported backends (e.g. GR.jl):Pkg.add(\"Plots\")\nPkg.add(\"GR\")The example below uses training images from the GeoStatsImages.jl package:using ImageQuilting\nusing GeoStatsImages\nusing Plots\n\nTI₁ = training_image(\"Strebelle\")\nTI₂ = training_image(\"StoneWall\")\n\nvoxelreuseplot(TI₁, label=\"Strebelle\")\nvoxelreuseplot!(TI₂, label=\"StoneWall\")(Image: Voxel reuse plot)"
 },
 
 {
