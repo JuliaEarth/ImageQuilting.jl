@@ -1,3 +1,4 @@
+using GeoStats
 using ImageQuilting
 using GeoStatsImages
 using Plots; gr()
@@ -172,5 +173,28 @@ if ImageQuilting.cl ≠ nothing && ImageQuilting.clfft ≠ nothing
     srand(0); realscpu = iqsim(TI, 10, 10, 10, size(TI)..., gpu=false)
     srand(0); realsgpu = iqsim(TI, 10, 10, 10, size(TI)..., gpu=true)
     @test realscpu[1] == realsgpu[1]
+  end
+end
+
+@testset "GeoStats.jl API" begin
+  grid = RegularGrid{Float64}(100,100)
+  problem = SimulationProblem(grid, :variable => Float64, 3)
+
+  TI = training_image("Strebelle")
+  solver = ImgQuilt(:variable => @NT(TI=TI, template=(30,30,1)))
+
+  srand(2017)
+  solution = solve(problem, solver)
+
+  @test keys(solution.realizations) ⊆ [:variable]
+
+  if ismaintainer || istravislinux
+    function plot_solution(fname)
+      plot(solution, size=(1000,300))
+      png(fname)
+    end
+    refimg = joinpath(datadir, "GeoStatsAPI.png")
+
+    @test test_images(VisualTest(plot_solution, refimg), popup=!istravislinux) |> success
   end
 end
