@@ -25,7 +25,8 @@ Image quilting simulation solver.
 * `soft`     - An instance of `SoftData`
 * `cut`      - Boundary cut algorithm (:boykov (default) or :dijkstra)
 * `path`     - Simulation path (:rasterup (default), :rasterdown, :dilation, or :random)
-* `simplex`  - Whether to apply or not the simplex transform
+* `simplex`  - Whether to apply or not the simplex transform (default to false)
+* `inactive` - Vector of inactive voxels (i.e. tuples (i,j,k)) in the grid
 * `tol`      - Initial relaxation tolerance in (0,1] (default to 0.1)
 
 ## Global parameters
@@ -42,6 +43,7 @@ Image quilting simulation solver.
   @param cut           = :boykov
   @param path          = :rasterup
   @param simplex       = false
+  @param inactive      = nothing
   @param tol           = .1
   @global threads      = CPU_PHYSICAL_CORES
   @global gpu          = false
@@ -70,9 +72,17 @@ function solve_single(problem::SimulationProblem, var::Symbol, solver::ImgQuilt)
     push!(hd, ind2sub(sz, loc) => value(pdata, datloc, var))
   end
 
+  # disable inactive voxels
+  shape = HardData()
+  if varparams.inactive ≠ nothing
+    for icoords in varparams.inactive
+      push!(shape, icoords => NaN)
+    end
+  end
+
   # run image quilting core function
   reals = iqsim(varparams.TI, varparams.template..., sz...,
-                soft=varparams.soft, hard=hd, tol=varparams.tol,
+                soft=varparams.soft, hard=merge(hd, shape), tol=varparams.tol,
                 cut=varparams.cut, path=varparams.path, simplex=varparams.simplex,
                 threads=solver.threads, gpu=solver.gpu, showprogress=solver.showprogress)
 
