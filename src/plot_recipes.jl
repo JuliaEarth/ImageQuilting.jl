@@ -43,7 +43,7 @@
     best = ts[rank[1:min(5,length(ts))]]
     xmin, xmax = minimum(best), maximum(best)
 
-    reference = μs[1] - σs[1]
+    reference = minimum(μs - σs)
     ymin = max(0., reference - .05)
     ymax = ymin + .008
 
