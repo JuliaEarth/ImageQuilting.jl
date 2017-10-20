@@ -165,24 +165,14 @@ if ismaintainer || istravislinux
   end
 end
 
-if ImageQuilting.cl ≠ nothing && ImageQuilting.clfft ≠ nothing
-  @testset "GPU" begin
-    # CPU and GPU give same results
-    TI = ones(20,20,20)
-    TI[10:end,:,:] = 2
-    srand(0); realscpu = iqsim(TI, 10, 10, 10, size(TI)..., gpu=false)
-    srand(0); realsgpu = iqsim(TI, 10, 10, 10, size(TI)..., gpu=true)
-    @test realscpu[1] == realsgpu[1]
-  end
-end
-
 @testset "GeoStats.jl API" begin
   geodata = GeoDataFrame(DataFrames.DataFrame(x=[25.,50.,75.], y=[25.,75.,50.], variable=[1.,0.,1.]), [:x,:y])
   grid = RegularGrid{Float64}(100,100)
   problem = SimulationProblem(geodata, grid, :variable, 3)
 
   TI = training_image("Strebelle")
-  solver = ImgQuilt(:variable => @NT(TI=TI, template=(30,30,1)))
+  inactive = [(i,j,1) for i in 1:30 for j in 1:30]
+  solver = ImgQuilt(:variable => @NT(TI=TI, template=(30,30,1), inactive=inactive))
 
   srand(2017)
   solution = solve(problem, solver)
@@ -199,5 +189,16 @@ end
     refimg = joinpath(datadir, "GeoStatsAPI.png")
 
     @test test_images(VisualTest(plot_solution, refimg), popup=!istravislinux) |> success
+  end
+end
+
+if ImageQuilting.cl ≠ nothing && ImageQuilting.clfft ≠ nothing
+  @testset "GPU" begin
+    # CPU and GPU give same results
+    TI = ones(20,20,20)
+    TI[10:end,:,:] = 2
+    srand(0); realscpu = iqsim(TI, 10, 10, 10, size(TI)..., gpu=false)
+    srand(0); realsgpu = iqsim(TI, 10, 10, 10, size(TI)..., gpu=true)
+    @test realscpu[1] == realsgpu[1]
   end
 end
