@@ -185,15 +185,17 @@ function iqsim(training_image::AbstractArray,
       auxpad = padarray(aux.data, Pad(:symmetric, [0,0,0], [nx-lx,ny-ly,nz-lz]))
       auxpad[isnan.(auxpad)] = 0
 
-      push!(softgrid, auxpad)
-
       auxTI = copy(aux.transform(training_image))
 
       @assert size(auxTI) == size(TI) "auxiliary TI must have the same size as TI"
 
-      # inactive voxels in the auxiliary training image
       auxTI[NaNTI] = 0
 
+      # always work with floating point
+      auxpad = map(Float64, auxpad)
+      auxTI  = map(Float64, auxTI)
+
+      push!(softgrid, auxpad)
       push!(softTI, auxTI)
     end
   end

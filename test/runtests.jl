@@ -42,6 +42,13 @@ end
   trend = SoftData(aux, x -> aux)
   iqsim(TI, 10, 10, 10, size(TI)..., soft=trend)
   @test aux == ones(TI)
+
+  # auxiliary variable with integer type
+  TI = ones(20,20,20)
+  aux = [i for i in 1:20, j in 1:20, k in 1:20]
+  trend = SoftData(aux, x -> aux)
+  iqsim(TI, 10, 10, 10, size(TI)..., soft=trend)
+  @test aux == [i for i in 1:20, j in 1:20, k in 1:20]
 end
 
 @testset "Hard data" begin
