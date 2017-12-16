@@ -22,7 +22,6 @@ end
   end
 
   AUX = [i for i in 1:nx, j in 1:ny, k in 1:nz]
-  sdata = SoftData(AUX, _ -> AUX)
 
-  @bench "Flumy" iqsim(TI, 50, 50, 20, size(TI)..., hard=shape, soft=sdata, tol=.01)
+  @bench "Flumy" iqsim(TI, 50, 50, 20, size(TI)..., hard=shape, soft=[(AUX,AUX)], tol=.01)
 end
