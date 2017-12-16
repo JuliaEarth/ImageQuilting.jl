@@ -62,13 +62,12 @@ function imfilter_gpu{T<:Real,K<:Real,N}(img::AbstractArray{T,N}, kern::Abstract
   AF = padarray(AF, Pad(:symmetric, zeros(Int, ndims(AF)), -paddings))
   AF = parent(AF)
 
-  out = []
   if border == "inner"
     out = Array{realtype(eltype(AF))}(([size(img)...] - prepad - postpad)...)
     indexesA = ntuple(d->postpad[d]+1:size(img,d)-prepad[d], N)
     copyreal!(out, AF, indexesA)
   else
-    out = Array(realtype(eltype(AF)), size(img))
+    out = Array{realtype(eltype(AF))}(size(img))
     indexesA = ntuple(d->postpad[d]+1:size(img,d)+postpad[d], N)
     copyreal!(out, AF, indexesA)
   end
