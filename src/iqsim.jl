@@ -52,6 +52,7 @@ function iqsim(training_image::AbstractArray,
     for aux in soft
       @assert ndims(aux.data) == 3 "soft data is not 3D (add ghost dimension for 2D)"
       @assert all([size(aux.data)...] .≥ [gridsizex, gridsizey, gridsizez]) "soft data size < grid size"
+      @assert size(aux.dataTI) == size(training_image) "auxiliary TI must have the same size as TI"
     end
   end
 
@@ -176,7 +177,7 @@ function iqsim(training_image::AbstractArray,
     end
   end
 
-  # pad soft data and soft transform training image
+  # pad soft data
   softgrid = Vector{Array{Float64,3}}()
   softTI   = Vector{Array{Float64,3}}()
   if soft ≠ nothing
@@ -188,10 +189,7 @@ function iqsim(training_image::AbstractArray,
       auxpad = parent(auxpad)
       auxpad[isnan.(auxpad)] = 0
 
-      auxTI = copy(aux.transform(training_image))
-
-      @assert size(auxTI) == size(TI) "auxiliary TI must have the same size as TI"
-
+      auxTI = copy(aux.dataTI)
       auxTI[NaNTI] = 0
 
       # always work with floating point

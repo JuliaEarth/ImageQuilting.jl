@@ -14,7 +14,7 @@
 
 struct SoftData
   data::AbstractArray
-  transform::Function
+  dataTI::AbstractArray
 end
 
 const HardData = Dict{NTuple{3,Integer},Real}
