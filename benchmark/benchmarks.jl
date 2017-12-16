@@ -12,7 +12,7 @@ srand(2017)
 end
 
 @benchgroup "3D simulation" begin
-  TI = training_image("Flumy")
+  TI = training_image("Flumy")[:,1:200,:]
   nx, ny, nz = size(TI)
 
   shape = HardData()
