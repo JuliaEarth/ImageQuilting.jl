@@ -17,7 +17,7 @@
           tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
           gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
           overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,
-          soft::AbstractVector=[], hard=nothing, tol::Real=.1,
+          soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1,
           cut::Symbol=:boykov, path::Symbol=:rasterup, simplex::Bool=false,
           nreal::Integer=1, threads::Integer=CPU_PHYSICAL_CORES,
           gpu::Bool=false, debug::Bool=false, showprogress::Bool=false)
@@ -37,7 +37,7 @@ Performs image quilting simulation as described in Hoffimann et al. 2017.
 * `overlapx`,`overlapy`,`overlapz` is the percentage of overlap
 * `soft` is a vector of `(data,dataTI)` pairs
 * `hard` is an instance of `HardData`
-* `tol` is the initial relaxation tolerance in (0,1]
+* `tol` is the initial relaxation tolerance in (0,1] (default to .1)
 * `cut` is the cut algorithm (`:dijkstra` or `:boykov`)
 * `path` is the simulation path (`:rasterup`, `:rasterdown`, `:dilation` or `:random`)
 * `simplex` informs whether to apply or not the simplex transform to the image
@@ -60,7 +60,7 @@ function iqsim(training_image::AbstractArray,
                tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
                gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
                overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,
-               soft::AbstractVector=[], hard=nothing, tol::Real=.1,
+               soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1,
                cut::Symbol=:boykov, path::Symbol=:rasterup, simplex::Bool=false,
                nreal::Integer=1, threads::Integer=CPU_PHYSICAL_CORES,
                gpu::Bool=false, debug::Bool=false, showprogress::Bool=false)
@@ -96,8 +96,7 @@ function iqsim(training_image::AbstractArray,
   end
 
   # hard data checks
-  if hard ≠ nothing
-    @assert isa(hard, HardData)
+  if !isempty(hard)
     locations = Int[loc[i] for loc in keys(hard), i=1:3]
     @assert all(maximum(locations, 1) .≤ [gridsizex gridsizey gridsizez]) "hard data locations outside of grid"
     @assert all(minimum(locations, 1) .> 0) "hard data locations must be positive indexes"
@@ -173,7 +172,7 @@ function iqsim(training_image::AbstractArray,
   # keep track of hard data and inactive voxels
   skipped = Set{Tuple{Int,Int,Int}}()
   datum   = Vector{Tuple{Int,Int,Int}}()
-  if hard ≠ nothing
+  if !isempty(hard)
     # hard data in grid format
     hardgrid = zeros(nx, ny, nz)
     preset = falses(nx, ny, nz)
@@ -341,7 +340,7 @@ function iqsim(training_image::AbstractArray,
 
       # compute hard and soft distances
       auxdistances = []
-      if hard ≠ nothing && any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
+      if !isempty(hard) && any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
         harddev = hardgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
         hsimplex = simplex ? simplex_transform(harddev, nvertices) : [harddev]
         D = convdist(simplexTI, hsimplex, weights=preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
@@ -413,7 +412,7 @@ function iqsim(training_image::AbstractArray,
     debug && push!(voxelreuse, sum(cutgrid)/overlap_volume)
 
     # hard data and shape correction
-    if hard ≠ nothing
+    if !isempty(hard)
       simgrid[preset] = hardgrid[preset]
       simgrid[.!activated] = NaN
       debug && (cutgrid[.!activated] = NaN)
