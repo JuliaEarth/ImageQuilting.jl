@@ -13,8 +13,9 @@
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 struct SoftData
-  data::AbstractArray
-  dataTI::AbstractArray
+  function SoftData(A, B)
+    Base.depwarn("`SoftData(AUX, TI -> AUXTI)` is deprecated, please pass `soft=[(AUX,AUXTI)]` to `iqsim` instead.", :SoftData)
+  end
 end
 
 const HardData = Dict{NTuple{3,Integer},Real}

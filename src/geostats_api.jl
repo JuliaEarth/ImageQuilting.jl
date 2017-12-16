@@ -39,11 +39,11 @@ Image quilting simulation solver.
   @param TI
   @param template
   @param overlap       = (1/6, 1/6, 1/6)
-  @param soft          = nothing
   @param cut           = :boykov
   @param path          = :rasterup
   @param simplex       = false
   @param inactive      = nothing
+  @param soft          = []
   @param tol           = .1
   @global threads      = CPU_PHYSICAL_CORES
   @global gpu          = false

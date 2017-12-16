@@ -16,7 +16,7 @@ function iqsim(training_image::AbstractArray,
                tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
                gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
                overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,
-               soft=nothing, hard=nothing, tol::Real=.1,
+               soft::AbstractVector=[], hard=nothing, tol::Real=.1,
                cut::Symbol=:boykov, path::Symbol=:rasterup, simplex::Bool=false,
                nreal::Integer=1, threads::Integer=CPU_PHYSICAL_CORES,
                gpu::Bool=false, debug::Bool=false, showprogress::Bool=false)
@@ -43,16 +43,11 @@ function iqsim(training_image::AbstractArray,
   end
 
   # soft data checks
-  if soft ≠ nothing
-    @assert isa(soft, SoftData) || isa(soft, AbstractArray{SoftData})
-
-    # encapsulate single auxiliary variable in an array
-    isa(soft, SoftData) && (soft = [soft])
-
-    for aux in soft
-      @assert ndims(aux.data) == 3 "soft data is not 3D (add ghost dimension for 2D)"
-      @assert all([size(aux.data)...] .≥ [gridsizex, gridsizey, gridsizez]) "soft data size < grid size"
-      @assert size(aux.dataTI) == size(training_image) "auxiliary TI must have the same size as TI"
+  if !isempty(soft)
+    for (aux, auxTI) in soft
+      @assert ndims(aux) == 3 "soft data is not 3D (add ghost dimension for 2D)"
+      @assert all([size(aux)...] .≥ [gridsizex, gridsizey, gridsizez]) "soft data size < grid size"
+      @assert size(auxTI) == size(training_image) "auxiliary TI must have the same size as TI"
     end
   end
 
@@ -177,27 +172,27 @@ function iqsim(training_image::AbstractArray,
     end
   end
 
-  # pad soft data
+  # preprocess soft data
   softgrid = Vector{Array{Float64,3}}()
   softTI   = Vector{Array{Float64,3}}()
-  if soft ≠ nothing
-    for aux in soft
-      mx, my, mz = size(aux.data)
+  if !isempty(soft)
+    for (aux, auxTI) in soft
+      mx, my, mz = size(aux)
       lx = min(mx,nx); ly = min(my,ny); lz = min(mz,nz)
 
-      auxpad = padarray(aux.data, Pad(:symmetric, [0,0,0], [nx-lx,ny-ly,nz-lz]))
-      auxpad = parent(auxpad)
-      auxpad[isnan.(auxpad)] = 0
+      AUX = padarray(aux, Pad(:symmetric, [0,0,0], [nx-lx,ny-ly,nz-lz]))
+      AUX = parent(AUX)
+      AUX[isnan.(AUX)] = 0
 
-      auxTI = copy(aux.dataTI)
-      auxTI[NaNTI] = 0
+      AUXTI = copy(auxTI)
+      AUXTI[NaNTI] = 0
 
       # always work with floating point
-      auxpad = Float64.(auxpad)
-      auxTI  = Float64.(auxTI)
+      AUX   = Float64.(AUX)
+      AUXTI = Float64.(AUXTI)
 
-      push!(softgrid, auxpad)
-      push!(softTI, auxTI)
+      push!(softgrid, AUX)
+      push!(softTI, AUXTI)
     end
   end
 

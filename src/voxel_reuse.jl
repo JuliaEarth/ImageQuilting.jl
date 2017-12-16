@@ -33,7 +33,8 @@ function voxelreuse(training_image::AbstractArray,
   gridsizey = ntiley * (tplsizey - ovy) + ovy
   gridsizez = ntilez * (tplsizez - ovz) + ovz
 
-  _, _, voxs = iqsim(training_image, tplsizex, tplsizey, tplsizez,
+  _, _, voxs = iqsim(training_image,
+                     tplsizex, tplsizey, tplsizez,
                      gridsizex, gridsizey, gridsizez,
                      overlapx=overlapx, overlapy=overlapy, overlapz=overlapz,
                      cut=cut, simplex=simplex, nreal=nreal,

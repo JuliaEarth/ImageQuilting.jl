@@ -70,10 +70,12 @@ export
   voxelreuse,
 
   # data types
-  SoftData,
   HardData,
 
   # geostats solver
-  ImgQuilt
+  ImgQuilt,
+
+  # deprecated
+  SoftData
 
 end

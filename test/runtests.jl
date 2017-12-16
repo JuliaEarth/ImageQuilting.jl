@@ -32,22 +32,20 @@ end
   # trends with soft data
   TI = [zeros(10,20,1); ones(10,20,1)]
   trend = [zeros(20,10,1) ones(20,10,1)]
-  reals = iqsim(TI, 10, 10, 1, size(TI)..., soft=SoftData(trend, TI), tol=1)
+  reals = iqsim(TI, 10, 10, 1, size(TI)..., soft=[(trend,TI)], tol=1)
   @test mean(reals[1][:,1:10,:]) ≤ mean(reals[1][:,11:20,:])
 
   # no side effects with soft data
   TI = ones(20,20,20)
   TI[:,5,:] = NaN
   aux = ones(TI)
-  trend = SoftData(aux, aux)
-  iqsim(TI, 10, 10, 10, size(TI)..., soft=trend)
+  iqsim(TI, 10, 10, 10, size(TI)..., soft=[(aux,aux)])
   @test aux == ones(TI)
 
   # auxiliary variable with integer type
   TI = ones(20,20,20)
   aux = [i for i in 1:20, j in 1:20, k in 1:20]
-  trend = SoftData(aux, aux)
-  iqsim(TI, 10, 10, 10, size(TI)..., soft=trend)
+  iqsim(TI, 10, 10, 10, size(TI)..., soft=[(aux,aux)])
   @test aux == [i for i in 1:20, j in 1:20, k in 1:20]
 end
 
@@ -96,13 +94,12 @@ end
   TI = ones(20,20,20)
   TI[:,5,:] = NaN
   aux = ones(TI)
-  trend = SoftData(aux, aux)
   shape = HardData((i,j,k)=>NaN for i=1:20, j=5, k=1:20)
   reals = iqsim(TI, 10, 10, 10, size(TI)..., hard=shape)
   @test all(isnan.(reals[1][:,5,:]))
   @test all(reals[1][:,1:4,:] .== 1)
   @test all(reals[1][:,6:20,:] .== 1)
-  reals = iqsim(TI, 10, 10, 10, size(TI)..., hard=shape, soft=trend)
+  reals = iqsim(TI, 10, 10, 10, size(TI)..., hard=shape, soft=[(aux,aux)])
   @test all(isnan.(reals[1][:,5,:]))
   @test all(reals[1][:,1:4,:] .== 1)
   @test all(reals[1][:,6:20,:] .== 1)
