@@ -15,10 +15,11 @@
 function iqsim(training_image::AbstractArray,
                tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
                gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
-               overlapx=1/6, overlapy=1/6, overlapz=1/6,
-               soft=nothing, hard=nothing, tol=.1,
-               cut=:boykov, path=:rasterup, simplex=false, nreal=1,
-               threads=CPU_PHYSICAL_CORES, gpu=false, debug=false, showprogress=false)
+               overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,
+               soft=nothing, hard=nothing, tol::Real=.1,
+               cut::Symbol=:boykov, path::Symbol=:rasterup, simplex::Bool=false,
+               nreal::Integer=1, threads::Integer=CPU_PHYSICAL_CORES,
+               gpu::Bool=false, debug::Bool=false, showprogress::Bool=false)
 
   # GPU setup
   global GPU = gpu ? gpu_setup() : nothing
@@ -94,7 +95,6 @@ function iqsim(training_image::AbstractArray,
   end
 
   # hard data in grid format
-  hardgrid = []; preset = []; activated = []
   if hard ≠ nothing
     hardgrid = zeros(nx, ny, nz)
     preset = falses(nx, ny, nz)
@@ -113,9 +113,9 @@ function iqsim(training_image::AbstractArray,
   end
 
   # keep track of hard data and inactive voxels
-  skipped = Set(); datum = []; rastered = []
+  skipped = Set{Tuple{Int,Int,Int}}()
+  datum = Vector{Tuple{Int,Int,Int}}()
   if hard ≠ nothing
-    rastered = falses(nx, ny, nz)
     for k=1:ntilez, j=1:ntiley, i=1:ntilex
       # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
       iₛ = (i-1)spacingx + 1
@@ -128,13 +128,11 @@ function iqsim(training_image::AbstractArray,
       if all(.!activated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
         push!(skipped, (i,j,k))
       else
-        rastered[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = true
         if any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
           push!(datum, (i,j,k))
         end
       end
     end
-    rastered[.!activated] = false
 
     # grid must contain active voxels
     any_activated = any(activated[1:gridsizex,1:gridsizey,1:gridsizez])
@@ -142,13 +140,12 @@ function iqsim(training_image::AbstractArray,
   end
 
   # always work with floating point
-  TI = map(Float64, training_image)
+  TI = Float64.(training_image)
 
   # inactive voxels in the training image
   NaNTI = isnan.(TI); TI[NaNTI] = 0
 
   # perform simplex transform
-  simplexTI = [TI]; nvertices = 1
   if simplex
     categories = Set(TI[.!NaNTI])
     ncategories = nvertices = length(categories) - 1
@@ -156,6 +153,9 @@ function iqsim(training_image::AbstractArray,
     @assert categories == Set(0:ncategories) "categories should be labeled 1, 2, 3,..."
 
     simplexTI = simplex_transform(TI, nvertices)
+  else
+    nvertices = 1
+    simplexTI = [TI]
   end
 
   # disable tiles in the training image if they contain inactive voxels
@@ -176,13 +176,15 @@ function iqsim(training_image::AbstractArray,
   end
 
   # pad soft data and soft transform training image
-  softgrid = []; softTI = []
+  softgrid = Vector{Array{Float64,3}}()
+  softTI   = Vector{Array{Float64,3}}()
   if soft ≠ nothing
     for aux in soft
       mx, my, mz = size(aux.data)
       lx = min(mx,nx); ly = min(my,ny); lz = min(mz,nz)
 
       auxpad = padarray(aux.data, Pad(:symmetric, [0,0,0], [nx-lx,ny-ly,nz-lz]))
+      auxpad = parent(auxpad)
       auxpad[isnan.(auxpad)] = 0
 
       auxTI = copy(aux.transform(training_image))
@@ -192,8 +194,8 @@ function iqsim(training_image::AbstractArray,
       auxTI[NaNTI] = 0
 
       # always work with floating point
-      auxpad = map(Float64, auxpad)
-      auxTI  = map(Float64, auxTI)
+      auxpad = Float64.(auxpad)
+      auxTI  = Float64.(auxTI)
 
       push!(softgrid, auxpad)
       push!(softTI, auxTI)
@@ -207,11 +209,11 @@ function iqsim(training_image::AbstractArray,
   boundary_cut = cut == :dijkstra ? dijkstra_cut : boykov_kolmogorov_cut
 
   # main output is a vector of 3D grids
-  realizations = []
+  realizations = Vector{Array{Float64,3}}()
 
   # for each realization we have:
-  boundarycuts = [] # boundary cut
-  voxelreuse = Float64[] # voxel reuse
+  boundarycuts = Vector{Array{Float64,3}}() # boundary cut
+  voxelreuse = Vector{Float64}() # voxel reuse
 
   # show progress and estimated time duration
   showprogress && (progress = Progress(nreal, color=:black))
@@ -222,10 +224,10 @@ function iqsim(training_image::AbstractArray,
   for real=1:nreal
     # allocate memory for current simulation
     simgrid = zeros(nx, ny, nz)
-    cutgrid = debug ? zeros(nx, ny, nz) : []
+    debug && (cutgrid = zeros(nx, ny, nz))
 
     # keep track of pasted tiles
-    pasted = Set()
+    pasted = Set{Tuple{Int,Int,Int}}()
 
     # construct simulation path
     simpath = genpath((ntilex,ntiley,ntilez), path, datum)

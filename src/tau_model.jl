@@ -12,7 +12,7 @@
 ## ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-function tau_model(events::AbstractVector{Int}, D₁::AbstractArray, Dₙ::AbstractArray)
+function tau_model(events::AbstractVector, D₁::AbstractArray, Dₙ::AbstractArray)
   nevents = length(events)
 
   # trivial mass function
