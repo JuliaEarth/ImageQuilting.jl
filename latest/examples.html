@@ -21,14 +21,15 @@ reals, cuts, voxs = iqsim(TI, 30, 30, 1, size(TI)..., hard=data, debug=true)</co
 using GeoStatsImages
 using Images
 
-TI = training_image(&quot;WalkerLake&quot;)
+TI    = training_image(&quot;WalkerLake&quot;)
 truth = training_image(&quot;WalkerLakeTruth&quot;)
 
 G(m) = imfilter(m, KernelFactors.IIRGaussian([10,10,0]))
 
-data = SoftData(G(truth), G)
+data   = G(truth)
+dataTI = G(TI)
 
-reals = iqsim(TI, 27, 27, 1, size(truth)..., soft=data, nreal=3)</code></pre><p><img src="images/soft.png" alt="Soft data conditioning"/></p><h2><a class="nav-anchor" id="Masked-grids-1" href="#Masked-grids-1">Masked grids</a></h2><p>Voxels marked with the special symbol <code>NaN</code> are treated as inactive. The algorithm will skip tiles that only contain inactive voxels to save computation and will generate realizations that are consistent with the mask. This is particularly useful with complex 3D models that have large inactive portions.</p><pre><code class="language-julia">using ImageQuilting
+reals = iqsim(TI, 27, 27, 1, size(truth)..., soft=[(data,dataTI)], nreal=3)</code></pre><p><img src="images/soft.png" alt="Soft data conditioning"/></p><h2><a class="nav-anchor" id="Masked-grids-1" href="#Masked-grids-1">Masked grids</a></h2><p>Voxels marked with the special symbol <code>NaN</code> are treated as inactive. The algorithm will skip tiles that only contain inactive voxels to save computation and will generate realizations that are consistent with the mask. This is particularly useful with complex 3D models that have large inactive portions.</p><pre><code class="language-julia">using ImageQuilting
 using GeoStatsImages
 
 TI = training_image(&quot;Strebelle&quot;)

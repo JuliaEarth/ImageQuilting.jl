@@ -5,7 +5,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Home",
     "category": "page",
-    "text": "note: News\nImageQuilting.jl can now be used as one of the many solvers in the GeoStats.jl framework. For more information, please type ?ImgQuilt in the Julia prompt after loading the package."
+    "text": ""
 },
 
 {
@@ -33,11 +33,35 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "index.html#ImageQuilting.ImgQuilt",
+    "page": "Home",
+    "title": "ImageQuilting.ImgQuilt",
+    "category": "Type",
+    "text": "ImgQuilt(var₁=>param₁, var₂=>param₂, ...)\n\nImage quilting simulation solver by Hoffimann et al. 2017.\n\nParameters\n\nRequired\n\nTI       - Training image\ntemplate - Template size in x, y and z\n\nOptional\n\noverlap  - Overlap size in x, y and z (default to (1/6, 1/6, 1/6))\ncut      - Boundary cut algorithm (:boykov (default) or :dijkstra)\npath     - Simulation path (:rasterup (default), :rasterdown, :dilation, or :random)\nsimplex  - Whether to apply or not the simplex transform (default to false)\ninactive - Vector of inactive voxels (i.e. tuples (i,j,k)) in the grid\nsoft     - A vector of (data,dataTI) pairs\ntol      - Initial relaxation tolerance in (0,1] (default to 0.1)\n\nGlobal parameters\n\nOptional\n\nthreads      - Number of threads in FFT (default to number of physical CPU cores)\ngpu          - Whether to use the GPU or the CPU (default to false)\nshowprogress - Whether to show or not the estimated time duration (default to false)\n\n\n\n\n\n"
+},
+
+{
     "location": "index.html#Usage-1",
     "page": "Home",
     "title": "Usage",
     "category": "section",
-    "text": "reals = iqsim(training_image::AbstractArray,\n              tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,\n              gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;\n              overlapx=1/6, overlapy=1/6, overlapz=1/6,\n              soft=nothing, hard=nothing, tol=.1,\n              cut=:boykov, path=:rasterup, simplex=false, nreal=1,\n              threads=CPU_PHYSICAL_CORES, gpu=false, debug=false, showprogress=false)where:requiredtraining_image can be any 3D array (add ghost dimension for 2D)\ntplsizex,tplsizey,tplsizez is the template size\ngridsizex,gridsizey,gridsizez is the simulation sizeoptionaloverlapx,overlapy,overlapz is the percentage of overlap\nsoft is an instance of SoftData or an array of such instances\nhard is an instance of HardData\ntol is the initial relaxation tolerance in (0,1]\ncut is the cut algorithm (:dijkstra or :boykov)\npath is the simulation path (:rasterup, :rasterdown, :dilation or :random)\nsimplex informs whether to apply or not the simplex transform to the image\nnreal is the number of realizations\nthreads is the number of threads for the FFT (default to all CPU cores)\ngpu informs whether to use the GPU or the CPU\ndebug informs whether to export or not the boundary cuts and voxel reuse\nshowprogress informs whether to show or not estimated time durationThe main output reals consists of a list of 3D realizations that can be indexed with reals[1], reals[2], ..., reals[nreal]. If debug=true, additional output is generated:reals, cuts, voxs = iqsim(..., debug=true)cuts[i] is the boundary cut for reals[i] and voxs[i] is the associated voxel reuse.In addition, this package provides utility functions for template design in image quilting. For more details, please refer to the Voxel reuse section."
+    "text": "This package is part of the GeoStats.jl framework. Solver options are displayed below:ImgQuilt"
+},
+
+{
+    "location": "index.html#ImageQuilting.iqsim",
+    "page": "Home",
+    "title": "ImageQuilting.iqsim",
+    "category": "Function",
+    "text": "iqsim(training_image::AbstractArray,\n      tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,\n      gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;\n      overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,\n      soft::AbstractVector=[], hard=nothing, tol::Real=.1,\n      cut::Symbol=:boykov, path::Symbol=:rasterup, simplex::Bool=false,\n      nreal::Integer=1, threads::Integer=CPU_PHYSICAL_CORES,\n      gpu::Bool=false, debug::Bool=false, showprogress::Bool=false)\n\nPerforms image quilting simulation as described in Hoffimann et al. 2017.\n\nParameters\n\nRequired\n\ntraining_image can be any 3D array (add ghost dimension for 2D)\ntplsizex,tplsizey,tplsizez is the template size\ngridsizex,gridsizey,gridsizez is the simulation size\n\nOptional\n\noverlapx,overlapy,overlapz is the percentage of overlap\nsoft is a vector of (data,dataTI) pairs\nhard is an instance of HardData\ntol is the initial relaxation tolerance in (0,1]\ncut is the cut algorithm (:dijkstra or :boykov)\npath is the simulation path (:rasterup, :rasterdown, :dilation or :random)\nsimplex informs whether to apply or not the simplex transform to the image\nnreal is the number of realizations\nthreads is the number of threads for the FFT (default to all CPU cores)\ngpu informs whether to use the GPU or the CPU\ndebug informs whether to export or not the boundary cuts and voxel reuse\nshowprogress informs whether to show or not estimated time duration\n\nThe main output reals consists of a list of 3D realizations that can be indexed with reals[1], reals[2], ..., reals[nreal]. If debug=true, additional output is generated:\n\nreals, cuts, voxs = iqsim(..., debug=true)\n\ncuts[i] is the boundary cut for reals[i] and voxs[i] is the associated voxel reuse.\n\n\n\n"
+},
+
+{
+    "location": "index.html#Low-level-API-1",
+    "page": "Home",
+    "title": "Low-level API",
+    "category": "section",
+    "text": "If you are interested in using the package without GeoStats.jl, please use the following function:iqsimThe major difference compared to the high-level API is that the iqsim function has no notion of coordinate system, and you will have to pre-process the data manually to match it with the cells in the simulation grid.GeoStats.jl takes the coordinate system into account and also enables parallel simulation on HPC clusters."
 },
 
 {
@@ -49,19 +73,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "concepts.html#Soft-data-1",
-    "page": "Concepts",
-    "title": "Soft data",
-    "category": "section",
-    "text": "Given 3D data at least as large as the simulation size and a transform such that transform(training_image) is comparable with data, the SoftData(data, transform) instance can be passed to iqsim for local relaxation:iqsim(..., soft=SoftData(seismic, blur))"
-},
-
-{
     "location": "concepts.html#Hard-data-1",
     "page": "Concepts",
     "title": "Hard data",
     "category": "section",
     "text": "Voxels can be assigned values that will be honored by the simulation. HardData() is a dictionary of locations and associated values specified by the user:well = HardData((i,j,k)=>value(i,j,k) for i=10, j=10, k=1:100)\niqsim(..., hard=well)"
+},
+
+{
+    "location": "concepts.html#Soft-data-1",
+    "page": "Concepts",
+    "title": "Soft data",
+    "category": "section",
+    "text": "Given 3D data of size (gridsizex, gridsizey, gridsizez) and dataTI of size size(training_image), local relaxation can be performed with:# 3D seismic as auxiliary data\niqsim(..., soft=[(seismic,seismicTI)])Multiple pairs of data can be passed as well:iqsim(..., soft=[(data1,dataTI1), (data2,dataTI2), ...])"
 },
 
 {
@@ -101,7 +125,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Examples",
     "title": "Soft data",
     "category": "section",
-    "text": "Sometimes it is also useful to incorporate auxiliary variables defined in the domain, which can guide the selection of patterns in the training image. This example shows how to achieve this texture transfer efficiently.using ImageQuilting\nusing GeoStatsImages\nusing Images\n\nTI = training_image(\"WalkerLake\")\ntruth = training_image(\"WalkerLakeTruth\")\n\nG(m) = imfilter(m, KernelFactors.IIRGaussian([10,10,0]))\n\ndata = SoftData(G(truth), G)\n\nreals = iqsim(TI, 27, 27, 1, size(truth)..., soft=data, nreal=3)(Image: Soft data conditioning)"
+    "text": "Sometimes it is also useful to incorporate auxiliary variables defined in the domain, which can guide the selection of patterns in the training image. This example shows how to achieve this texture transfer efficiently.using ImageQuilting\nusing GeoStatsImages\nusing Images\n\nTI    = training_image(\"WalkerLake\")\ntruth = training_image(\"WalkerLakeTruth\")\n\nG(m) = imfilter(m, KernelFactors.IIRGaussian([10,10,0]))\n\ndata   = G(truth)\ndataTI = G(TI)\n\nreals = iqsim(TI, 27, 27, 1, size(truth)..., soft=[(data,dataTI)], nreal=3)(Image: Soft data conditioning)"
 },
 
 {
@@ -121,11 +145,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "voxel-reuse.html#ImageQuilting.voxelreuse",
+    "page": "Voxel reuse",
+    "title": "ImageQuilting.voxelreuse",
+    "category": "Function",
+    "text": "voxelreuse(training_image::AbstractArray,\n           tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;\n           overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,\n           cut::Symbol=:boykov, simplex::Bool=false, nreal::Integer=10,\n           threads::Integer=CPU_PHYSICAL_CORES, gpu::Bool=false)\n\nReturns the mean voxel reuse in [0,1] and its standard deviation.\n\nNotes\n\nThe approximation gets better as nreal is made larger.\n\n\n\n"
+},
+
+{
     "location": "voxel-reuse.html#Helper-function-1",
     "page": "Voxel reuse",
     "title": "Helper function",
     "category": "section",
-    "text": "A helper function is provided for the fast approximation of the mean voxel reuse:mean, dev = voxelreuse(training_image::AbstractArray,\n                       tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;\n                       overlapx=1/6, overlapy=1/6, overlapz=1/6,\n                       cut=:boykov, simplex=false, nreal=10,\n                       threads=CPU_PHYSICAL_CORES, gpu=false)with mean in the interval 01 and dev the standard deviation. The approximation gets better as nreal is made larger."
+    "text": "A helper function is provided for the fast approximation of the mean voxel reuse:voxelreuse"
 },
 
 {
