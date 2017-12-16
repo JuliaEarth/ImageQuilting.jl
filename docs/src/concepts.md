@@ -1,16 +1,6 @@
 Below are the concepts implemented in this package. For understanding how these concepts
 are used, please consult the [Examples](examples.md) section.
 
-## Soft data
-
-Given 3D `data` at least as large as the simulation size and a `transform` such that
-`transform(training_image)` is comparable with `data`, the `SoftData(data, transform)`
-instance can be passed to `iqsim` for local relaxation:
-
-```julia
-iqsim(..., soft=SoftData(seismic, blur))
-```
-
 ## Hard data
 
 Voxels can be assigned values that will be honored by the simulation. `HardData()` is
@@ -19,6 +9,22 @@ a dictionary of locations and associated values specified by the user:
 ```julia
 well = HardData((i,j,k)=>value(i,j,k) for i=10, j=10, k=1:100)
 iqsim(..., hard=well)
+```
+
+## Soft data
+
+Given 3D `data` of size `(gridsizex, gridsizey, gridsizez)` and `dataTI` of size
+`size(training_image)`, local relaxation can be performed with:
+
+```julia
+# 3D seismic as auxiliary data
+iqsim(..., soft=[(seismic,seismicTI)])
+```
+
+Multiple pairs of data can be passed as well:
+
+```julia
+iqsim(..., soft=[(data1,dataTI1), (data2,dataTI2), ...])
 ```
 
 ## Masked grids

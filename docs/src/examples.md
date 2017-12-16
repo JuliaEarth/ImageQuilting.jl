@@ -55,14 +55,15 @@ using ImageQuilting
 using GeoStatsImages
 using Images
 
-TI = training_image("WalkerLake")
+TI    = training_image("WalkerLake")
 truth = training_image("WalkerLakeTruth")
 
 G(m) = imfilter(m, KernelFactors.IIRGaussian([10,10,0]))
 
-data = SoftData(G(truth), G)
+data   = G(truth)
+dataTI = G(TI)
 
-reals = iqsim(TI, 27, 27, 1, size(truth)..., soft=data, nreal=3)
+reals = iqsim(TI, 27, 27, 1, size(truth)..., soft=[(data,dataTI)], nreal=3)
 ```
 ![Soft data conditioning](images/soft.png)
 

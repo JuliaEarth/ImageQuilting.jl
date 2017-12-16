@@ -2,16 +2,9 @@
 
 A helper function is provided for the fast approximation of the *mean voxel reuse*:
 
-```julia
-mean, dev = voxelreuse(training_image::AbstractArray,
-                       tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
-                       overlapx=1/6, overlapy=1/6, overlapz=1/6,
-                       cut=:boykov, simplex=false, nreal=10,
-                       threads=CPU_PHYSICAL_CORES, gpu=false)
+```@docs
+voxelreuse
 ```
-
-with `mean` in the interval ``[0,1]`` and `dev` the standard deviation. The approximation
-gets better as `nreal` is made larger.
 
 ## Plot recipe
 
