@@ -1,9 +1,3 @@
-## News
-ImageQuilting.jl can now be used as one of the many solvers in the
-[GeoStats.jl](https://github.com/juliohm/GeoStats.jl) framework.
-For more information, please type `?ImgQuilt` in the Julia prompt
-after loading the package.
-
 ImageQuilting.jl
 ================
 
@@ -12,6 +6,12 @@ ImageQuilting.jl
 [![][travis-img]][travis-url] [![][julia-pkg-img]][julia-pkg-url] [![][codecov-img]][codecov-url] [![][docs-stable-img]][docs-stable-url] [![][docs-latest-img]][docs-latest-url]
 
 ![3D Quilting Animation](docs/src/images/quilting.gif)
+
+## Latest News
+ImageQuilting.jl can now be used as one of the many solvers in the
+[GeoStats.jl](https://github.com/juliohm/GeoStats.jl) framework.
+For more information, please type `?ImgQuilt` in the Julia prompt
+after loading the package.
 
 Installation
 ------------
