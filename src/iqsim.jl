@@ -94,51 +94,6 @@ function iqsim(training_image::AbstractArray,
     warn("Overlaps with only 1 voxel. Check template/overlap configuration.")
   end
 
-  # hard data in grid format
-  if hard ≠ nothing
-    hardgrid = zeros(nx, ny, nz)
-    preset = falses(nx, ny, nz)
-    activated = trues(nx, ny, nz)
-    for loc in keys(hard)
-      if isnan(hard[loc])
-        activated[loc...] = false
-      else
-        hardgrid[loc...] = hard[loc]
-        preset[loc...] = true
-      end
-    end
-    activated[gridsizex+1:nx,:,:] = false
-    activated[:,gridsizey+1:ny,:] = false
-    activated[:,:,gridsizez+1:nz] = false
-  end
-
-  # keep track of hard data and inactive voxels
-  skipped = Set{Tuple{Int,Int,Int}}()
-  datum = Vector{Tuple{Int,Int,Int}}()
-  if hard ≠ nothing
-    for k=1:ntilez, j=1:ntiley, i=1:ntilex
-      # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
-      iₛ = (i-1)spacingx + 1
-      jₛ = (j-1)spacingy + 1
-      kₛ = (k-1)spacingz + 1
-      iₑ = iₛ + tplsizex - 1
-      jₑ = jₛ + tplsizey - 1
-      kₑ = kₛ + tplsizez - 1
-
-      if all(.!activated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
-        push!(skipped, (i,j,k))
-      else
-        if any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
-          push!(datum, (i,j,k))
-        end
-      end
-    end
-
-    # grid must contain active voxels
-    any_activated = any(activated[1:gridsizex,1:gridsizey,1:gridsizez])
-    @assert any_activated "simulation grid has no active voxel"
-  end
-
   # always work with floating point
   TI = Float64.(training_image)
 
@@ -173,6 +128,52 @@ function iqsim(training_image::AbstractArray,
     kₑ = min(kₙ, pₜ-tplsizez+1)
 
     disabled[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = true
+  end
+
+  # keep track of hard data and inactive voxels
+  skipped = Set{Tuple{Int,Int,Int}}()
+  datum   = Vector{Tuple{Int,Int,Int}}()
+  if hard ≠ nothing
+    # hard data in grid format
+    hardgrid = zeros(nx, ny, nz)
+    preset = falses(nx, ny, nz)
+    activated = trues(nx, ny, nz)
+    for loc in keys(hard)
+      if isnan(hard[loc])
+        activated[loc...] = false
+      else
+        hardgrid[loc...] = hard[loc]
+        preset[loc...] = true
+      end
+    end
+
+    # deactivate voxels beyond true grid size
+    activated[gridsizex+1:nx,:,:] = false
+    activated[:,gridsizey+1:ny,:] = false
+    activated[:,:,gridsizez+1:nz] = false
+
+    # grid must contain active voxels
+    any_activated = any(activated[1:gridsizex,1:gridsizey,1:gridsizez])
+    @assert any_activated "simulation grid has no active voxel"
+
+    # determine tiles that should be skipped and tiles with data
+    for k=1:ntilez, j=1:ntiley, i=1:ntilex
+      # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
+      iₛ = (i-1)spacingx + 1
+      jₛ = (j-1)spacingy + 1
+      kₛ = (k-1)spacingz + 1
+      iₑ = iₛ + tplsizex - 1
+      jₑ = jₛ + tplsizey - 1
+      kₑ = kₛ + tplsizez - 1
+
+      if all(.!activated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
+        push!(skipped, (i,j,k))
+      else
+        if any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
+          push!(datum, (i,j,k))
+        end
+      end
+    end
   end
 
   # pad soft data and soft transform training image
@@ -213,7 +214,7 @@ function iqsim(training_image::AbstractArray,
 
   # for each realization we have:
   boundarycuts = Vector{Array{Float64,3}}() # boundary cut
-  voxelreuse = Vector{Float64}() # voxel reuse
+  voxelreuse = Vector{Float64}()            # voxel reuse
 
   # show progress and estimated time duration
   showprogress && (progress = Progress(nreal, color=:black))
