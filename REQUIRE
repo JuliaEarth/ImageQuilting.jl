@@ -9,4 +9,4 @@ ImageMorphology
 LightGraphs 0.6.1
 RecipesBase
 ProgressMeter
-Hwloc
+Hwloc 0.6.2

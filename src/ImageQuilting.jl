@@ -28,7 +28,7 @@ using Combinatorics: nthperm!
 using StatsBase: sample, weights
 using Primes: factor
 using ProgressMeter: Progress, next!
-using Hwloc: topology_load, histmap
+using Hwloc: num_physical_cores
 
 # optional dependencies
 try
