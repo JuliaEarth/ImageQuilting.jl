@@ -12,6 +12,50 @@
 ## ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+"""
+    iqsim(training_image::AbstractArray,
+          tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
+          gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
+          overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,
+          soft::AbstractVector=[], hard=nothing, tol::Real=.1,
+          cut::Symbol=:boykov, path::Symbol=:rasterup, simplex::Bool=false,
+          nreal::Integer=1, threads::Integer=CPU_PHYSICAL_CORES,
+          gpu::Bool=false, debug::Bool=false, showprogress::Bool=false)
+
+Performs image quilting simulation as described in Hoffimann et al. 2017.
+
+## Parameters
+
+### Required
+
+* `training_image` can be any 3D array (add ghost dimension for 2D)
+* `tplsizex`,`tplsizey`,`tplsizez` is the template size
+* `gridsizex`,`gridsizey`,`gridsizez` is the simulation size
+
+### Optional
+
+* `overlapx`,`overlapy`,`overlapz` is the percentage of overlap
+* `soft` is a vector of `(data,dataTI)` pairs
+* `hard` is an instance of `HardData`
+* `tol` is the initial relaxation tolerance in (0,1]
+* `cut` is the cut algorithm (`:dijkstra` or `:boykov`)
+* `path` is the simulation path (`:rasterup`, `:rasterdown`, `:dilation` or `:random`)
+* `simplex` informs whether to apply or not the simplex transform to the image
+* `nreal` is the number of realizations
+* `threads` is the number of threads for the FFT (default to all CPU cores)
+* `gpu` informs whether to use the GPU or the CPU
+* `debug` informs whether to export or not the boundary cuts and voxel reuse
+* `showprogress` informs whether to show or not estimated time duration
+
+The main output `reals` consists of a list of 3D realizations that can be indexed with
+`reals[1], reals[2], ..., reals[nreal]`. If `debug=true`, additional output is generated:
+
+```julia
+reals, cuts, voxs = iqsim(..., debug=true)
+```
+
+`cuts[i]` is the boundary cut for `reals[i]` and `voxs[i]` is the associated voxel reuse.
+"""
 function iqsim(training_image::AbstractArray,
                tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
                gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;

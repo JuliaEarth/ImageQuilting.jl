@@ -12,6 +12,19 @@
 ## ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+"""
+    voxelreuse(training_image::AbstractArray,
+               tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
+               overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,
+               cut::Symbol=:boykov, simplex::Bool=false, nreal::Integer=10,
+               threads::Integer=CPU_PHYSICAL_CORES, gpu::Bool=false)
+
+Returns the mean voxel reuse in `[0,1]` and its standard deviation.
+
+### Notes
+
+The approximation gets better as `nreal` is made larger.
+"""
 function voxelreuse(training_image::AbstractArray,
                     tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
                     overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,

@@ -15,21 +15,28 @@
 """
     ImgQuilt(var₁=>param₁, var₂=>param₂, ...)
 
-Image quilting simulation solver.
+Image quilting simulation solver by Hoffimann et al. 2017.
 
 ## Parameters
 
-* `TI` - Training image
+### Required
+
+* `TI`       - Training image
 * `template` - Template size in x, y and z
+
+### Optional
+
 * `overlap`  - Overlap size in x, y and z (default to (1/6, 1/6, 1/6))
-* `soft`     - An instance of `SoftData`
 * `cut`      - Boundary cut algorithm (:boykov (default) or :dijkstra)
 * `path`     - Simulation path (:rasterup (default), :rasterdown, :dilation, or :random)
 * `simplex`  - Whether to apply or not the simplex transform (default to false)
 * `inactive` - Vector of inactive voxels (i.e. tuples (i,j,k)) in the grid
+* `soft`     - A vector of `(data,dataTI)` pairs
 * `tol`      - Initial relaxation tolerance in (0,1] (default to 0.1)
 
 ## Global parameters
+
+### Optional
 
 * `threads`      - Number of threads in FFT (default to number of physical CPU cores)
 * `gpu`          - Whether to use the GPU or the CPU (default to false)
