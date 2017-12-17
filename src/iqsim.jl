@@ -339,7 +339,7 @@ function iqsim(training_image::AbstractArray,
       distance[disabled] = Inf
 
       # compute hard and soft distances
-      auxdistances = []
+      auxdistances = Vector{Array{Float64,3}}()
       if !isempty(hard) && any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
         harddev = hardgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
         hsimplex = simplex ? simplex_transform(harddev, nvertices) : [harddev]
