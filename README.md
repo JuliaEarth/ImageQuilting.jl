@@ -28,13 +28,6 @@ Documentation
 - [**STABLE**][docs-stable-url] &mdash; **most recently tagged version of the documentation.**
 - [**LATEST**][docs-latest-url] &mdash; *in-development version of the documentation.*
 
-Contributing
-------------
-
-Contributions are very welcome, as are feature requests and suggestions.
-
-Please [open an issue](https://github.com/juliohm/ImageQuilting.jl/issues) if you encounter any problems.
-
 Citation
 --------
 
@@ -70,6 +63,13 @@ Publications
 
 - Hoffimann et al. 2015. *Geostatistical Modeling of Evolving Landscapes by Means of Image Quilting*
 [DOWNLOAD](https://www.researchgate.net/publication/295902985_Geostatistical_Modeling_of_Evolving_Landscapes_by_Means_of_Image_Quilting)
+
+Contributing
+------------
+
+Contributions are very welcome, as are feature requests and suggestions.
+
+Please [open an issue](https://github.com/juliohm/ImageQuilting.jl/issues) if you encounter any problems.
 
 [travis-img]: https://travis-ci.org/juliohm/ImageQuilting.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/juliohm/ImageQuilting.jl
