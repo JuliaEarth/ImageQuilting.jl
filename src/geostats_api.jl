@@ -15,7 +15,7 @@
 """
     ImgQuilt(var₁=>param₁, var₂=>param₂, ...)
 
-Image quilting simulation solver by Hoffimann et al. 2017.
+Image quilting simulation solver as described in Hoffimann et al. 2017.
 
 ## Parameters
 
