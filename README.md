@@ -38,7 +38,7 @@ Please [open an issue](https://github.com/juliohm/ImageQuilting.jl/issues) if yo
 Citation
 --------
 
-If you find ImageQuilting.jl useful in your work, please consider citing the following paper:
+If you find ImageQuilting.jl useful in your work, please consider citing our paper:
 
 ```latex
 @ARTICLE{Hoffimann2017,
