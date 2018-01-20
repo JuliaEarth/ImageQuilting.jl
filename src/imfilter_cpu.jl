@@ -12,7 +12,6 @@
 ## ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-function imfilter_cpu{T<:Real,K<:Real,N}(img::AbstractArray{T,N}, kern::AbstractArray{K,N}, border::AbstractString)
-  padding = border == "inner" ? Inner() : "symmetric"
-  imfilter(img, centered(kern), padding, Algorithm.FFT())
+function imfilter_cpu{T<:Real,K<:Real,N}(img::AbstractArray{T,N}, kern::AbstractArray{K,N})
+  imfilter(img, centered(kern), Inner(), Algorithm.FFT())
 end

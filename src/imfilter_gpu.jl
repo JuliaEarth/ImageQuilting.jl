@@ -12,7 +12,7 @@
 ## ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ## OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-function imfilter_gpu{T<:Real,K<:Real,N}(img::AbstractArray{T,N}, kern::AbstractArray{K,N}, border::AbstractString)
+function imfilter_gpu{T<:Real,K<:Real,N}(img::AbstractArray{T,N}, kern::AbstractArray{K,N})
   # GPU metadata
   ctx = GPU.ctx; queue = GPU.queue
   mult_kernel = GPU.mult_kernel
@@ -24,10 +24,8 @@ function imfilter_gpu{T<:Real,K<:Real,N}(img::AbstractArray{T,N}, kern::Abstract
   # Int prefix is a workaround for julia #15276
   prepad  = Int[div(size(kern,i)-1, 2) for i = 1:N]
   postpad = Int[div(size(kern,i),   2) for i = 1:N]
-  fullpad = Int[nextprod([2,3], size(img,i) + prepad[i] + postpad[i]) - size(img, i) - prepad[i] for i = 1:N]
 
-  A = border == "inner" ? img : padarray(img, Pad(Symbol(border), prepad, fullpad))
-  A = parent(A)
+  A = parent(img)
 
   # OpenCL FFT expects powers of 2, 3, 5, 7, 11 or 13
   paddings = clfftpad(A)
@@ -62,15 +60,9 @@ function imfilter_gpu{T<:Real,K<:Real,N}(img::AbstractArray{T,N}, kern::Abstract
   AF = padarray(AF, Pad(:symmetric, zeros(Int, ndims(AF)), -paddings))
   AF = parent(AF)
 
-  if border == "inner"
-    out = Array{realtype(eltype(AF))}(([size(img)...] - prepad - postpad)...)
-    indexesA = ntuple(d->postpad[d]+1:size(img,d)-prepad[d], N)
-    copyreal!(out, AF, indexesA)
-  else
-    out = Array{realtype(eltype(AF))}(size(img))
-    indexesA = ntuple(d->postpad[d]+1:size(img,d)+postpad[d], N)
-    copyreal!(out, AF, indexesA)
-  end
+  out = Array{realtype(eltype(AF))}(([size(img)...] - prepad - postpad)...)
+  indexesA = ntuple(d->postpad[d]+1:size(img,d)-prepad[d], N)
+  copyreal!(out, AF, indexesA)
 
   out
 end

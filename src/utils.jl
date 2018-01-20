@@ -22,9 +22,7 @@ function get_imfilter_impl(GPU)
   end
 end
 
-function convdist(Xs::AbstractArray, masks::AbstractArray; weights=nothing, inner=true)
-  padding = inner == true ? "inner" : "symmetric"
-
+function convdist(Xs::AbstractArray, masks::AbstractArray; weights=nothing)
   # choose among imfilter implementations
   imfilter_impl = get_imfilter_impl(GPU)
 
@@ -35,8 +33,8 @@ function convdist(Xs::AbstractArray, masks::AbstractArray; weights=nothing, inne
   for (X, mask) in zip(Xs, masks)
     wmask = weights.*mask
 
-    A² = imfilter_impl(X.^2, weights, padding)
-    AB = imfilter_impl(X, wmask, padding)
+    A² = imfilter_impl(X.^2, weights)
+    AB = imfilter_impl(X, wmask)
     B² = sum(abs2, wmask)
 
     push!(result, abs.(A² - 2AB + B²))
@@ -44,7 +42,7 @@ function convdist(Xs::AbstractArray, masks::AbstractArray; weights=nothing, inne
 
   D = sum(result)
 
-  # always return a plain simple Array
+  # always return a plain simple array
   parent(D)
 end
 
