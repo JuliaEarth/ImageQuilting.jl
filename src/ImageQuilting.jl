@@ -22,6 +22,7 @@ module ImageQuilting
 using ImageFiltering
 using ImageMorphology
 using LightGraphs
+using LightGraphsFlows
 using RecipesBase
 using Base: @nexprs, @nloops, @nref
 using Combinatorics: nthperm!
