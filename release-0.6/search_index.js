@@ -29,7 +29,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Installation",
     "category": "section",
-    "text": "Get the latest stable release with Julia's package manager:Pkg.add(\"ImageQuilting\")For even faster computation with GPUs, please follow the instructions in GPU support."
+    "text": "Get the latest stable release with Julia\'s package manager:Pkg.add(\"ImageQuilting\")For even faster computation with GPUs, please follow the instructions in GPU support."
 },
 
 {
@@ -93,7 +93,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Concepts",
     "title": "Masked grids",
     "category": "section",
-    "text": "Masked grids are a special case of hard data conditioning where inactive voxels are marked with the value NaN. The algorithm handles this hard data differently as it shouldn't be considered in the pattern similarity calculations.training_image can also have inactive voxels marked with NaN. Convolution results are only looked up in active regions."
+    "text": "Masked grids are a special case of hard data conditioning where inactive voxels are marked with the value NaN. The algorithm handles this hard data differently as it shouldn\'t be considered in the pattern similarity calculations.training_image can also have inactive voxels marked with NaN. Convolution results are only looked up in active regions."
 },
 
 {
@@ -221,7 +221,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Citation",
     "title": "Citation",
     "category": "page",
-    "text": "If you find ImageQuilting.jl useful in your work, please consider citing our paper:@ARTICLE{Hoffimann2017,\n  title={Stochastic Simulation by Image Quilting of Process-based Geological Models},\n  author={Hoffimann, J{\\'u}lio and Scheidt, C{\\'e}line and Barfod, Adrian and Caers, Jef},\n  journal={Computers \\& Geosciences},\n  publisher={Elsevier BV},\n  volume={106},\n  pages={18-32},\n  ISSN={0098-3004},\n  DOI={10.1016/j.cageo.2017.05.012},\n  url={http://dx.doi.org/10.1016/j.cageo.2017.05.012},\n  year={2017},\n  month={May}\n}"
+    "text": "If you find ImageQuilting.jl useful in your work, please consider citing our paper:@ARTICLE{Hoffimann2017,\n  title={Stochastic Simulation by Image Quilting of Process-based Geological Models},\n  author={Hoffimann, J{\\\'u}lio and Scheidt, C{\\\'e}line and Barfod, Adrian and Caers, Jef},\n  journal={Computers \\& Geosciences},\n  publisher={Elsevier BV},\n  volume={106},\n  pages={18-32},\n  ISSN={0098-3004},\n  DOI={10.1016/j.cageo.2017.05.012},\n  url={http://dx.doi.org/10.1016/j.cageo.2017.05.012},\n  year={2017},\n  month={May}\n}"
 },
 
 ]}
