@@ -8,7 +8,7 @@ ImageQuilting.jl
 ![3D Quilting Animation](docs/src/images/quilting.gif)
 
 ## Latest News
-- [Syvitski Modeler Award 2018](https://csdms.colorado.edu/wiki/Student_Modeler_Award_2018).
+- ImageQuilting.jl wins [Syvitski Modeler Award 2018](https://csdms.colorado.edu/wiki/Student_Modeler_Award_2018).
 - ImageQuilting.jl can now be used as one of the many solvers in the
 [GeoStats.jl](https://github.com/juliohm/GeoStats.jl) framework.
 For more information, please type `?ImgQuilt` in the Julia prompt
