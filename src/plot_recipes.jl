@@ -14,7 +14,11 @@
 
 @userplot VoxelReusePlot
 
-@recipe function f(vr::VoxelReusePlot; tmin=nothing, tmax=nothing, nreal=10)
+@recipe function f(vr::VoxelReusePlot; 
+        tmin=nothing, tmax=nothing, nreal=10, 
+        gpu=false, soft=[], hard=HardData(), tol=.1,
+        overlapx=1/6, overlapy=1/6, overlapz=1/6, 
+        cut=:boykov, simplex=false, threads=CPU_PHYSICAL_CORES)
   # get input image
   img = vr.args[1]
 
@@ -35,7 +39,22 @@
   ts = collect(tmin:tmax)
 
   # compute voxel reuse
-  μs, σs = mapreuse(img, ts, nreal)
+  extent = size(img)
+  idx = [extent...] .> 1
+
+  p = Progress(length(ts), color=:black)
+  μs = Float64[]; σs = Float64[]
+  for T in ts
+    tplconfig = [1,1,1]
+    tplconfig[idx] = T
+    μ, σ = voxelreuse(img, tplconfig...,
+            nreal=nreal, gpu=gpu, soft=soft, hard=hard,
+			overlapx=overlapx, overlapy=overlapy, overlapz=overlapz,
+			cut=cut, simplex=simplex, threads=threads)
+    push!(μs, μ); push!(σs, σ)
+
+    next!(p)
+  end
 
   # highlight the optimum template range
   @series begin
@@ -68,20 +87,3 @@
   ts, μs
 end
 
-function mapreuse(img::AbstractArray, ts::Array{Int}, nreal::Int)
-  extent = size(img)
-  idx = [extent...] .> 1
-
-  p = Progress(length(ts), color=:black)
-  μs = Float64[]; σs = Float64[]
-  for T in ts
-    tplconfig = [1,1,1]
-    tplconfig[idx] = T
-    μ, σ = voxelreuse(img, tplconfig..., nreal=nreal)
-    push!(μs, μ); push!(σs, σ)
-
-    next!(p)
-  end
-
-  μs, σs
-end
