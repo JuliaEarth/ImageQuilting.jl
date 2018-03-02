@@ -18,7 +18,7 @@
                overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,
                cut::Symbol=:boykov, simplex::Bool=false, nreal::Integer=10,
                threads::Integer=CPU_PHYSICAL_CORES, gpu::Bool=false,
-			   soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1) #this last line was added
+			   soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1)
 
 Returns the mean voxel reuse in `[0,1]` and its standard deviation.
 

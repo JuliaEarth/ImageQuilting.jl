@@ -38,7 +38,7 @@
   # save support as an array
   ts = collect(tmin:tmax)
 
-  # compute voxel reuse
+  # -- compute voxel reuse
   extent = size(img)
   idx = [extent...] .> 1
 
@@ -55,6 +55,7 @@
 
     next!(p)
   end
+  # --
 
   # highlight the optimum template range
   @series begin
