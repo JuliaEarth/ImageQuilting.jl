@@ -17,7 +17,8 @@
                tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
                overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,
                cut::Symbol=:boykov, simplex::Bool=false, nreal::Integer=10,
-               threads::Integer=CPU_PHYSICAL_CORES, gpu::Bool=false)
+               threads::Integer=CPU_PHYSICAL_CORES, gpu::Bool=false,
+			   soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1)
 
 Returns the mean voxel reuse in `[0,1]` and its standard deviation.
 
@@ -29,7 +30,8 @@ function voxelreuse(training_image::AbstractArray,
                     tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
                     overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,
                     cut::Symbol=:boykov, simplex::Bool=false, nreal::Integer=10,
-                    threads::Integer=CPU_PHYSICAL_CORES, gpu::Bool=false)
+                    threads::Integer=CPU_PHYSICAL_CORES, gpu::Bool=false,
+					soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1)
 
   # calculate the overlap from given percentage
   ovx = ceil(Int, overlapx * tplsizex)
@@ -51,7 +53,8 @@ function voxelreuse(training_image::AbstractArray,
                      gridsizex, gridsizey, gridsizez,
                      overlapx=overlapx, overlapy=overlapy, overlapz=overlapz,
                      cut=cut, simplex=simplex, nreal=nreal,
-                     threads=threads, gpu=gpu, debug=true)
+                     threads=threads, gpu=gpu, debug=true,
+					 soft=soft,hard=hard,tol=tol)
 
   μ = mean(voxs)
   σ = std(voxs, mean=μ)
