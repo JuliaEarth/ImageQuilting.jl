@@ -16,20 +16,19 @@
     voxelreuse(training_image::AbstractArray,
                tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
                overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,
-               cut::Symbol=:boykov, simplex::Bool=false, nreal::Integer=10,
-               threads::Integer=CPU_PHYSICAL_CORES, gpu::Bool=false)
+               nreal::Integer=10, kwargs...)
 
 Returns the mean voxel reuse in `[0,1]` and its standard deviation.
 
 ### Notes
 
-The approximation gets better as `nreal` is made larger.
+- The approximation gets better as `nreal` is made larger.
+- Keyword arguments `kwargs` are passed to `iqsim` directly.
 """
 function voxelreuse(training_image::AbstractArray,
                     tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
                     overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,
-                    cut::Symbol=:boykov, simplex::Bool=false, nreal::Integer=10,
-                    threads::Integer=CPU_PHYSICAL_CORES, gpu::Bool=false)
+                    nreal::Integer=10, kwargs...)
 
   # calculate the overlap from given percentage
   ovx = ceil(Int, overlapx * tplsizex)
@@ -50,8 +49,7 @@ function voxelreuse(training_image::AbstractArray,
                      tplsizex, tplsizey, tplsizez,
                      gridsizex, gridsizey, gridsizez,
                      overlapx=overlapx, overlapy=overlapy, overlapz=overlapz,
-                     cut=cut, simplex=simplex, nreal=nreal,
-                     threads=threads, gpu=gpu, debug=true)
+                     nreal=nreal, debug=true, kwargs...)
 
   μ = mean(voxs)
   σ = std(voxs, mean=μ)
