@@ -34,8 +34,20 @@
   # save support as an array
   ts = collect(tmin:tmax)
 
-  # compute voxel reuse
-  μs, σs = mapreuse(img, ts, nreal)
+  # compute voxel reuse for each template size
+  p = Progress(length(ts), color=:black)
+  μs = Float64[]; σs = Float64[]
+  for t in ts
+    tplconfig = [1,1,1]
+    tplconfig[idx] = t
+
+    μ, σ = voxelreuse(img, tplconfig...;
+                      nreal=nreal)
+
+    push!(μs, μ)
+    push!(σs, σ)
+    next!(p)
+  end
 
   # highlight the optimum template range
   @series begin
@@ -66,22 +78,4 @@
   ylabel --> "Voxel reuse"
 
   ts, μs
-end
-
-function mapreuse(img::AbstractArray, ts::Array{Int}, nreal::Int)
-  extent = size(img)
-  idx = [extent...] .> 1
-
-  p = Progress(length(ts), color=:black)
-  μs = Float64[]; σs = Float64[]
-  for T in ts
-    tplconfig = [1,1,1]
-    tplconfig[idx] = T
-    μ, σ = voxelreuse(img, tplconfig..., nreal=nreal)
-    push!(μs, μ); push!(σs, σ)
-
-    next!(p)
-  end
-
-  μs, σs
 end
