@@ -149,7 +149,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Voxel reuse",
     "title": "ImageQuilting.voxelreuse",
     "category": "Function",
-    "text": "voxelreuse(training_image::AbstractArray,\n           tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;\n           overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,\n           cut::Symbol=:boykov, simplex::Bool=false, nreal::Integer=10,\n           threads::Integer=CPU_PHYSICAL_CORES, gpu::Bool=false)\n\nReturns the mean voxel reuse in [0,1] and its standard deviation.\n\nNotes\n\nThe approximation gets better as nreal is made larger.\n\n\n\n"
+    "text": "voxelreuse(training_image::AbstractArray,\n           tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;\n           overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,\n           nreal::Integer=10, kwargs...)\n\nReturns the mean voxel reuse in [0,1] and its standard deviation.\n\nNotes\n\nThe approximation gets better as nreal is made larger.\nKeyword arguments kwargs are passed to iqsim directly.\n\n\n\n"
 },
 
 {
