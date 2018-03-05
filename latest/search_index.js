@@ -36,7 +36,7 @@ var documenterSearchIndex = {"docs": [
     "location": "index.html#ImageQuilting.ImgQuilt",
     "page": "Home",
     "title": "ImageQuilting.ImgQuilt",
-    "category": "Type",
+    "category": "type",
     "text": "ImgQuilt(var₁=>param₁, var₂=>param₂, ...)\n\nImage quilting simulation solver as described in Hoffimann et al. 2017.\n\nParameters\n\nRequired\n\nTI       - Training image\ntemplate - Template size in x, y and z\n\nOptional\n\noverlap  - Overlap size in x, y and z (default to (1/6, 1/6, 1/6))\ncut      - Boundary cut algorithm (:boykov (default) or :dijkstra)\npath     - Simulation path (:rasterup (default), :rasterdown, :dilation, or :random)\nsimplex  - Whether to apply or not the simplex transform (default to false)\ninactive - Vector of inactive voxels (i.e. tuples (i,j,k)) in the grid\nsoft     - A vector of (data,dataTI) pairs\ntol      - Initial relaxation tolerance in (0,1] (default to 0.1)\n\nGlobal parameters\n\nOptional\n\nthreads      - Number of threads in FFT (default to number of physical CPU cores)\ngpu          - Whether to use the GPU or the CPU (default to false)\nshowprogress - Whether to show or not the estimated time duration (default to false)\n\n\n\n\n\n"
 },
 
@@ -52,7 +52,7 @@ var documenterSearchIndex = {"docs": [
     "location": "index.html#ImageQuilting.iqsim",
     "page": "Home",
     "title": "ImageQuilting.iqsim",
-    "category": "Function",
+    "category": "function",
     "text": "iqsim(training_image::AbstractArray,\n      tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,\n      gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;\n      overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,\n      soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1,\n      cut::Symbol=:boykov, path::Symbol=:rasterup, simplex::Bool=false,\n      nreal::Integer=1, threads::Integer=CPU_PHYSICAL_CORES,\n      gpu::Bool=false, debug::Bool=false, showprogress::Bool=false)\n\nPerforms image quilting simulation as described in Hoffimann et al. 2017.\n\nParameters\n\nRequired\n\ntraining_image can be any 3D array (add ghost dimension for 2D)\ntplsizex,tplsizey,tplsizez is the template size\ngridsizex,gridsizey,gridsizez is the simulation size\n\nOptional\n\noverlapx,overlapy,overlapz is the percentage of overlap\nsoft is a vector of (data,dataTI) pairs\nhard is an instance of HardData\ntol is the initial relaxation tolerance in (0,1] (default to .1)\ncut is the cut algorithm (:dijkstra or :boykov)\npath is the simulation path (:rasterup, :rasterdown, :dilation or :random)\nsimplex informs whether to apply or not the simplex transform to the image\nnreal is the number of realizations\nthreads is the number of threads for the FFT (default to all CPU cores)\ngpu informs whether to use the GPU or the CPU\ndebug informs whether to export or not the boundary cuts and voxel reuse\nshowprogress informs whether to show or not estimated time duration\n\nThe main output reals consists of a list of 3D realizations that can be indexed with reals[1], reals[2], ..., reals[nreal]. If debug=true, additional output is generated:\n\nreals, cuts, voxs = iqsim(..., debug=true)\n\ncuts[i] is the boundary cut for reals[i] and voxs[i] is the associated voxel reuse.\n\n\n\n"
 },
 
@@ -148,7 +148,7 @@ var documenterSearchIndex = {"docs": [
     "location": "voxel-reuse.html#ImageQuilting.voxelreuse",
     "page": "Voxel reuse",
     "title": "ImageQuilting.voxelreuse",
-    "category": "Function",
+    "category": "function",
     "text": "voxelreuse(training_image::AbstractArray,\n           tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;\n           overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,\n           nreal::Integer=10, kwargs...)\n\nReturns the mean voxel reuse in [0,1] and its standard deviation.\n\nNotes\n\nThe approximation gets better as nreal is made larger.\nKeyword arguments kwargs are passed to iqsim directly.\n\n\n\n"
 },
 
