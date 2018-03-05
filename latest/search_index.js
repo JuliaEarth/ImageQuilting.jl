@@ -85,7 +85,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Concepts",
     "title": "Soft data",
     "category": "section",
-    "text": "Given 3D data of size (gridsizex, gridsizey, gridsizez) and dataTI of size size(training_image), local relaxation can be performed with:# 3D seismic as auxiliary data\niqsim(..., soft=[(seismic,seismicTI)])Multiple pairs of data can be passed as well:iqsim(..., soft=[(data1,dataTI1), (data2,dataTI2), ...])"
+    "text": "Given 3D data of the same size of the simulation grid (e.g. seismic) and data of the same of the training image (e.g. seismicTI), local relaxation can be performed with:# 3D seismic as auxiliary data\niqsim(..., soft=[(seismic,seismicTI)])Multiple pairs of data can be passed as well:iqsim(..., soft=[(data₁,dataTI₁), (data₂,dataTI₂), ...])"
 },
 
 {
@@ -93,7 +93,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Concepts",
     "title": "Masked grids",
     "category": "section",
-    "text": "Masked grids are a special case of hard data conditioning where inactive voxels are marked with the value NaN. The algorithm handles this hard data differently as it shouldn\'t be considered in the pattern similarity calculations.training_image can also have inactive voxels marked with NaN. Convolution results are only looked up in active regions."
+    "text": "Masked grids are a special case of hard data conditioning where inactive voxels are marked with the value NaN. The algorithm handles this hard data differently as it shouldn\'t be considered in the pattern similarity calculations.The training image can also have inactive voxels marked with NaN. Convolution results are only looked up in active regions."
 },
 
 {
