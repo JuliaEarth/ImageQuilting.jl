@@ -5,7 +5,9 @@
 
 @userplot VoxelReusePlot
 
-@recipe function f(vr::VoxelReusePlot; tmin=nothing, tmax=nothing, nreal=10)
+@recipe function f(vr::VoxelReusePlot; tmin=nothing, tmax=nothing,
+                   overlapx=1/6, overlapy=1/6, overlapz=1/6,
+                   nreal=10, gpu=false)
   # get input image
   img = vr.args[1]
 
@@ -33,7 +35,10 @@
     tplconfig[idx] = t
 
     μ, σ = voxelreuse(img, tplconfig...;
-                      nreal=nreal)
+                      overlapx=overlapx,
+                      overlapy=overlapy,
+                      overlapz=overlapz,
+                      nreal=nreal, gpu=gpu)
 
     push!(μs, μ)
     push!(σs, σ)
