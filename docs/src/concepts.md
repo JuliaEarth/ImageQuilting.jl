@@ -13,8 +13,8 @@ iqsim(..., hard=well)
 
 ## Soft data
 
-Given 3D `data` of size `(gridsizex, gridsizey, gridsizez)` and `dataTI` of size
-`size(training_image)`, local relaxation can be performed with:
+Given 3D data of the same size of the simulation grid (e.g. `seismic`) and data of the same
+of the training image (e.g. `seismicTI`), local relaxation can be performed with:
 
 ```julia
 # 3D seismic as auxiliary data
@@ -24,7 +24,7 @@ iqsim(..., soft=[(seismic,seismicTI)])
 Multiple pairs of data can be passed as well:
 
 ```julia
-iqsim(..., soft=[(data1,dataTI1), (data2,dataTI2), ...])
+iqsim(..., soft=[(data₁,dataTI₁), (data₂,dataTI₂), ...])
 ```
 
 ## Masked grids
@@ -33,5 +33,5 @@ Masked grids are a special case of hard data conditioning where inactive voxels 
 marked with the value `NaN`. The algorithm handles this hard data differently as it
 shouldn't be considered in the pattern similarity calculations.
 
-`training_image` can also have inactive voxels marked with `NaN`. Convolution results
+The training image can also have inactive voxels marked with `NaN`. Convolution results
 are only looked up in active regions.
