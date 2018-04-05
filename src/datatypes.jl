@@ -10,3 +10,4 @@ struct SoftData
 end
 
 const HardData = Dict{NTuple{3,Integer},Real}
+coords(hd::HardData) = keys(hd)

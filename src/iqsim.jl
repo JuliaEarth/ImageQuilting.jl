@@ -83,9 +83,9 @@ function iqsim(training_image::AbstractArray,
 
   # hard data checks
   if !isempty(hard)
-    locations = Int[loc[i] for loc in keys(hard), i=1:3]
-    @assert all(maximum(locations, 1) .≤ [gridsizex gridsizey gridsizez]) "hard data locations outside of grid"
-    @assert all(minimum(locations, 1) .> 0) "hard data locations must be positive indexes"
+    coordinates = Int[coord[i] for coord in coords(hard), i=1:3]
+    @assert all(maximum(coordinates, 1) .≤ [gridsizex gridsizey gridsizez]) "hard data coordinates outside of grid"
+    @assert all(minimum(coordinates, 1) .> 0) "hard data coordinates must be positive indexes"
   end
 
   # calculate the overlap from given percentage
@@ -163,12 +163,12 @@ function iqsim(training_image::AbstractArray,
     hardgrid = zeros(nx, ny, nz)
     preset = falses(nx, ny, nz)
     activated = trues(nx, ny, nz)
-    for loc in keys(hard)
-      if isnan(hard[loc])
-        activated[loc...] = false
+    for coord in coords(hard)
+      if isnan(hard[coord])
+        activated[coord...] = false
       else
-        hardgrid[loc...] = hard[loc]
-        preset[loc...] = true
+        hardgrid[coord...] = hard[coord]
+        preset[coord...] = true
       end
     end
 
