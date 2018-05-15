@@ -48,7 +48,7 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
   @global showprogress = false
 end
 
-function solve_single(problem::SimulationProblem, var::Symbol, solver::ImgQuilt)
+function preprocess(problem::SimulationProblem, solver::ImgQuilt)
   # retrieve problem info
   pdata = data(problem)
   pdomain = domain(problem)
@@ -56,34 +56,51 @@ function solve_single(problem::SimulationProblem, var::Symbol, solver::ImgQuilt)
   # sanity checks
   @assert pdomain isa RegularGrid "ImgQuilt solver only supports regular grids"
   @assert ndims(pdomain) ∈ [2,3] "Number of dimensions must be 2 or 3"
-  @assert var ∈ keys(solver.params) "Parameters for variable `$var` not found"
 
-  # get user parameters
-  varparams = solver.params[var]
+  # result of preprocessing
+  preproc = Dict{Symbol,Tuple}()
 
-  # add ghost dimension to simulation grid if necessary
-  sz = ndims(pdomain) == 2 ? (size(pdomain)..., 1) : size(pdomain)
+  for (var, V) in variables(problem)
+    @assert var ∈ keys(solver.params) "Parameters for variable `$var` not found"
 
-  # create hard data object
-  hd = HardData()
-  for (loc, datloc) in datamap(problem, var)
-    push!(hd, ind2sub(sz, loc) => value(pdata, datloc, var))
-  end
+    # get user parameters
+    varparams = solver.params[var]
 
-  # disable inactive voxels
-  shape = HardData()
-  if varparams.inactive ≠ nothing
-    for icoords in varparams.inactive
-      push!(shape, icoords => NaN)
+    # add ghost dimension to simulation grid if necessary
+    simsize = ndims(pdomain) == 2 ? (size(pdomain)..., 1) : size(pdomain)
+
+    # create hard data object
+    hdata = HardData()
+    for (loc, datloc) in datamap(problem, var)
+      push!(hdata, ind2sub(simsize, loc) => value(pdata, datloc, var))
     end
+
+    # disable inactive voxels
+    shape = HardData()
+    if varparams.inactive ≠ nothing
+      for icoords in varparams.inactive
+        push!(shape, icoords => NaN)
+      end
+    end
+
+    preproc[var] = (varparams, simsize, merge(hdata, shape))
   end
+
+  preproc
+end
+
+function solve_single(problem::SimulationProblem, var::Symbol,
+                      solver::ImgQuilt, preproc)
+  # unpack preprocessed parameters
+  par, simsize, hard = preproc[var]
 
   # run image quilting core function
-  reals = iqsim(varparams.TI, varparams.template..., sz...,
-                soft=varparams.soft, hard=merge(hd, shape), tol=varparams.tol,
-                cut=varparams.cut, path=varparams.path, simplex=varparams.simplex,
-                threads=solver.threads, gpu=solver.gpu, showprogress=solver.showprogress)
+  reals = iqsim(par.TI, par.template..., simsize...,
+                soft=par.soft, hard=hard, tol=par.tol,
+                cut=par.cut, path=par.path, simplex=par.simplex,
+                threads=solver.threads, gpu=solver.gpu,
+                showprogress=solver.showprogress)
 
-  # return result
+  # flatten result
   reals[1][:]
 end
