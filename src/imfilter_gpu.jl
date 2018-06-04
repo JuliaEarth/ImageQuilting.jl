@@ -9,22 +9,20 @@ function imfilter_gpu{T<:Real,K<:Real,N}(img::AbstractArray{T,N}, kern::Abstract
   mult_kernel = GPU.mult_kernel
 
   # operations with complex type
-  img = map(Complex64, img)
+  img  = map(Complex64, img)
   kern = map(Complex64, kern)
 
-  # Int prefix is a workaround for julia #15276
-  prepad  = Int[div(size(kern,i)-1, 2) for i = 1:N]
-  postpad = Int[div(size(kern,i),   2) for i = 1:N]
-
-  A = parent(img)
+  # kernel may require padding
+  prepad  = ntuple(d->(size(kern,d)-1) ÷ 2, N)
+  postpad = ntuple(d->(size(kern,d)  ) ÷ 2, N)
 
   # OpenCL FFT expects powers of 2, 3, 5, 7, 11 or 13
-  paddings = clfftpad(A)
-  A = padarray(A, Pad(:symmetric, zeros(Int, ndims(A)), paddings))
+  clpad = clfftpad(img)
+  A = padarray(img, Pad(:symmetric, zeros(Int, ndims(img)), clpad))
   A = parent(A)
 
   krn = zeros(Complex64, size(A))
-  indexesK = ntuple(d->[size(krn,d)-prepad[d]+1:size(krn,d);1:size(kern,d)-prepad[d]], N)
+  indexesK = ntuple(d->[size(A,d)-prepad[d]+1:size(A,d);1:size(kern,d)-prepad[d]], N)
   krn[indexesK...] = reflect(kern)
 
   # plan FFT
@@ -34,7 +32,7 @@ function imfilter_gpu{T<:Real,K<:Real,N}(img::AbstractArray{T,N}, kern::Abstract
   clfft.bake!(p, queue)
 
   # populate GPU memory
-  bufA = cl.Buffer(Complex64, ctx, :copy, hostbuf=A)
+  bufA   = cl.Buffer(Complex64, ctx, :copy, hostbuf=A)
   bufkrn = cl.Buffer(Complex64, ctx, :copy, hostbuf=krn)
   bufRES = cl.Buffer(Complex64, ctx, length(A))
 
@@ -48,10 +46,9 @@ function imfilter_gpu{T<:Real,K<:Real,N}(img::AbstractArray{T,N}, kern::Abstract
   AF = reshape(cl.read(queue, bufRES), size(A))
 
   # undo OpenCL FFT paddings
-  AF = padarray(AF, Pad(:symmetric, zeros(Int, ndims(AF)), -paddings))
-  AF = parent(AF)
+  AF = view(AF, ntuple(d->1:size(AF,d)-clpad[d], N)...)
 
-  out = Array{realtype(eltype(AF))}(([size(img)...] - prepad - postpad)...)
+  out = Array{realtype(eltype(AF))}(ntuple(d->size(img,d) - prepad[d] - postpad[d], N))
   indexesA = ntuple(d->postpad[d]+1:size(img,d)-prepad[d], N)
   copyreal!(out, AF, indexesA)
 

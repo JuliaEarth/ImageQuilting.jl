@@ -61,10 +61,9 @@ function basic_kernels(ctx)
 end
 
 function clfftpad(A::AbstractArray)
-  v = clfft.version()
-
   # clFFT releases support powers of 2, 3, 5, ...
   radices = [2,3,5]
+  v = clfft.version()
   v ≥ v"2.8.0"  && push!(radices, 7)
   v ≥ v"2.12.0" && push!(radices, 11, 13)
 
