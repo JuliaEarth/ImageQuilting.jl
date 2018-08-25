@@ -64,7 +64,10 @@ Publications
 Talks
 -----
 
+#### CSDMS 2018
 [![CSDMS2018](https://img.youtube.com/vi/Y5KhQCapuPw/0.jpg)](https://www.youtube.com/watch?v=Y5KhQCapuPw)
+
+#### JuliaCon 2017
 [![JuliaCon2017](https://img.youtube.com/vi/YJs7jl_Y9yM/0.jpg)](https://www.youtube.com/watch?v=YJs7jl_Y9yM)
 
 Contributing
