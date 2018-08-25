@@ -55,15 +55,17 @@ Publications
 
 - Barfod et al. 2017. *Hydrostratigraphic modelling using multiple-point statistics and airborne transient electromagnetic methods* [DOWNLOAD](https://www.researchgate.net/publication/319235285_Hydrostratigraphic_modelling_using_multiple-point_statistics_and_airborne_transient_electromagnetic_methods)
 
-- Talk at JuliaCon 2017
-
-[![JuliaCon2017](https://img.youtube.com/vi/YJs7jl_Y9yM/0.jpg)](https://www.youtube.com/watch?v=YJs7jl_Y9yM)
-
 - Hoffimann et al. 2017. *Stochastic Simulation by Image Quilting of Process-based Geological Models*
 [DOWNLOAD](https://www.researchgate.net/publication/317151543_Stochastic_Simulation_by_Image_Quilting_of_Process-based_Geological_Models)
 
 - Hoffimann et al. 2015. *Geostatistical Modeling of Evolving Landscapes by Means of Image Quilting*
 [DOWNLOAD](https://www.researchgate.net/publication/295902985_Geostatistical_Modeling_of_Evolving_Landscapes_by_Means_of_Image_Quilting)
+
+Talks
+-----
+
+[![CSDMS2018](https://img.youtube.com/vi/Y5KhQCapuPw/0.jpg)](https://www.youtube.com/watch?v=Y5KhQCapuPw)
+[![JuliaCon2017](https://img.youtube.com/vi/YJs7jl_Y9yM/0.jpg)](https://www.youtube.com/watch?v=YJs7jl_Y9yM)
 
 Contributing
 ------------
@@ -75,7 +77,7 @@ Please [open an issue](https://github.com/juliohm/ImageQuilting.jl/issues) if yo
 [travis-img]: https://travis-ci.org/juliohm/ImageQuilting.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/juliohm/ImageQuilting.jl
 
-[julia-pkg-img]: http://pkg.julialang.org/badges/ImageQuilting_0.6.svg
+[julia-pkg-img]: http://pkg.julialang.org/badges/ImageQuilting_0.7.svg
 [julia-pkg-url]: http://pkg.julialang.org/?pkg=ImageQuilting
 
 [codecov-img]: https://codecov.io/gh/juliohm/ImageQuilting.jl/branch/master/graph/badge.svg
