@@ -20,7 +20,7 @@ using Combinatorics: nthperm!
 using StatsBase: sample, weights
 using Primes: factor
 using ProgressMeter: Progress, next!
-using Hwloc: num_physical_cores
+using CpuId: cpucores
 
 # optional dependencies
 try
@@ -37,8 +37,10 @@ catch
 end
 
 # GeoStats.jl interface
-importall GeoStatsBase
+using GeoStatsBase
 using GeoStatsDevTools
+
+import GeoStatsBase: preprocess, solve_single
 
 include("utils.jl")
 include("utils_gpu.jl")
@@ -66,8 +68,5 @@ export
 
   # geostats solver
   ImgQuilt,
-
-  # deprecated
-  SoftData
 
 end

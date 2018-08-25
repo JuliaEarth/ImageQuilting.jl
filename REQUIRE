@@ -1,5 +1,5 @@
-julia 0.6
-GeoStatsBase 0.1.1
+julia 0.7
+GeoStatsBase 0.2.0
 GeoStatsDevTools
 Combinatorics
 StatsBase
@@ -10,4 +10,4 @@ LightGraphs 0.6.1
 LightGraphsFlows 0.0.5
 RecipesBase
 ProgressMeter
-Hwloc 0.6.2
+CpuId 0.2.0
