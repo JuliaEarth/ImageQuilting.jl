@@ -72,7 +72,7 @@ function preprocess(problem::SimulationProblem, solver::ImgQuilt)
     # create hard data object
     hdata = HardData()
     for (loc, datloc) in datamap(problem, var)
-      push!(hdata, ind2sub(simsize, loc) => value(pdata, datloc, var))
+      push!(hdata, myind2sub(simsize, loc) => value(pdata, datloc, var))
     end
 
     # disable inactive voxels

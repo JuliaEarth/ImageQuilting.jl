@@ -10,15 +10,15 @@ function simplex_transform(img::AbstractArray, nvertices::Integer)
   ncoords = nvertices - 1
 
   # simplex construction
-  vertices = [eye(ncoords) ones(ncoords)*(1-sqrt(ncoords+1))/2]
-  center = sum(vertices, 2) / nvertices
+  vertices = [Matrix(1.0I, ncoords, ncoords) ones(ncoords)*(1-sqrt(ncoords+1))/2]
+  center = sum(vertices, dims=2) / nvertices
   vertices = vertices .- center
 
   # map 0 to (0,0,...,0)
   vertices = [zeros(ncoords) vertices]
-  idx = map(Int, img + 1)
+  idx = map(Int, img .+ 1)
 
-  result = Array{Array}(ncoords)
+  result = Array{Array}(undef, ncoords)
   for i=1:ncoords
     coords = similar(img)
     coords[:] = vertices[i,idx[:]]

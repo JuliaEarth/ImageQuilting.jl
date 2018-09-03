@@ -3,7 +3,8 @@
 # Licensed under the ISC License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-function imfilter_gpu{T<:Real,K<:Real,N}(img::AbstractArray{T,N}, kern::AbstractArray{K,N})
+function imfilter_gpu(img::AbstractArray{T,N},
+                      kern::AbstractArray{K,N}) where {T<:Real,K<:Real,N}
   # GPU metadata
   ctx = GPU.ctx; queue = GPU.queue
   mult_kernel = GPU.mult_kernel

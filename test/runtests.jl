@@ -1,21 +1,24 @@
-using GeoStats
-using ImageQuilting
+using GeoStatsBase
+using GeoStatsDevTools
 using GeoStatsImages
+using Statistics
+using ImageQuilting
 using Plots; gr()
-using Base.Test
 using VisualRegressionTests
-
-# setup GR backend for Travis CI
-ENV["GKSwstype"] = "100"
-ENV["PLOTS_TEST"] = "true"
+using Test, Pkg, Random
 
 # list of maintainers
 maintainers = ["juliohm"]
 
 # environment settings
+istravis = "TRAVIS" ∈ keys(ENV)
 ismaintainer = "USER" ∈ keys(ENV) && ENV["USER"] ∈ maintainers
-istravislinux = "TRAVIS" ∈ keys(ENV) && ENV["TRAVIS_OS_NAME"] == "linux"
 datadir = joinpath(@__DIR__,"data")
+
+if ismaintainer
+  Pkg.add("Gtk")
+  using Gtk
+end
 
 @testset "ImageQuilting.jl" begin
   @testset "Basic checks" begin
@@ -25,7 +28,7 @@ datadir = joinpath(@__DIR__,"data")
     @test reals[1] == TI
 
     # categories are obtained from training image only
-    ncateg = 3; TI = rand(RandomDevice(), 0:ncateg, 20, 20, 20)
+    ncateg = 3; TI = rand(0:ncateg, 20, 20, 20)
     reals = iqsim(TI, 10, 10, 10, size(TI)..., simplex=true)
     @test Set(reals[1]) ⊆ Set(TI)
   end
@@ -39,10 +42,10 @@ datadir = joinpath(@__DIR__,"data")
 
     # no side effects with soft data
     TI = ones(20,20,20)
-    TI[:,5,:] = NaN
-    aux = ones(TI)
+    TI[:,5,:] .= NaN
+    aux = fill(1.0, size(TI))
     iqsim(TI, 10, 10, 10, size(TI)..., soft=[(aux,aux)])
-    @test aux == ones(TI)
+    @test aux == fill(1.0, size(TI))
 
     # auxiliary variable with integer type
     TI = ones(20,20,20)
@@ -54,7 +57,7 @@ datadir = joinpath(@__DIR__,"data")
   @testset "Hard data" begin
     # hard data is honored everywhere
     TI = ones(20,20,20)
-    obs = rand(size(TI))
+    obs = rand(size(TI)...)
     data = HardData((i,j,k)=>obs[i,j,k] for i=1:20, j=1:20, k=1:20)
     reals = iqsim(TI, 10, 10, 10, size(TI)..., hard=data)
     @test reals[1] == obs
@@ -72,7 +75,7 @@ datadir = joinpath(@__DIR__,"data")
     # masked simulation domain
     TI = ones(20,20,20)
     shape = HardData()
-    active = trues(TI)
+    active = trues(size(TI))
     for i=1:20, j=1:20, k=1:20
       if (i-10)^2 + (j-10)^2 + (k-10)^2 < 25
         push!(shape, (i,j,k)=>NaN)
@@ -85,17 +88,17 @@ datadir = joinpath(@__DIR__,"data")
 
     # masked training image
     TI = ones(20,20,20)
-    TI[:,5,:] = NaN
+    TI[:,5,:] .= NaN
     reals = iqsim(TI, 10, 10, 10, size(TI)...)
-    @test reals[1] == ones(TI)
-    TI[1,5] = 0
+    @test reals[1] == fill(1.0, size(TI))
+    TI[1,5,:] .= 0
     reals = iqsim(TI, 10, 10, 10, size(TI)..., simplex=true)
-    @test reals[1] == ones(TI)
+    @test reals[1] == fill(1.0, size(TI))
 
     # masked domain and masked training image
     TI = ones(20,20,20)
-    TI[:,5,:] = NaN
-    aux = ones(TI)
+    TI[:,5,:] .= NaN
+    aux = fill(1.0, size(TI))
     shape = HardData((i,j,k)=>NaN for i=1:20, j=5, k=1:20)
     reals = iqsim(TI, 10, 10, 10, size(TI)..., hard=shape)
     @test all(isnan.(reals[1][:,5,:]))
@@ -135,27 +138,23 @@ datadir = joinpath(@__DIR__,"data")
     @test 0 ≤ μ ≤ 1
   end
 
-  # visual regression tests are very hard to get
-  # right given the frequent changes in the Julia
-  # plotting packages, therefore we only run them
-  # on maintainers machines and on Travis CI
-  if ismaintainer || istravislinux
+  if ismaintainer || istravis
     @testset "Visual tests" begin
       for TIname in ["StoneWall","WalkerLake"]
         function plot_voxel_reuse(fname)
-          srand(2017)
+          Random.seed!(2017)
           TI = training_image(TIname)[1:20,1:20,:]
           voxelreuseplot(TI)
           png(fname)
         end
         refimg = joinpath(datadir, "Voxel"*TIname*".png")
 
-        @test test_images(VisualTest(plot_voxel_reuse, refimg), popup=!istravislinux) |> success
+        @test test_images(VisualTest(plot_voxel_reuse, refimg), popup=!istravis, tol=0.1) |> success
       end
 
       for TIname in ["Strebelle","StoneWall"]
         function plot_reals(fname)
-          srand(2017)
+          Random.seed!(2017)
           TI = training_image(TIname)[1:50,1:50,:]
           reals = iqsim(TI, 30, 30, 1, size(TI)..., nreal=4)
           ps = []
@@ -167,46 +166,46 @@ datadir = joinpath(@__DIR__,"data")
         end
         refimg = joinpath(datadir, "Reals"*TIname*".png")
 
-        @test test_images(VisualTest(plot_reals, refimg), popup=!istravislinux) |> success
+        @test test_images(VisualTest(plot_reals, refimg), popup=!istravis, tol=0.1) |> success
       end
     end
   end
 
   @testset "GeoStats.jl API" begin
-    geodata = GeoDataFrame(DataFrames.DataFrame(x=[25.,50.,75.], y=[25.,75.,50.], variable=[1.,0.,1.]), [:x,:y])
-    grid = RegularGrid{Float64}(100,100)
+    geodata = PointSetData(Dict(:variable => [1.,0.,1.]), [25. 50. 75.; 25. 75. 50.])
+    grid    = RegularGrid{Float64}(100,100)
     problem = SimulationProblem(geodata, grid, :variable, 3)
 
     TI = training_image("Strebelle")
     inactive = [(i,j,1) for i in 1:30 for j in 1:30]
-    solver = ImgQuilt(:variable => @NT(TI=TI, template=(30,30,1), inactive=inactive))
+    solver = ImgQuilt(:variable => (TI=TI, template=(30,30,1), inactive=inactive))
 
-    srand(2017)
+    Random.seed!(2017)
     solution = solve(problem, solver)
     @test keys(solution.realizations) ⊆ [:variable]
 
     incomplete_solver = ImgQuilt()
     @test_throws AssertionError solve(problem, incomplete_solver)
 
-    if ismaintainer || istravislinux
+    if ismaintainer || istravis
       function plot_solution(fname)
         plot(solution, size=(1000,300))
         png(fname)
       end
       refimg = joinpath(datadir, "GeoStatsAPI.png")
 
-      @test test_images(VisualTest(plot_solution, refimg), popup=!istravislinux) |> success
+      @test test_images(VisualTest(plot_solution, refimg), popup=!istravis, tol=0.1) |> success
     end
   end
 
-  if ImageQuilting.cl ≠ nothing && ImageQuilting.clfft ≠ nothing
-    @testset "GPU support" begin
-      # CPU and GPU give same results
-      TI = ones(20,20,20)
-      TI[10:end,:,:] = 2
-      srand(0); realscpu = iqsim(TI, 10, 10, 10, size(TI)..., gpu=false)
-      srand(0); realsgpu = iqsim(TI, 10, 10, 10, size(TI)..., gpu=true)
-      @test realscpu[1] == realsgpu[1]
-    end
-  end
+  # if ImageQuilting.cl ≠ nothing && ImageQuilting.clfft ≠ nothing
+    # @testset "GPU support" begin
+      # # CPU and GPU give same results
+      # TI = ones(20,20,20)
+      # TI[10:end,:,:] = 2
+      # Random.seed!(0); realscpu = iqsim(TI, 10, 10, 10, size(TI)..., gpu=false)
+      # Random.seed!(0); realsgpu = iqsim(TI, 10, 10, 10, size(TI)..., gpu=true)
+      # @test realscpu[1] == realsgpu[1]
+    # end
+  # end
 end

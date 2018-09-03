@@ -7,7 +7,7 @@ function tau_model(events::AbstractVector, D₁::AbstractArray, Dₙ::AbstractAr
   nevents = length(events)
 
   # trivial mass function
-  nevents == 1 && return ones(1)
+  nevents == 1 && return [1.0]
 
   # sources of information: primary + auxiliary₁ + auxiliary₂ + ...
   nsources = 1 + length(Dₙ)
@@ -20,7 +20,7 @@ function tau_model(events::AbstractVector, D₁::AbstractArray, Dₙ::AbstractAr
   end
 
   # convert distances to ranks
-  idx = mapslices(sortperm, D, 1)
+  idx = mapslices(sortperm, D, dims=1)
   for j=1:nsources
     r = 0; prevdist = -Inf
     for i in view(idx,:,j)
@@ -31,15 +31,15 @@ function tau_model(events::AbstractVector, D₁::AbstractArray, Dₙ::AbstractAr
   end
 
   # conditional probabilities
-  P = nevents - D + 1
-  P = broadcast(/, P, sum(P, 1))
+  P = nevents .- D .+ 1
+  P = broadcast(/, P, sum(P, dims=1))
 
   # prior to data all events are equally probable
   x₀ = (1 - 1/nevents) / (1/nevents)
 
   # assume no redundancy
-  X = (1 - P) ./ P
-  x = x₀ * prod(X/x₀, 2)
+  X = (1 .- P) ./ P
+  x = x₀ * prod(X/x₀, dims=2)
 
-  p = 1 ./ (1 + x)
+  p = 1 ./ (1 .+ x)
 end

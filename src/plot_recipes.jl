@@ -32,7 +32,7 @@
   μs = Float64[]; σs = Float64[]
   for t in ts
     tplconfig = [1,1,1]
-    tplconfig[idx] = t
+    tplconfig[idx] .= t
 
     μ, σ = voxelreuse(img, tplconfig...;
                       overlapx=overlapx,
@@ -46,21 +46,19 @@
   end
 
   # highlight the optimum template range
+  rank = sortperm(μs, rev=true)
+  best = ts[rank[1:min(5,length(ts))]]
+  xmin, xmax = minimum(best), maximum(best)
+
+  yref = minimum(μs - σs)
+  ymin = max(0., yref - .05)
+  ymax = ymin + .008
+
   @series begin
-    rank = sortperm(μs, rev=true)
-    best = ts[rank[1:min(5,length(ts))]]
-    xmin, xmax = minimum(best), maximum(best)
-
-    reference = minimum(μs - σs)
-    ymin = max(0., reference - .05)
-    ymax = ymin + .008
-
-    tplrange = [xmin, xmax]
-
     seriestype := :shape
     linewidth := 0
     fillalpha := .5
-    label --> "Optimum range: $tplrange"
+    label --> "Optimum range: [$xmin, $xmax]"
 
     [xmin, xmax, xmax, xmin], [ymin, ymin, ymax, ymax]
   end
@@ -70,6 +68,7 @@
   ribbon := σs
   fillalpha := .5
   xlim := (0, tmax)
+  ylim := (ymin, Inf)
   xlabel --> "Template size"
   ylabel --> "Voxel reuse"
 

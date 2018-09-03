@@ -5,6 +5,8 @@
 
 const CPU_PHYSICAL_CORES = cpucores()
 
+const GPU = nothing
+
 function get_imfilter_impl(GPU)
   if GPU ≠ nothing
     imfilter_gpu
@@ -13,12 +15,15 @@ function get_imfilter_impl(GPU)
   end
 end
 
+mysub2ind(dims, I...) = LinearIndices(dims)[I...]
+myind2sub(dims, ind)  = Tuple(CartesianIndices(dims)[ind])
+
 function convdist(Xs::AbstractArray, masks::AbstractArray; weights=nothing)
   # choose among imfilter implementations
   imfilter_impl = get_imfilter_impl(GPU)
 
   # default to uniform weights
-  weights == nothing && (weights = ones(masks[1]))
+  weights == nothing && (weights = fill(1.0, size(masks[1])))
 
   result = []
   for (X, mask) in zip(Xs, masks)
@@ -28,7 +33,7 @@ function convdist(Xs::AbstractArray, masks::AbstractArray; weights=nothing)
     AB = imfilter_impl(X, wmask)
     B² = sum(abs2, wmask)
 
-    push!(result, abs.(A² - 2AB + B²))
+    push!(result, abs.(A² .- 2AB .+ B²))
   end
 
   D = sum(result)
@@ -38,17 +43,17 @@ function convdist(Xs::AbstractArray, masks::AbstractArray; weights=nothing)
 end
 
 function genpath(extent::NTuple{3,Integer}, kind::Symbol, datum=[])
-  path = Int[]
+  path = Vector{Int}()
 
   if kind == :rasterup
     for k=1:extent[3], j=1:extent[2], i=1:extent[1]
-      push!(path, sub2ind(extent, i,j,k))
+      push!(path, mysub2ind(extent, i,j,k))
     end
   end
 
   if kind == :rasterdown
     for k=extent[3]:-1:1, j=1:extent[2], i=1:extent[1]
-      push!(path, sub2ind(extent, i,j,k))
+      push!(path, mysub2ind(extent, i,j,k))
     end
   end
 
@@ -67,7 +72,7 @@ function genpath(extent::NTuple{3,Integer}, kind::Symbol, datum=[])
 
     while !all(grid)
       dilated = dilate(grid, [1,2,3])
-      append!(path, find(dilated - grid))
+      append!(path, findall(vec(dilated .& .!grid)))
       grid = dilated
     end
   end
@@ -79,14 +84,14 @@ function genpath(extent::NTuple{3,Integer}, kind::Symbol, datum=[])
 
     grid = falses(extent)
     for (i,j,k) in datum
-      pivot = sub2ind(extent, i,j,k)
+      pivot = mysub2ind(extent, i,j,k)
       grid[pivot] = true
       push!(path, pivot)
     end
 
     while !all(grid)
       dilated = dilate(grid, [1,2,3])
-      append!(path, find(dilated - grid))
+      append!(path, findall(vec(dilated .& .!grid)))
       grid = dilated
     end
   end

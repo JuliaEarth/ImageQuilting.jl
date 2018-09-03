@@ -1,13 +1,13 @@
 julia 0.7
-GeoStatsBase 0.2.0
-GeoStatsDevTools
-Combinatorics
-StatsBase
-Primes
-ImageFiltering
-ImageMorphology
+GeoStatsBase 0.2.2
+GeoStatsDevTools 0.2.0
+ImageFiltering 0.4.1
+ImageMorphology 0.1.1
 LightGraphs 0.6.1
 LightGraphsFlows 0.0.5
-RecipesBase
-ProgressMeter
+Combinatorics 0.7.0
+StatsBase 0.25.0
+Primes 0.4.0
+RecipesBase 0.5.0
+ProgressMeter 0.6.0
 CpuId 0.2.0

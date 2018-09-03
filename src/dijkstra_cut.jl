@@ -18,7 +18,7 @@ function dijkstra_cut(A1::AbstractArray, A2::AbstractArray, dir::Symbol)
   mx, my, mz = size(B)
 
   # accumulation cube and overlap mask
-  E = zeros(B); M = falses(B)
+  E = zeros(size(B)); M = falses(size(B))
 
   # pad accumulation cube with +inf
   Epad(i,j,k) = all(0 .< [i,j,k] .≤ [mx,my,mz]) ? E[i,j,k] : Inf
@@ -43,7 +43,7 @@ function dijkstra_cut(A1::AbstractArray, A2::AbstractArray, dir::Symbol)
   end
 
   # backward search along last slice
-  idx = indmin(zslice[:,my])
+  idx = argmin(zslice[:,my])
   mslice = view(M,:,:,mz)
   mslice[1:idx,my] = trues(idx)
   idxvec = zeros(Int, my); idxvec[my] = idx # keep track of indexes
@@ -56,7 +56,7 @@ function dijkstra_cut(A1::AbstractArray, A2::AbstractArray, dir::Symbol)
         idx -= 1
       end
     end
-    mslice[1:idx,j] = true
+    mslice[1:idx,j] .= true
     idxvec[j] = idx
   end
 
@@ -72,7 +72,7 @@ function dijkstra_cut(A1::AbstractArray, A2::AbstractArray, dir::Symbol)
           idx -= 1
         end
       end
-      M[1:idx,j,k] = true
+      M[1:idx,j,k] .= true
     end
   end
 
