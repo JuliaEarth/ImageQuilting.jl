@@ -166,7 +166,7 @@ end
         end
         refimg = joinpath(datadir, "Reals"*TIname*".png")
 
-        @test test_images(VisualTest(plot_reals, refimg), popup=!istravis, tol=0.1) |> success
+        @test test_images(VisualTest(plot_reals, refimg), popup=!istravis, tol=0.2) |> success
       end
     end
   end
@@ -194,7 +194,7 @@ end
       end
       refimg = joinpath(datadir, "GeoStatsAPI.png")
 
-      @test test_images(VisualTest(plot_solution, refimg), popup=!istravis, tol=0.1) |> success
+      @test test_images(VisualTest(plot_solution, refimg), popup=!istravis, tol=0.2) |> success
     end
   end
 
