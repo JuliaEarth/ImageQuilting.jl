@@ -10,16 +10,17 @@ using ImageMorphology
 using LightGraphs
 using LightGraphsFlows
 using Base: @nexprs, @nloops, @nref
+using Primes: factor
 using Combinatorics: nthperm!
 using StatsBase: sample, weights
-using Primes: factor
 using ProgressMeter: Progress, next!
+using FFTW: set_num_threads
 using CpuId: cpucores
+using RecipesBase
 using LinearAlgebra: I # TODO: eliminate this dependency
 using SparseArrays: spzeros
 using Random: shuffle!
 using Statistics: mean, std
-using RecipesBase
 
 # GeoStats.jl interface
 using GeoStatsBase

@@ -54,8 +54,8 @@ function iqsim(trainimg::AbstractArray{T,N},
                nreal::Integer=1, threads::Integer=CPU_PHYSICAL_CORES,
                gpu::Bool=false, debug::Bool=false, showprogress::Bool=false) where {T,N}
 
-  # use all CPU cores in FFT
-  # FFTW.set_num_threads(threads)
+  # number of threads in FFTW
+  set_num_threads(threads)
 
   # sanity checks
   @assert ndims(trainimg) == 3 "image is not 3D (add ghost dimension for 2D)"
