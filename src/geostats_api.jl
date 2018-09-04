@@ -13,7 +13,7 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
 ### Required
 
 * `TI`       - Training image
-* `template` - Template size in x, y and z
+* `tilesize` - Tile size in x, y and z
 
 ### Optional
 
@@ -35,7 +35,7 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
 """
 @simsolver ImgQuilt begin
   @param TI
-  @param template
+  @param tilesize
   @param overlap       = (1/6, 1/6, 1/6)
   @param cut           = :boykov
   @param path          = :rasterup
@@ -95,7 +95,7 @@ function solve_single(problem::SimulationProblem, var::Symbol,
   par, simsize, hard = preproc[var]
 
   # run image quilting core function
-  reals = iqsim(par.TI, par.template..., simsize...,
+  reals = iqsim(par.TI, par.tilesize, simsize...,
                 soft=par.soft, hard=hard, tol=par.tol,
                 cut=par.cut, path=par.path, simplex=par.simplex,
                 threads=solver.threads, gpu=solver.gpu,

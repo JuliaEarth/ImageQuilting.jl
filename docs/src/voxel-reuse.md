@@ -8,7 +8,7 @@ voxelreuse
 
 ## Plot recipe
 
-A plot recipe is provided for template design in image quilting. In order to plot the voxel
+A plot recipe is provided for tile design in image quilting. In order to plot the voxel
 reuse of a training image, install [Plots.jl](https://github.com/JuliaPlots/Plots.jl) and
 any of its supported backends (e.g. [GR.jl](https://github.com/jheinen/GR.jl)):
 

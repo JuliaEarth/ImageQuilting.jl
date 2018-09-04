@@ -4,8 +4,7 @@
 # ------------------------------------------------------------------
 
 """
-    iqsim(training_image::AbstractArray,
-          tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
+    iqsim(trainimg::AbstractArray{T,N}, tilesize::NTuple{N,Int},
           gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
           overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,
           soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1,
@@ -19,8 +18,8 @@ Performs image quilting simulation as described in Hoffimann et al. 2017.
 
 ### Required
 
-* `training_image` can be any 3D array (add ghost dimension for 2D)
-* `tplsizex`,`tplsizey`,`tplsizez` is the template size
+* `trainimg` is any 3D array (add ghost dimension for 2D)
+* `tilesize` is the tile size
 * `gridsizex`,`gridsizey`,`gridsizez` is the simulation size
 
 ### Optional
@@ -47,22 +46,21 @@ reals, cuts, voxs = iqsim(..., debug=true)
 
 `cuts[i]` is the boundary cut for `reals[i]` and `voxs[i]` is the associated voxel reuse.
 """
-function iqsim(training_image::AbstractArray,
-               tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,
+function iqsim(trainimg::AbstractArray{T,N}, tilesize::NTuple{N,Int},
                gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;
                overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,
                soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1,
                cut::Symbol=:boykov, path::Symbol=:rasterup, simplex::Bool=false,
                nreal::Integer=1, threads::Integer=CPU_PHYSICAL_CORES,
-               gpu::Bool=false, debug::Bool=false, showprogress::Bool=false)
+               gpu::Bool=false, debug::Bool=false, showprogress::Bool=false) where {T,N}
 
   # use all CPU cores in FFT
   # FFTW.set_num_threads(threads)
 
   # sanity checks
-  @assert ndims(training_image) == 3 "training image is not 3D (add ghost dimension for 2D)"
-  @assert all(0 .< [tplsizex, tplsizey, tplsizez] .≤ [size(training_image)...]) "invalid template size"
-  @assert all([gridsizex, gridsizey, gridsizez] .≥ [tplsizex, tplsizey, tplsizez]) "invalid grid size"
+  @assert ndims(trainimg) == 3 "training image is not 3D (add ghost dimension for 2D)"
+  @assert all(0 .< tilesize .≤ size(trainimg)) "invalid tile size"
+  @assert all((gridsizex, gridsizey, gridsizez) .≥ tilesize) "invalid grid size"
   @assert all(0 .< [overlapx, overlapy, overlapz] .< 1) "overlaps must be in range (0,1)"
   @assert 0 < tol ≤ 1 "tolerance must be in range (0,1]"
   @assert cut ∈ [:dijkstra,:boykov] "invalid cut algorithm"
@@ -74,7 +72,7 @@ function iqsim(training_image::AbstractArray,
     for (aux, auxTI) in soft
       @assert ndims(aux) == 3 "soft data is not 3D (add ghost dimension for 2D)"
       @assert all([size(aux)...] .≥ [gridsizex, gridsizey, gridsizez]) "soft data size < grid size"
-      @assert size(auxTI) == size(training_image) "auxiliary TI must have the same size as TI"
+      @assert size(auxTI) == size(trainimg) "auxiliary TI must have the same size as TI"
     end
   end
 
@@ -86,14 +84,14 @@ function iqsim(training_image::AbstractArray,
   end
 
   # calculate the overlap from given percentage
-  overlapx = ceil(Int, overlapx * tplsizex)
-  overlapy = ceil(Int, overlapy * tplsizey)
-  overlapz = ceil(Int, overlapz * tplsizez)
+  overlapx = ceil(Int, overlapx * tilesize[1])
+  overlapy = ceil(Int, overlapy * tilesize[2])
+  overlapz = ceil(Int, overlapz * tilesize[3])
 
   # spacing in raster path
-  spacingx = tplsizex - overlapx
-  spacingy = tplsizey - overlapy
-  spacingz = tplsizez - overlapz
+  spacingx = tilesize[1] - overlapx
+  spacingy = tilesize[2] - overlapy
+  spacingz = tilesize[3] - overlapz
 
   # calculate the number of tiles from grid size
   ntilex = ceil(Int, gridsizex / max(spacingx, 1))
@@ -101,9 +99,9 @@ function iqsim(training_image::AbstractArray,
   ntilez = ceil(Int, gridsizez / max(spacingz, 1))
 
   # simulation grid dimensions
-  nx = ntilex * (tplsizex - overlapx) + overlapx
-  ny = ntiley * (tplsizey - overlapy) + overlapy
-  nz = ntilez * (tplsizez - overlapz) + overlapz
+  nx = ntilex * (tilesize[1] - overlapx) + overlapx
+  ny = ntiley * (tilesize[2] - overlapy) + overlapy
+  nz = ntilez * (tilesize[3] - overlapz) + overlapz
 
   # total overlap volume in simulation grid
   overlap_volume = nx*ny*nz - (nx - (ntilex-1)overlapx)*
@@ -111,13 +109,12 @@ function iqsim(training_image::AbstractArray,
                               (nz - (ntilez-1)overlapz)
 
   # warn in case of 1-voxel overlaps
-  if any(([tplsizex, tplsizey, tplsizez] .>  1) .&
-         ([overlapx, overlapy, overlapz] .== 1))
-    warn("Overlaps with only 1 voxel. Check template/overlap configuration.")
+  if any((tilesize .>  1) .& ([overlapx, overlapy, overlapz] .== 1))
+    warn("Overlaps with only 1 voxel. Check tilesize/overlap configuration.")
   end
 
   # always work with floating point
-  TI = Float64.(training_image)
+  TI = Float64.(trainimg)
 
   # inactive voxels in the training image
   NaNTI = isnan.(TI); TI[NaNTI] .= 0
@@ -137,17 +134,17 @@ function iqsim(training_image::AbstractArray,
 
   # disable tiles in the training image if they contain inactive voxels
   mₜ, nₜ, pₜ = size(TI)
-  disabled = falses(mₜ-tplsizex+1, nₜ-tplsizey+1, pₜ-tplsizez+1)
+  disabled = falses(mₜ-tilesize[1]+1, nₜ-tilesize[2]+1, pₜ-tilesize[3]+1)
   for nanidx in findall(vec(NaNTI))
     iₙ, jₙ, kₙ = myind2sub(size(TI), nanidx)
 
     # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
-    iₛ = max(iₙ-tplsizex+1, 1)
-    jₛ = max(jₙ-tplsizey+1, 1)
-    kₛ = max(kₙ-tplsizez+1, 1)
-    iₑ = min(iₙ, mₜ-tplsizex+1)
-    jₑ = min(jₙ, nₜ-tplsizey+1)
-    kₑ = min(kₙ, pₜ-tplsizez+1)
+    iₛ = max(iₙ-tilesize[1]+1, 1)
+    jₛ = max(jₙ-tilesize[2]+1, 1)
+    kₛ = max(kₙ-tilesize[3]+1, 1)
+    iₑ = min(iₙ, mₜ-tilesize[1]+1)
+    jₑ = min(jₙ, nₜ-tilesize[2]+1)
+    kₑ = min(kₙ, pₜ-tilesize[3]+1)
 
     disabled[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] .= true
   end
@@ -184,9 +181,9 @@ function iqsim(training_image::AbstractArray,
       iₛ = (i-1)spacingx + 1
       jₛ = (j-1)spacingy + 1
       kₛ = (k-1)spacingz + 1
-      iₑ = iₛ + tplsizex - 1
-      jₑ = jₛ + tplsizey - 1
-      kₑ = kₛ + tplsizez - 1
+      iₑ = iₛ + tilesize[1] - 1
+      jₑ = jₛ + tilesize[2] - 1
+      kₑ = kₛ + tilesize[3] - 1
 
       if all(.!activated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
         push!(skipped, (i,j,k))
@@ -239,7 +236,7 @@ function iqsim(training_image::AbstractArray,
   showprogress && (progress = Progress(nreal, color=:black))
 
   # preallocate memory for distance calculations
-  distance = Array{Float64}(undef, mₜ-tplsizex+1, nₜ-tplsizey+1, pₜ-tplsizez+1)
+  distance = Array{Float64}(undef, mₜ-tilesize[1]+1, nₜ-tilesize[2]+1, pₜ-tilesize[3]+1)
 
   for real=1:nreal
     # allocate memory for current simulation
@@ -266,9 +263,9 @@ function iqsim(training_image::AbstractArray,
       iₛ = (i-1)spacingx + 1
       jₛ = (j-1)spacingy + 1
       kₛ = (k-1)spacingz + 1
-      iₑ = iₛ + tplsizex - 1
-      jₑ = jₛ + tplsizey - 1
-      kₑ = kₛ + tplsizez - 1
+      iₑ = iₛ + tilesize[1] - 1
+      jₑ = jₛ + tilesize[2] - 1
+      kₑ = kₛ + tilesize[3] - 1
 
       # current simulation dataevent
       simdev = view(simgrid, iₛ:iₑ,jₛ:jₑ,kₛ:kₑ)
@@ -280,10 +277,10 @@ function iqsim(training_image::AbstractArray,
         xsimplex = simplex ? simplex_transform(ovx, nvertices) : [ovx]
 
         D = convdist(simplexTI, xsimplex)
-        distance .+= view(D,1:mₜ-tplsizex+1,:,:)
+        distance .+= view(D,1:mₜ-tilesize[1]+1,:,:)
       end
       if overlapx > 1 && (i+1,j,k) ∈ pasted
-        ovx = view(simdev,spacingx+1:tplsizex,:,:)
+        ovx = view(simdev,spacingx+1:tilesize[1],:,:)
         xsimplex = simplex ? simplex_transform(ovx, nvertices) : [ovx]
 
         D = convdist(simplexTI, xsimplex)
@@ -294,10 +291,10 @@ function iqsim(training_image::AbstractArray,
         ysimplex = simplex ? simplex_transform(ovy, nvertices) : [ovy]
 
         D = convdist(simplexTI, ysimplex)
-        distance .+= view(D,:,1:nₜ-tplsizey+1,:)
+        distance .+= view(D,:,1:nₜ-tilesize[2]+1,:)
       end
       if overlapy > 1 && (i,j+1,k) ∈ pasted
-        ovy = view(simdev,:,spacingy+1:tplsizey,:)
+        ovy = view(simdev,:,spacingy+1:tilesize[2],:)
         ysimplex = simplex ? simplex_transform(ovy, nvertices) : [ovy]
 
         D = convdist(simplexTI, ysimplex)
@@ -308,10 +305,10 @@ function iqsim(training_image::AbstractArray,
         zsimplex = simplex ? simplex_transform(ovz, nvertices) : [ovz]
 
         D = convdist(simplexTI, zsimplex)
-        distance .+= view(D,:,:,1:pₜ-tplsizez+1)
+        distance .+= view(D,:,:,1:pₜ-tilesize[3]+1)
       end
       if overlapz > 1 && (i,j,k+1) ∈ pasted
-        ovz = view(simdev,:,:,spacingz+1:tplsizez)
+        ovz = view(simdev,:,:,spacingz+1:tilesize[3])
         zsimplex = simplex ? simplex_transform(ovz, nvertices) : [ovz]
 
         D = convdist(simplexTI, zsimplex)
@@ -355,7 +352,7 @@ function iqsim(training_image::AbstractArray,
       iᵦ, jᵦ, kᵦ = myind2sub(size(distance), idx)
 
       # selected training image dataevent
-      TIdev = view(TI,iᵦ:iᵦ+tplsizex-1,jᵦ:jᵦ+tplsizey-1,kᵦ:kᵦ+tplsizez-1)
+      TIdev = view(TI,iᵦ:iᵦ+tilesize[1]-1,jᵦ:jᵦ+tilesize[2]-1,kᵦ:kᵦ+tilesize[3]-1)
 
       # boundary cut mask
       M = falses(size(simdev))
@@ -364,24 +361,24 @@ function iqsim(training_image::AbstractArray,
         M[1:overlapx,:,:] .|= boundary_cut(A, B, :x)
       end
       if overlapx > 1 && (i+1,j,k) ∈ pasted
-        A = view(simdev,spacingx+1:tplsizex,:,:); B = view(TIdev,spacingx+1:tplsizex,:,:)
-        M[spacingx+1:tplsizex,:,:] .|= reverse(boundary_cut(reverse(A, dims=1), reverse(B, dims=1), :x), dims=1)
+        A = view(simdev,spacingx+1:tilesize[1],:,:); B = view(TIdev,spacingx+1:tilesize[1],:,:)
+        M[spacingx+1:tilesize[1],:,:] .|= reverse(boundary_cut(reverse(A, dims=1), reverse(B, dims=1), :x), dims=1)
       end
       if overlapy > 1 && (i,j-1,k) ∈ pasted
         A = view(simdev,:,1:overlapy,:); B = view(TIdev,:,1:overlapy,:)
         M[:,1:overlapy,:] .|= boundary_cut(A, B, :y)
       end
       if overlapy > 1 && (i,j+1,k) ∈ pasted
-        A = view(simdev,:,spacingy+1:tplsizey,:); B = view(TIdev,:,spacingy+1:tplsizey,:)
-        M[:,spacingy+1:tplsizey,:] .|= reverse(boundary_cut(reverse(A, dims=2), reverse(B, dims=2), :y), dims=2)
+        A = view(simdev,:,spacingy+1:tilesize[2],:); B = view(TIdev,:,spacingy+1:tilesize[2],:)
+        M[:,spacingy+1:tilesize[2],:] .|= reverse(boundary_cut(reverse(A, dims=2), reverse(B, dims=2), :y), dims=2)
       end
       if overlapz > 1 && (i,j,k-1) ∈ pasted
         A = view(simdev,:,:,1:overlapz); B = view(TIdev,:,:,1:overlapz)
         M[:,:,1:overlapz] .|= boundary_cut(A, B, :z)
       end
       if overlapz > 1 && (i,j,k+1) ∈ pasted
-        A = view(simdev,:,:,spacingz+1:tplsizez); B = view(TIdev,:,:,spacingz+1:tplsizez)
-        M[:,:,spacingz+1:tplsizez] .|= reverse(boundary_cut(reverse(A, dims=3), reverse(B, dims=3), :z), dims=3)
+        A = view(simdev,:,:,spacingz+1:tilesize[3]); B = view(TIdev,:,:,spacingz+1:tilesize[3])
+        M[:,:,spacingz+1:tilesize[3]] .|= reverse(boundary_cut(reverse(A, dims=3), reverse(B, dims=3), :z), dims=3)
       end
 
       # paste quilted pattern from training image

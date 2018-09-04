@@ -27,14 +27,13 @@
   # save support as an array
   ts = collect(tmin:tmax)
 
-  # compute voxel reuse for each template size
+  # compute voxel reuse for each tile size
   p = Progress(length(ts), color=:black)
   μs = Float64[]; σs = Float64[]
   for t in ts
-    tplconfig = [1,1,1]
-    tplconfig[idx] .= t
+    tilesize = ntuple(i -> idx[i] ? t : 1, 3)
 
-    μ, σ = voxelreuse(img, tplconfig...;
+    μ, σ = voxelreuse(img, tilesize;
                       overlapx=overlapx,
                       overlapy=overlapy,
                       overlapz=overlapz,
@@ -45,7 +44,7 @@
     next!(p)
   end
 
-  # highlight the optimum template range
+  # highlight the optimum tile size range
   rank = sortperm(μs, rev=true)
   best = ts[rank[1:min(5,length(ts))]]
   xmin, xmax = minimum(best), maximum(best)
@@ -69,7 +68,7 @@
   fillalpha := .5
   xlim := (0, tmax)
   ylim := (ymin, Inf)
-  xlabel --> "Template size"
+  xlabel --> "Tile size"
   ylabel --> "Voxel reuse"
 
   ts, μs

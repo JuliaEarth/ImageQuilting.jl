@@ -4,8 +4,7 @@
 # ------------------------------------------------------------------
 
 """
-    voxelreuse(training_image::AbstractArray,
-               tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
+    voxelreuse(trainimg::AbstractArray{T,N}, tilesize::NTuple{N,Int};
                overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,
                nreal::Integer=10, kwargs...)
 
@@ -16,15 +15,14 @@ Returns the mean voxel reuse in `[0,1]` and its standard deviation.
 - The approximation gets better as `nreal` is made larger.
 - Keyword arguments `kwargs` are passed to `iqsim` directly.
 """
-function voxelreuse(training_image::AbstractArray,
-                    tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;
+function voxelreuse(trainimg::AbstractArray{T,N}, tilesize::NTuple{N,Int};
                     overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,
-                    nreal::Integer=10, kwargs...)
+                    nreal::Integer=10, kwargs...) where {T,N}
 
   # calculate the overlap from given percentage
-  ovx = ceil(Int, overlapx * tplsizex)
-  ovy = ceil(Int, overlapy * tplsizey)
-  ovz = ceil(Int, overlapz * tplsizez)
+  ovx = ceil(Int, overlapx * tilesize[1])
+  ovy = ceil(Int, overlapy * tilesize[2])
+  ovz = ceil(Int, overlapz * tilesize[3])
 
   # elementary raster path
   ntilex = ovx > 1 ? 2 : 1
@@ -32,13 +30,11 @@ function voxelreuse(training_image::AbstractArray,
   ntilez = ovz > 1 ? 2 : 1
 
   # simulation grid dimensions
-  gridsizex = ntilex * (tplsizex - ovx) + ovx
-  gridsizey = ntiley * (tplsizey - ovy) + ovy
-  gridsizez = ntilez * (tplsizez - ovz) + ovz
+  gridsizex = ntilex * (tilesize[1] - ovx) + ovx
+  gridsizey = ntiley * (tilesize[2] - ovy) + ovy
+  gridsizez = ntilez * (tilesize[3] - ovz) + ovz
 
-  _, _, voxs = iqsim(training_image,
-                     tplsizex, tplsizey, tplsizez,
-                     gridsizex, gridsizey, gridsizez;
+  _, _, voxs = iqsim(trainimg, tilesize, gridsizex, gridsizey, gridsizez;
                      overlapx=overlapx, overlapy=overlapy, overlapz=overlapz,
                      nreal=nreal, debug=true, kwargs...)
 
