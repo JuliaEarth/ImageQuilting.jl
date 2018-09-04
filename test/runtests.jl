@@ -24,12 +24,12 @@ end
   @testset "Basic checks" begin
     # the output of a homogeneous image is also homogeneous
     TI = ones(20,20,20)
-    reals = iqsim(TI, (10,10,10), size(TI)...)
+    reals = iqsim(TI, (10,10,10), size(TI))
     @test reals[1] == TI
 
     # categories are obtained from training image only
     ncateg = 3; TI = rand(0:ncateg, 20, 20, 20)
-    reals = iqsim(TI, (10,10,10), size(TI)..., simplex=true)
+    reals = iqsim(TI, (10,10,10), size(TI), simplex=true)
     @test Set(reals[1]) ⊆ Set(TI)
   end
 
@@ -37,20 +37,20 @@ end
     # trends with soft data
     TI = [zeros(10,20,1); ones(10,20,1)]
     trend = [zeros(20,10,1) ones(20,10,1)]
-    reals = iqsim(TI, (10,10,1), size(TI)..., soft=[(trend,TI)], tol=1)
+    reals = iqsim(TI, (10,10,1), size(TI), soft=[(trend,TI)], tol=1)
     @test mean(reals[1][:,1:10,:]) ≤ mean(reals[1][:,11:20,:])
 
     # no side effects with soft data
     TI = ones(20,20,20)
     TI[:,5,:] .= NaN
     aux = fill(1.0, size(TI))
-    iqsim(TI, (10,10,10), size(TI)..., soft=[(aux,aux)])
+    iqsim(TI, (10,10,10), size(TI), soft=[(aux,aux)])
     @test aux == fill(1.0, size(TI))
 
     # auxiliary variable with integer type
     TI = ones(20,20,20)
     aux = [i for i in 1:20, j in 1:20, k in 1:20]
-    iqsim(TI, (10,10,10), size(TI)..., soft=[(aux,aux)])
+    iqsim(TI, (10,10,10), size(TI), soft=[(aux,aux)])
     @test aux == [i for i in 1:20, j in 1:20, k in 1:20]
   end
 
@@ -59,13 +59,13 @@ end
     TI = ones(20,20,20)
     obs = rand(size(TI)...)
     data = HardData((i,j,k)=>obs[i,j,k] for i=1:20, j=1:20, k=1:20)
-    reals = iqsim(TI, (10,10,10), size(TI)..., hard=data)
+    reals = iqsim(TI, (10,10,10), size(TI), hard=data)
     @test reals[1] == obs
 
     # multiple realizations with hard data
     TI = ones(20,20,20)
     data = HardData((20,20,20)=>10)
-    reals = iqsim(TI, (10,10,10), size(TI)..., hard=data, nreal=3)
+    reals = iqsim(TI, (10,10,10), size(TI), hard=data, nreal=3)
     for real in reals
       @test real[20,20,20] == 10
     end
@@ -82,17 +82,17 @@ end
         active[i,j,k] = false
       end
     end
-    reals = iqsim(TI, (10,10,10), size(TI)..., hard=shape)
+    reals = iqsim(TI, (10,10,10), size(TI), hard=shape)
     @test all(isnan.(reals[1][.!active]))
     @test all(.!isnan.(reals[1][active]))
 
     # masked training image
     TI = ones(20,20,20)
     TI[:,5,:] .= NaN
-    reals = iqsim(TI, (10,10,10), size(TI)...)
+    reals = iqsim(TI, (10,10,10), size(TI))
     @test reals[1] == fill(1.0, size(TI))
     TI[1,5,:] .= 0
-    reals = iqsim(TI, (10,10,10), size(TI)..., simplex=true)
+    reals = iqsim(TI, (10,10,10), size(TI), simplex=true)
     @test reals[1] == fill(1.0, size(TI))
 
     # masked domain and masked training image
@@ -100,11 +100,11 @@ end
     TI[:,5,:] .= NaN
     aux = fill(1.0, size(TI))
     shape = HardData((i,j,k)=>NaN for i=1:20, j=5, k=1:20)
-    reals = iqsim(TI, (10,10,10), size(TI)..., hard=shape)
+    reals = iqsim(TI, (10,10,10), size(TI), hard=shape)
     @test all(isnan.(reals[1][:,5,:]))
     @test all(reals[1][:,1:4,:] .== 1)
     @test all(reals[1][:,6:20,:] .== 1)
-    reals = iqsim(TI, (10,10,10), size(TI)..., hard=shape, soft=[(aux,aux)])
+    reals = iqsim(TI, (10,10,10), size(TI), hard=shape, soft=[(aux,aux)])
     @test all(isnan.(reals[1][:,5,:]))
     @test all(reals[1][:,1:4,:] .== 1)
     @test all(reals[1][:,6:20,:] .== 1)
@@ -114,7 +114,7 @@ end
     # 3D cut
     TI = ones(20,20,20)
     for cut in [:dijkstra,:boykov]
-      _, _, voxs = iqsim(TI, (10,10,10), size(TI)..., overlapx=1/3, overlapy=1/3, overlapz=1/3, cut=cut, debug=true)
+      _, _, voxs = iqsim(TI, (10,10,10), size(TI), overlapx=1/3, overlapy=1/3, overlapz=1/3, cut=cut, debug=true)
       @test 0 ≤ voxs[1] ≤ 1
     end
   end
@@ -156,7 +156,7 @@ end
         function plot_reals(fname)
           Random.seed!(2017)
           TI = training_image(TIname)[1:50,1:50,:]
-          reals = iqsim(TI, (30,30,1), size(TI)..., nreal=4)
+          reals = iqsim(TI, (30,30,1), size(TI), nreal=4)
           ps = []
           for real in reals
             push!(ps, heatmap(real[:,:,1]))
@@ -203,8 +203,8 @@ end
       # # CPU and GPU give same results
       # TI = ones(20,20,20)
       # TI[10:end,:,:] = 2
-      # Random.seed!(0); realscpu = iqsim(TI, (10,10,10), size(TI)..., gpu=false)
-      # Random.seed!(0); realsgpu = iqsim(TI, (10,10,10), size(TI)..., gpu=true)
+      # Random.seed!(0); realscpu = iqsim(TI, (10,10,10), size(TI), gpu=false)
+      # Random.seed!(0); realsgpu = iqsim(TI, (10,10,10), size(TI), gpu=true)
       # @test realscpu[1] == realsgpu[1]
     # end
   # end

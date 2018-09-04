@@ -34,7 +34,7 @@ function voxelreuse(trainimg::AbstractArray{T,N}, tilesize::NTuple{N,Int};
   gridsizey = ntiley * (tilesize[2] - ovy) + ovy
   gridsizez = ntilez * (tilesize[3] - ovz) + ovz
 
-  _, _, voxs = iqsim(trainimg, tilesize, gridsizex, gridsizey, gridsizez;
+  _, _, voxs = iqsim(trainimg, tilesize, (gridsizex,gridsizey,gridsizez);
                      overlapx=overlapx, overlapy=overlapy, overlapz=overlapz,
                      nreal=nreal, debug=true, kwargs...)
 

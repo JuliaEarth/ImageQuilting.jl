@@ -95,7 +95,7 @@ function solve_single(problem::SimulationProblem, var::Symbol,
   par, simsize, hard = preproc[var]
 
   # run image quilting core function
-  reals = iqsim(par.TI, par.tilesize, simsize...,
+  reals = iqsim(par.TI, par.tilesize, simsize,
                 soft=par.soft, hard=hard, tol=par.tol,
                 cut=par.cut, path=par.path, simplex=par.simplex,
                 threads=solver.threads, gpu=solver.gpu,
