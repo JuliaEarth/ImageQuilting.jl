@@ -16,7 +16,7 @@ function gpu_setup()
 
   devs = cl.devices(:gpu)
   if isempty(devs)
-    warn("GPU not found, falling back to other OpenCL devices")
+    @warn "GPU not found, falling back to other OpenCL devices"
     devs = cl.devices()
   end
   @assert !isempty(devs) "OpenCL device not found, make sure drivers are installed"

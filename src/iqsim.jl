@@ -99,18 +99,18 @@ function iqsim(trainimg::AbstractArray{T,N},
 
   # warn in case of 1-voxel overlaps
   if any((tilesize .>  1) .& (ovlsize .== 1))
-    warn("Overlaps with only 1 voxel. Check tilesize/overlap configuration.")
+    @warn "Overlaps with only 1 voxel, check tilesize/overlap configuration"
   end
 
   # always work with floating point
   TI = Float64.(trainimg)
+  TIsize = size(TI)
 
   # inactive voxels in the training image
   NaNTI = isnan.(TI); TI[NaNTI] .= 0
 
   # disable tiles in the training image if they contain inactive voxels
-  mₜ, nₜ, pₜ = size(TI)
-  disabled = falses(mₜ-tilesize[1]+1, nₜ-tilesize[2]+1, pₜ-tilesize[3]+1)
+  disabled = falses(TIsize .- tilesize .+ 1)
   for nanidx in findall(vec(NaNTI))
     iₙ, jₙ, kₙ = myind2sub(size(TI), nanidx)
 
@@ -118,9 +118,9 @@ function iqsim(trainimg::AbstractArray{T,N},
     iₛ = max(iₙ-tilesize[1]+1, 1)
     jₛ = max(jₙ-tilesize[2]+1, 1)
     kₛ = max(kₙ-tilesize[3]+1, 1)
-    iₑ = min(iₙ, mₜ-tilesize[1]+1)
-    jₑ = min(jₙ, nₜ-tilesize[2]+1)
-    kₑ = min(kₙ, pₜ-tilesize[3]+1)
+    iₑ = min(iₙ, TIsize[1]-tilesize[1]+1)
+    jₑ = min(jₙ, TIsize[2]-tilesize[2]+1)
+    kₑ = min(kₙ, TIsize[3]-tilesize[3]+1)
 
     disabled[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] .= true
   end
@@ -211,7 +211,7 @@ function iqsim(trainimg::AbstractArray{T,N},
   showprogress && (progress = Progress(nreal, color=:black))
 
   # preallocate memory for distance calculations
-  distance = Array{Float64}(undef, mₜ-tilesize[1]+1, nₜ-tilesize[2]+1, pₜ-tilesize[3]+1)
+  distance = Array{Float64}(undef, TIsize .- tilesize .+ 1)
 
   for real=1:nreal
     # allocate memory for current simulation
@@ -252,42 +252,42 @@ function iqsim(trainimg::AbstractArray{T,N},
         xsimplex = [ovx]
 
         D = convdist([TI], xsimplex)
-        distance .+= view(D,1:mₜ-tilesize[1]+1,:,:)
+        distance .+= view(D,1:TIsize[1]-tilesize[1]+1,:,:)
       end
       if ovlsize[1] > 1 && (i+1,j,k) ∈ pasted
         ovx = view(simdev,spacing[1]+1:tilesize[1],:,:)
         xsimplex = [ovx]
 
         D = convdist([TI], xsimplex)
-        distance .+= view(D,spacing[1]+1:mₜ-ovlsize[1]+1,:,:)
+        distance .+= view(D,spacing[1]+1:TIsize[1]-ovlsize[1]+1,:,:)
       end
       if ovlsize[2] > 1 && (i,j-1,k) ∈ pasted
         ovy = view(simdev,:,1:ovlsize[2],:)
         ysimplex = [ovy]
 
         D = convdist([TI], ysimplex)
-        distance .+= view(D,:,1:nₜ-tilesize[2]+1,:)
+        distance .+= view(D,:,1:TIsize[2]-tilesize[2]+1,:)
       end
       if ovlsize[2] > 1 && (i,j+1,k) ∈ pasted
         ovy = view(simdev,:,spacing[2]+1:tilesize[2],:)
         ysimplex = [ovy]
 
         D = convdist([TI], ysimplex)
-        distance .+= view(D,:,spacing[2]+1:nₜ-ovlsize[2]+1,:)
+        distance .+= view(D,:,spacing[2]+1:TIsize[2]-ovlsize[2]+1,:)
       end
       if ovlsize[3] > 1 && (i,j,k-1) ∈ pasted
         ovz = view(simdev,:,:,1:ovlsize[3])
         zsimplex = [ovz]
 
         D = convdist([TI], zsimplex)
-        distance .+= view(D,:,:,1:pₜ-tilesize[3]+1)
+        distance .+= view(D,:,:,1:TIsize[3]-tilesize[3]+1)
       end
       if ovlsize[3] > 1 && (i,j,k+1) ∈ pasted
         ovz = view(simdev,:,:,spacing[3]+1:tilesize[3])
         zsimplex = [ovz]
 
         D = convdist([TI], zsimplex)
-        distance .+= view(D,:,:,spacing[3]+1:pₜ-ovlsize[3]+1)
+        distance .+= view(D,:,:,spacing[3]+1:TIsize[3]-ovlsize[3]+1)
       end
 
       # disable dataevents that contain inactive voxels
