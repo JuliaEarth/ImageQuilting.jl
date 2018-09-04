@@ -9,7 +9,7 @@
           overlap::NTuple{N,Float64}=ntuple(i->1/6,N),
           soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1,
           cut::Symbol=:boykov, path::Symbol=:rasterup, nreal::Integer=1,
-          threads::Integer=CPU_PHYSICAL_CORES, gpu::Bool=false,
+          threads::Integer=cpucores(), gpu::Bool=false,
           debug::Bool=false, showprogress::Bool=false)
 
 Performs image quilting simulation as described in Hoffimann et al. 2017.
@@ -50,7 +50,7 @@ function iqsim(trainimg::AbstractArray{T,N},
                overlap::NTuple{N,Float64}=ntuple(i->1/6,N),
                soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1,
                cut::Symbol=:boykov, path::Symbol=:rasterup, nreal::Integer=1,
-               threads::Integer=CPU_PHYSICAL_CORES, gpu::Bool=false,
+               threads::Integer=cpucores(), gpu::Bool=false,
                debug::Bool=false, showprogress::Bool=false) where {T,N}
 
   # number of threads in FFTW
@@ -77,9 +77,9 @@ function iqsim(trainimg::AbstractArray{T,N},
 
   # hard data checks
   if !isempty(hard)
-    coordinates = Int[coord[i] for coord in coords(hard), i=1:3]
-    @assert all(maximum(coordinates, dims=1)' .≤ gridsize) "hard data coordinates outside of grid"
-    @assert all(minimum(coordinates, dims=1)' .> 0) "hard data coordinates must be positive indexes"
+    coordinates = [coord[i] for i in 1:N, coord in coords(hard)]
+    @assert all(maximum(coordinates, dims=2) .≤ gridsize) "hard data coordinates outside of grid"
+    @assert all(minimum(coordinates, dims=2) .> 0) "hard data coordinates must be positive indexes"
   end
 
   # calculate the overlap size from given percentage
@@ -126,8 +126,8 @@ function iqsim(trainimg::AbstractArray{T,N},
   end
 
   # keep track of hard data and inactive voxels
-  skipped = Set{Tuple{Int,Int,Int}}()
-  datum   = Vector{Tuple{Int,Int,Int}}()
+  skipped = Set{NTuple{N,Int}}()
+  datum   = Vector{NTuple{N,Int}}()
   if !isempty(hard)
     # hard data in grid format
     hardgrid = zeros(padsize)
@@ -172,8 +172,8 @@ function iqsim(trainimg::AbstractArray{T,N},
   end
 
   # preprocess soft data
-  softgrid = Vector{Array{Float64,3}}()
-  softTI   = Vector{Array{Float64,3}}()
+  softgrid = Vector{Array{Float64,N}}()
+  softTI   = Vector{Array{Float64,N}}()
   if !isempty(soft)
     for (aux, auxTI) in soft
       auxpad = padsize .- min.(padsize, size(aux))
@@ -201,10 +201,10 @@ function iqsim(trainimg::AbstractArray{T,N},
   boundary_cut = cut == :dijkstra ? dijkstra_cut : boykov_kolmogorov_cut
 
   # main output is a vector of 3D grids
-  realizations = Vector{Array{Float64,3}}()
+  realizations = Vector{Array{Float64,N}}()
 
   # for each realization we have:
-  boundarycuts = Vector{Array{Float64,3}}() # boundary cut
+  boundarycuts = Vector{Array{Float64,N}}() # boundary cut
   voxelreuse = Vector{Float64}()            # voxel reuse
 
   # show progress and estimated time duration

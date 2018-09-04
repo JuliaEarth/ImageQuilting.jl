@@ -3,8 +3,6 @@
 # Licensed under the ISC License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-const CPU_PHYSICAL_CORES = cpucores()
-
 const GPU = nothing
 
 function get_imfilter_impl(GPU)

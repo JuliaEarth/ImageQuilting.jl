@@ -43,7 +43,7 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
   @param inactive      = nothing
   @param soft          = []
   @param tol           = .1
-  @global threads      = CPU_PHYSICAL_CORES
+  @global threads      = cpucores()
   @global gpu          = false
   @global showprogress = false
 end
