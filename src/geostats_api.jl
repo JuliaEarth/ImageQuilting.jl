@@ -67,12 +67,12 @@ function preprocess(problem::SimulationProblem, solver::ImgQuilt)
     varparams = solver.params[var]
 
     # add ghost dimension to simulation grid if necessary
-    simsize = ndims(pdomain) == 2 ? (size(pdomain)..., 1) : size(pdomain)
+    gridsize = ndims(pdomain) == 2 ? (size(pdomain)..., 1) : size(pdomain)
 
     # create hard data object
     hdata = HardData()
     for (loc, datloc) in datamap(problem, var)
-      push!(hdata, myind2sub(simsize, loc) => value(pdata, datloc, var))
+      push!(hdata, myind2sub(gridsize, loc) => value(pdata, datloc, var))
     end
 
     # disable inactive voxels
@@ -83,7 +83,7 @@ function preprocess(problem::SimulationProblem, solver::ImgQuilt)
       end
     end
 
-    preproc[var] = (varparams, simsize, merge(hdata, shape))
+    preproc[var] = (varparams, gridsize, merge(hdata, shape))
   end
 
   preproc
@@ -92,10 +92,11 @@ end
 function solve_single(problem::SimulationProblem, var::Symbol,
                       solver::ImgQuilt, preproc)
   # unpack preprocessed parameters
-  par, simsize, hard = preproc[var]
+  par, gridsize, hard = preproc[var]
 
   # run image quilting core function
-  reals = iqsim(par.TI, par.tilesize, simsize,
+  reals = iqsim(par.TI, par.tilesize, gridsize;
+                overlap=par.overlap,
                 soft=par.soft, hard=hard, tol=par.tol,
                 cut=par.cut, path=par.path, simplex=par.simplex,
                 threads=solver.threads, gpu=solver.gpu,

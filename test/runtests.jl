@@ -114,7 +114,7 @@ end
     # 3D cut
     TI = ones(20,20,20)
     for cut in [:dijkstra,:boykov]
-      _, _, voxs = iqsim(TI, (10,10,10), size(TI), overlapx=1/3, overlapy=1/3, overlapz=1/3, cut=cut, debug=true)
+      _, _, voxs = iqsim(TI, (10,10,10), size(TI), overlap=(1/3,1/3,1/3), cut=cut, debug=true)
       @test 0 ≤ voxs[1] ≤ 1
     end
   end

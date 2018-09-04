@@ -5,7 +5,7 @@
 
 """
     voxelreuse(trainimg::AbstractArray{T,N}, tilesize::NTuple{N,Int};
-               overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,
+               overlap::NTuple{N,Float64}=ntuple(i->1/6,N),
                nreal::Integer=10, kwargs...)
 
 Returns the mean voxel reuse in `[0,1]` and its standard deviation.
@@ -16,27 +16,20 @@ Returns the mean voxel reuse in `[0,1]` and its standard deviation.
 - Keyword arguments `kwargs` are passed to `iqsim` directly.
 """
 function voxelreuse(trainimg::AbstractArray{T,N}, tilesize::NTuple{N,Int};
-                    overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,
+                    overlap::NTuple{N,Float64}=ntuple(i->1/6,N),
                     nreal::Integer=10, kwargs...) where {T,N}
 
-  # calculate the overlap from given percentage
-  ovx = ceil(Int, overlapx * tilesize[1])
-  ovy = ceil(Int, overlapy * tilesize[2])
-  ovz = ceil(Int, overlapz * tilesize[3])
+  # calculate the overlap size from given percentage
+  ovlsize = ntuple(i -> ceil(Int, overlap[i]*tilesize[i]), N)
 
   # elementary raster path
-  ntilex = ovx > 1 ? 2 : 1
-  ntiley = ovy > 1 ? 2 : 1
-  ntilez = ovz > 1 ? 2 : 1
+  ntiles = ntuple(i -> ovlsize[i] > 1 ? 2 : 1, N)
 
   # simulation grid dimensions
-  gridsizex = ntilex * (tilesize[1] - ovx) + ovx
-  gridsizey = ntiley * (tilesize[2] - ovy) + ovy
-  gridsizez = ntilez * (tilesize[3] - ovz) + ovz
+  gridsize = ntuple(i -> ntiles[i]*(tilesize[i]-ovlsize[i]) + ovlsize[i], N)
 
-  _, _, voxs = iqsim(trainimg, tilesize, (gridsizex,gridsizey,gridsizez);
-                     overlapx=overlapx, overlapy=overlapy, overlapz=overlapz,
-                     nreal=nreal, debug=true, kwargs...)
+  _, _, voxs = iqsim(trainimg, tilesize, gridsize;
+                     overlap=overlap, nreal=nreal, debug=true, kwargs...)
 
   μ = mean(voxs)
   σ = std(voxs, mean=μ)
