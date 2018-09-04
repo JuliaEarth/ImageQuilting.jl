@@ -18,25 +18,18 @@ end
 mysub2ind(dims, I...) = LinearIndices(dims)[I...]
 myind2sub(dims, ind)  = Tuple(CartesianIndices(dims)[ind])
 
-function convdist(Xs::AbstractArray, masks::AbstractArray; weights=nothing)
+function convdist(img::AbstractArray, kern::AbstractArray;
+                  weights::AbstractArray=fill(1.0, size(kern)))
   # choose among imfilter implementations
   imfilter_impl = get_imfilter_impl(GPU)
 
-  # default to uniform weights
-  weights == nothing && (weights = fill(1.0, size(masks[1])))
+  wkern = weights.*kern
 
-  result = []
-  for (X, mask) in zip(Xs, masks)
-    wmask = weights.*mask
+  A² = imfilter_impl(img.^2, weights)
+  AB = imfilter_impl(img, wkern)
+  B² = sum(abs2, wkern)
 
-    A² = imfilter_impl(X.^2, weights)
-    AB = imfilter_impl(X, wmask)
-    B² = sum(abs2, wmask)
-
-    push!(result, abs.(A² .- 2AB .+ B²))
-  end
-
-  D = sum(result)
+  D = abs.(A² .- 2AB .+ B²)
 
   # always return a plain simple array
   parent(D)

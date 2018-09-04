@@ -249,44 +249,32 @@ function iqsim(trainimg::AbstractArray{T,N},
       distance[:] .= 0
       if ovlsize[1] > 1 && (i-1,j,k) ∈ pasted
         ovx = view(simdev,1:ovlsize[1],:,:)
-        xsimplex = [ovx]
-
-        D = convdist([TI], xsimplex)
+        D = convdist(TI, ovx)
         distance .+= view(D,1:TIsize[1]-tilesize[1]+1,:,:)
       end
       if ovlsize[1] > 1 && (i+1,j,k) ∈ pasted
         ovx = view(simdev,spacing[1]+1:tilesize[1],:,:)
-        xsimplex = [ovx]
-
-        D = convdist([TI], xsimplex)
+        D = convdist(TI, ovx)
         distance .+= view(D,spacing[1]+1:TIsize[1]-ovlsize[1]+1,:,:)
       end
       if ovlsize[2] > 1 && (i,j-1,k) ∈ pasted
         ovy = view(simdev,:,1:ovlsize[2],:)
-        ysimplex = [ovy]
-
-        D = convdist([TI], ysimplex)
+        D = convdist(TI, ovy)
         distance .+= view(D,:,1:TIsize[2]-tilesize[2]+1,:)
       end
       if ovlsize[2] > 1 && (i,j+1,k) ∈ pasted
         ovy = view(simdev,:,spacing[2]+1:tilesize[2],:)
-        ysimplex = [ovy]
-
-        D = convdist([TI], ysimplex)
+        D = convdist(TI, ovy)
         distance .+= view(D,:,spacing[2]+1:TIsize[2]-ovlsize[2]+1,:)
       end
       if ovlsize[3] > 1 && (i,j,k-1) ∈ pasted
         ovz = view(simdev,:,:,1:ovlsize[3])
-        zsimplex = [ovz]
-
-        D = convdist([TI], zsimplex)
+        D = convdist(TI, ovz)
         distance .+= view(D,:,:,1:TIsize[3]-tilesize[3]+1)
       end
       if ovlsize[3] > 1 && (i,j,k+1) ∈ pasted
         ovz = view(simdev,:,:,spacing[3]+1:tilesize[3])
-        zsimplex = [ovz]
-
-        D = convdist([TI], zsimplex)
+        D = convdist(TI, ovz)
         distance .+= view(D,:,:,spacing[3]+1:TIsize[3]-ovlsize[3]+1)
       end
 
@@ -297,8 +285,7 @@ function iqsim(trainimg::AbstractArray{T,N},
       auxdistances = Vector{Array{Float64,3}}()
       if !isempty(hard) && any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
         harddev = hardgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-        hsimplex = [harddev]
-        D = convdist([TI], hsimplex, weights=preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
+        D = convdist(TI, harddev, weights=preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
 
         # disable dataevents that contain inactive voxels
         D[disabled] .= Inf
@@ -309,7 +296,7 @@ function iqsim(trainimg::AbstractArray{T,N},
       end
       for n=1:length(softTI)
         softdev = softgrid[n][iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-        D = convdist([softTI[n]], [softdev])
+        D = convdist(softTI[n], softdev)
 
         # disable dataevents that contain inactive voxels
         D[disabled] .= Inf
