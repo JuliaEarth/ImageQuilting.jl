@@ -98,7 +98,7 @@ function solve_single(problem::SimulationProblem, var::Symbol,
   reals = iqsim(par.TI, par.tilesize, gridsize;
                 overlap=par.overlap,
                 soft=par.soft, hard=hard, tol=par.tol,
-                cut=par.cut, path=par.path, simplex=par.simplex,
+                cut=par.cut, path=par.path,
                 threads=solver.threads, gpu=solver.gpu,
                 showprogress=solver.showprogress)
 

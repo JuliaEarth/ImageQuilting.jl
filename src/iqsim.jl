@@ -8,9 +8,9 @@
           tilesize::NTuple{N,Int}, gridsize::NTuple{N,Int};
           overlap::NTuple{N,Float64}=ntuple(i->1/6,N),
           soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1,
-          cut::Symbol=:boykov, path::Symbol=:rasterup, simplex::Bool=false,
-          nreal::Integer=1, threads::Integer=CPU_PHYSICAL_CORES,
-          gpu::Bool=false, debug::Bool=false, showprogress::Bool=false)
+          cut::Symbol=:boykov, path::Symbol=:rasterup, nreal::Integer=1,
+          threads::Integer=CPU_PHYSICAL_CORES, gpu::Bool=false,
+          debug::Bool=false, showprogress::Bool=false)
 
 Performs image quilting simulation as described in Hoffimann et al. 2017.
 
@@ -30,7 +30,6 @@ Performs image quilting simulation as described in Hoffimann et al. 2017.
 * `tol` is the initial relaxation tolerance in (0,1] (default to .1)
 * `cut` is the cut algorithm (`:dijkstra` or `:boykov`)
 * `path` is the simulation path (`:rasterup`, `:rasterdown`, `:dilation` or `:random`)
-* `simplex` informs whether to apply or not the simplex transform to the image
 * `nreal` is the number of realizations
 * `threads` is the number of threads for the FFT (default to all CPU cores)
 * `gpu` informs whether to use the GPU or the CPU
@@ -50,9 +49,9 @@ function iqsim(trainimg::AbstractArray{T,N},
                tilesize::NTuple{N,Int}, gridsize::NTuple{N,Int};
                overlap::NTuple{N,Float64}=ntuple(i->1/6,N),
                soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1,
-               cut::Symbol=:boykov, path::Symbol=:rasterup, simplex::Bool=false,
-               nreal::Integer=1, threads::Integer=CPU_PHYSICAL_CORES,
-               gpu::Bool=false, debug::Bool=false, showprogress::Bool=false) where {T,N}
+               cut::Symbol=:boykov, path::Symbol=:rasterup, nreal::Integer=1,
+               threads::Integer=CPU_PHYSICAL_CORES, gpu::Bool=false,
+               debug::Bool=false, showprogress::Bool=false) where {T,N}
 
   # number of threads in FFTW
   set_num_threads(threads)
@@ -108,19 +107,6 @@ function iqsim(trainimg::AbstractArray{T,N},
 
   # inactive voxels in the training image
   NaNTI = isnan.(TI); TI[NaNTI] .= 0
-
-  # perform simplex transform
-  if simplex
-    categories = Set(TI[.!NaNTI])
-    ncategories = nvertices = length(categories) - 1
-
-    @assert categories == Set(0:ncategories) "categories should be labeled 1, 2, 3,..."
-
-    simplexTI = simplex_transform(TI, nvertices)
-  else
-    nvertices = 1
-    simplexTI = [TI]
-  end
 
   # disable tiles in the training image if they contain inactive voxels
   mₜ, nₜ, pₜ = size(TI)
@@ -263,44 +249,44 @@ function iqsim(trainimg::AbstractArray{T,N},
       distance[:] .= 0
       if ovlsize[1] > 1 && (i-1,j,k) ∈ pasted
         ovx = view(simdev,1:ovlsize[1],:,:)
-        xsimplex = simplex ? simplex_transform(ovx, nvertices) : [ovx]
+        xsimplex = [ovx]
 
-        D = convdist(simplexTI, xsimplex)
+        D = convdist([TI], xsimplex)
         distance .+= view(D,1:mₜ-tilesize[1]+1,:,:)
       end
       if ovlsize[1] > 1 && (i+1,j,k) ∈ pasted
         ovx = view(simdev,spacing[1]+1:tilesize[1],:,:)
-        xsimplex = simplex ? simplex_transform(ovx, nvertices) : [ovx]
+        xsimplex = [ovx]
 
-        D = convdist(simplexTI, xsimplex)
+        D = convdist([TI], xsimplex)
         distance .+= view(D,spacing[1]+1:mₜ-ovlsize[1]+1,:,:)
       end
       if ovlsize[2] > 1 && (i,j-1,k) ∈ pasted
         ovy = view(simdev,:,1:ovlsize[2],:)
-        ysimplex = simplex ? simplex_transform(ovy, nvertices) : [ovy]
+        ysimplex = [ovy]
 
-        D = convdist(simplexTI, ysimplex)
+        D = convdist([TI], ysimplex)
         distance .+= view(D,:,1:nₜ-tilesize[2]+1,:)
       end
       if ovlsize[2] > 1 && (i,j+1,k) ∈ pasted
         ovy = view(simdev,:,spacing[2]+1:tilesize[2],:)
-        ysimplex = simplex ? simplex_transform(ovy, nvertices) : [ovy]
+        ysimplex = [ovy]
 
-        D = convdist(simplexTI, ysimplex)
+        D = convdist([TI], ysimplex)
         distance .+= view(D,:,spacing[2]+1:nₜ-ovlsize[2]+1,:)
       end
       if ovlsize[3] > 1 && (i,j,k-1) ∈ pasted
         ovz = view(simdev,:,:,1:ovlsize[3])
-        zsimplex = simplex ? simplex_transform(ovz, nvertices) : [ovz]
+        zsimplex = [ovz]
 
-        D = convdist(simplexTI, zsimplex)
+        D = convdist([TI], zsimplex)
         distance .+= view(D,:,:,1:pₜ-tilesize[3]+1)
       end
       if ovlsize[3] > 1 && (i,j,k+1) ∈ pasted
         ovz = view(simdev,:,:,spacing[3]+1:tilesize[3])
-        zsimplex = simplex ? simplex_transform(ovz, nvertices) : [ovz]
+        zsimplex = [ovz]
 
-        D = convdist(simplexTI, zsimplex)
+        D = convdist([TI], zsimplex)
         distance .+= view(D,:,:,spacing[3]+1:pₜ-ovlsize[3]+1)
       end
 
@@ -311,8 +297,8 @@ function iqsim(trainimg::AbstractArray{T,N},
       auxdistances = Vector{Array{Float64,3}}()
       if !isempty(hard) && any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
         harddev = hardgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-        hsimplex = simplex ? simplex_transform(harddev, nvertices) : [harddev]
-        D = convdist(simplexTI, hsimplex, weights=preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
+        hsimplex = [harddev]
+        D = convdist([TI], hsimplex, weights=preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
 
         # disable dataevents that contain inactive voxels
         D[disabled] .= Inf

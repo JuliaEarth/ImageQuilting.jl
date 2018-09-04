@@ -29,7 +29,7 @@ end
 
     # categories are obtained from training image only
     ncateg = 3; TI = rand(0:ncateg, 20, 20, 20)
-    reals = iqsim(TI, (10,10,10), size(TI), simplex=true)
+    reals = iqsim(TI, (10,10,10), size(TI))
     @test Set(reals[1]) ⊆ Set(TI)
   end
 
@@ -92,7 +92,7 @@ end
     reals = iqsim(TI, (10,10,10), size(TI))
     @test reals[1] == fill(1.0, size(TI))
     TI[1,5,:] .= 0
-    reals = iqsim(TI, (10,10,10), size(TI), simplex=true)
+    reals = iqsim(TI, (10,10,10), size(TI))
     @test reals[1] == fill(1.0, size(TI))
 
     # masked domain and masked training image

@@ -38,7 +38,6 @@ include("relaxation.jl")
 include("tau_model.jl")
 include("dijkstra_cut.jl")
 include("boykov_kolmogorov_cut.jl")
-include("simplex_transform.jl")
 include("voxel_reuse.jl")
 include("iqsim.jl")
 
