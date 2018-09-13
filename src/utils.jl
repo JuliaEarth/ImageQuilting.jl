@@ -13,8 +13,8 @@ function get_imfilter_impl(GPU)
   end
 end
 
-mysub2ind(dims, I...) = LinearIndices(dims)[I...]
-myind2sub(dims, ind)  = Tuple(CartesianIndices(dims)[ind])
+mysub2ind(dims, ind...) = LinearIndices(dims)[ind...]
+myind2sub(dims, ind)    = Tuple(CartesianIndices(dims)[ind])
 
 function convdist(img::AbstractArray, kern::AbstractArray;
                   weights::AbstractArray=fill(1.0, size(kern)))
@@ -29,8 +29,7 @@ function convdist(img::AbstractArray, kern::AbstractArray;
 
   D = abs.(A² .- 2AB .+ B²)
 
-  # always return a plain simple array
-  parent(D)
+  parent(D) # always return a plain simple array
 end
 
 function genpath(extent::NTuple{3,Integer}, kind::Symbol, datum=[])

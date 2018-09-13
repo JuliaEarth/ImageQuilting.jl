@@ -79,7 +79,7 @@ function iqsim(trainimg::AbstractArray{T,N},
   if !isempty(hard)
     coordinates = [coord[i] for i in 1:N, coord in coords(hard)]
     @assert all(maximum(coordinates, dims=2) .≤ gridsize) "hard data coordinates outside of grid"
-    @assert all(minimum(coordinates, dims=2) .> 0) "hard data coordinates must be positive indexes"
+    @assert all(minimum(coordinates, dims=2) .> 0) "hard data coordinates must be positive indices"
   end
 
   # calculate the overlap size from given percentage
@@ -104,25 +104,17 @@ function iqsim(trainimg::AbstractArray{T,N},
 
   # always work with floating point
   TI = Float64.(trainimg)
-  TIsize = size(TI)
+  TIsize = size(trainimg)
 
   # inactive voxels in the training image
   NaNTI = isnan.(TI); TI[NaNTI] .= 0
 
   # disable tiles in the training image if they contain inactive voxels
-  disabled = falses(TIsize .- tilesize .+ 1)
-  for nanidx in findall(vec(NaNTI))
-    iₙ, jₙ, kₙ = myind2sub(size(TI), nanidx)
-
-    # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
-    iₛ = max(iₙ-tilesize[1]+1, 1)
-    jₛ = max(jₙ-tilesize[2]+1, 1)
-    kₛ = max(kₙ-tilesize[3]+1, 1)
-    iₑ = min(iₙ, TIsize[1]-tilesize[1]+1)
-    jₑ = min(jₙ, TIsize[2]-tilesize[2]+1)
-    kₑ = min(kₙ, TIsize[3]-tilesize[3]+1)
-
-    disabled[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] .= true
+  disabled = Vector{CartesianIndex{N}}()
+  for ind in findall(NaNTI)
+    start  = ntuple(i -> max(ind[i]-tilesize[i]+1, 1), N)
+    finish = ntuple(i -> min(ind[i], TIsize[i]-tilesize[i]+1), N)
+    append!(disabled, CartesianIndices(ntuple(i -> start[i]:finish[i], N)))
   end
 
   # keep track of hard data and inactive voxels
@@ -204,8 +196,8 @@ function iqsim(trainimg::AbstractArray{T,N},
   realizations = Vector{Array{Float64,N}}()
 
   # for each realization we have:
-  boundarycuts = Vector{Array{Float64,N}}() # boundary cut
-  voxelreuse = Vector{Float64}()            # voxel reuse
+  boundarycuts = Vector{Array{Float64,N}}()
+  voxelreuse   = Vector{Float64}()
 
   # show progress and estimated time duration
   showprogress && (progress = Progress(nreal, color=:black))
@@ -225,8 +217,8 @@ function iqsim(trainimg::AbstractArray{T,N},
     simpath = genpath(ntiles, path, datum)
 
     # loop simulation grid tile by tile
-    for pathidx in simpath
-      i, j, k = myind2sub(ntiles, pathidx)
+    for tileind in simpath
+      i, j, k = myind2sub(ntiles, tileind)
 
       # skip tile if all voxels are inactive
       (i,j,k) ∈ skipped && continue
@@ -282,7 +274,7 @@ function iqsim(trainimg::AbstractArray{T,N},
       distance[disabled] .= Inf
 
       # compute hard and soft distances
-      auxdistances = Vector{Array{Float64,3}}()
+      auxdistances = Vector{Array{Float64,N}}()
       if !isempty(hard) && any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
         harddev = hardgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
         D = convdist(TI, harddev, weights=preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
@@ -307,11 +299,13 @@ function iqsim(trainimg::AbstractArray{T,N},
       # current pattern database
       patterndb = isempty(auxdistances) ? findall(vec(distance .≤ (1+tol)minimum(distance))) :
                                           relaxation(distance, auxdistances, tol)
+
+      # pattern probability
       patternprobs = tau_model(patterndb, distance, auxdistances)
 
       # pick a pattern at random from the database
-      idx = sample(patterndb, weights(patternprobs))
-      iᵦ, jᵦ, kᵦ = myind2sub(size(distance), idx)
+      ind = sample(patterndb, weights(patternprobs))
+      iᵦ, jᵦ, kᵦ = myind2sub(size(distance), ind)
 
       # selected training image dataevent
       TIdev = view(TI,iᵦ:iᵦ+tilesize[1]-1,jᵦ:jᵦ+tilesize[2]-1,kᵦ:kᵦ+tilesize[3]-1)
