@@ -20,7 +20,6 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
 * `overlap`  - Overlap size in x, y and z (default to (1/6, 1/6, 1/6))
 * `cut`      - Boundary cut algorithm (:boykov (default) or :dijkstra)
 * `path`     - Simulation path (:rasterup (default), :rasterdown, :dilation, or :random)
-* `simplex`  - Whether to apply or not the simplex transform (default to false)
 * `inactive` - Vector of inactive voxels (i.e. tuples (i,j,k)) in the grid
 * `soft`     - A vector of `(data,dataTI)` pairs
 * `tol`      - Initial relaxation tolerance in (0,1] (default to 0.1)
@@ -39,7 +38,6 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
   @param overlap       = (1/6, 1/6, 1/6)
   @param cut           = :boykov
   @param path          = :rasterup
-  @param simplex       = false
   @param inactive      = nothing
   @param soft          = []
   @param tol           = .1
@@ -72,7 +70,7 @@ function preprocess(problem::SimulationProblem, solver::ImgQuilt)
     # create hard data object
     hdata = HardData()
     for (loc, datloc) in datamap(problem, var)
-      push!(hdata, myind2sub(gridsize, loc) => value(pdata, datloc, var))
+      push!(hdata, lin2cart(gridsize, loc) => value(pdata, datloc, var))
     end
 
     # disable inactive voxels

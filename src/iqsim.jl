@@ -127,10 +127,10 @@ function iqsim(trainimg::AbstractArray{T,N},
     activated = trues(padsize)
     for coord in coords(hard)
       if isnan(hard[coord])
-        activated[coord...] = false
+        activated[coord] = false
       else
-        hardgrid[coord...] = hard[coord]
-        preset[coord...] = true
+        hardgrid[coord] = hard[coord]
+        preset[coord] = true
       end
     end
 
@@ -218,7 +218,7 @@ function iqsim(trainimg::AbstractArray{T,N},
 
     # loop simulation grid tile by tile
     for tileind in simpath
-      i, j, k = myind2sub(ntiles, tileind)
+      i, j, k = Tuple(lin2cart(ntiles, tileind))
 
       # skip tile if all voxels are inactive
       (i,j,k) ∈ skipped && continue
@@ -305,7 +305,7 @@ function iqsim(trainimg::AbstractArray{T,N},
 
       # pick a pattern at random from the database
       ind = sample(patterndb, weights(patternprobs))
-      iᵦ, jᵦ, kᵦ = myind2sub(size(distance), ind)
+      iᵦ, jᵦ, kᵦ = Tuple(lin2cart(size(distance), ind))
 
       # selected training image dataevent
       TIdev = view(TI,iᵦ:iᵦ+tilesize[1]-1,jᵦ:jᵦ+tilesize[2]-1,kᵦ:kᵦ+tilesize[3]-1)

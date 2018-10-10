@@ -13,8 +13,8 @@ function get_imfilter_impl(GPU)
   end
 end
 
-mysub2ind(dims, ind...) = LinearIndices(dims)[ind...]
-myind2sub(dims, ind)    = Tuple(CartesianIndices(dims)[ind])
+cart2lin(dims, ind...) = LinearIndices(dims)[ind...]
+lin2cart(dims, ind)    = CartesianIndices(dims)[ind]
 
 function convdist(img::AbstractArray, kern::AbstractArray;
                   weights::AbstractArray=fill(1.0, size(kern)))
@@ -32,18 +32,18 @@ function convdist(img::AbstractArray, kern::AbstractArray;
   parent(D) # always return a plain simple array
 end
 
-function genpath(extent::NTuple{3,Integer}, kind::Symbol, datum=[])
+function genpath(extent::Dims{N}, kind::Symbol, datum=[]) where {N}
   path = Vector{Int}()
 
   if kind == :rasterup
     for k=1:extent[3], j=1:extent[2], i=1:extent[1]
-      push!(path, mysub2ind(extent, i,j,k))
+      push!(path, cart2lin(extent, i,j,k))
     end
   end
 
   if kind == :rasterdown
     for k=extent[3]:-1:1, j=1:extent[2], i=1:extent[1]
-      push!(path, mysub2ind(extent, i,j,k))
+      push!(path, cart2lin(extent, i,j,k))
     end
   end
 
@@ -74,7 +74,7 @@ function genpath(extent::NTuple{3,Integer}, kind::Symbol, datum=[])
 
     grid = falses(extent)
     for (i,j,k) in datum
-      pivot = mysub2ind(extent, i,j,k)
+      pivot = cart2lin(extent, i,j,k)
       grid[pivot] = true
       push!(path, pivot)
     end

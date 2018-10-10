@@ -58,13 +58,13 @@ end
     # hard data is honored everywhere
     TI = ones(20,20,20)
     obs = rand(size(TI)...)
-    data = HardData((i,j,k)=>obs[i,j,k] for i=1:20, j=1:20, k=1:20)
+    data = HardData(CartesianIndex(i,j,k)=>obs[i,j,k] for i=1:20, j=1:20, k=1:20)
     reals = iqsim(TI, (10,10,10), size(TI), hard=data)
     @test reals[1] == obs
 
     # multiple realizations with hard data
     TI = ones(20,20,20)
-    data = HardData((20,20,20)=>10)
+    data = HardData(CartesianIndex(20,20,20)=>10)
     reals = iqsim(TI, (10,10,10), size(TI), hard=data, nreal=3)
     for real in reals
       @test real[20,20,20] == 10
@@ -78,7 +78,7 @@ end
     active = trues(size(TI))
     for i=1:20, j=1:20, k=1:20
       if (i-10)^2 + (j-10)^2 + (k-10)^2 < 25
-        push!(shape, (i,j,k)=>NaN)
+        push!(shape, CartesianIndex(i,j,k)=>NaN)
         active[i,j,k] = false
       end
     end
@@ -99,7 +99,7 @@ end
     TI = ones(20,20,20)
     TI[:,5,:] .= NaN
     aux = fill(1.0, size(TI))
-    shape = HardData((i,j,k)=>NaN for i=1:20, j=5, k=1:20)
+    shape = HardData(CartesianIndex(i,j,k)=>NaN for i=1:20, j=5, k=1:20)
     reals = iqsim(TI, (10,10,10), size(TI), hard=shape)
     @test all(isnan.(reals[1][:,5,:]))
     @test all(reals[1][:,1:4,:] .== 1)
@@ -177,7 +177,7 @@ end
     problem = SimulationProblem(geodata, grid, :variable, 3)
 
     TI = training_image("Strebelle")
-    inactive = [(i,j,1) for i in 1:30 for j in 1:30]
+    inactive = [CartesianIndex(i,j,1) for i in 1:30 for j in 1:30]
     solver = ImgQuilt(:variable => (TI=TI, tilesize=(30,30,1), inactive=inactive))
 
     Random.seed!(2017)
