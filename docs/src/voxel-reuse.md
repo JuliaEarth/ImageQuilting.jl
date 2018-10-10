@@ -13,8 +13,7 @@ reuse of a training image, install [Plots.jl](https://github.com/JuliaPlots/Plot
 any of its supported backends (e.g. [GR.jl](https://github.com/jheinen/GR.jl)):
 
 ```julia
-Pkg.add("Plots")
-Pkg.add("GR")
+] add Plots GR
 ```
 
 The example below uses training images from the

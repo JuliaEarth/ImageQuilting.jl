@@ -7,7 +7,7 @@ Voxels can be assigned values that will be honored by the simulation. `HardData(
 a dictionary of locations and associated values specified by the user:
 
 ```julia
-well = HardData((i,j,k)=>value(i,j,k) for i=10, j=10, k=1:100)
+well = HardData(CartesianIndex(i,j,k)=>value(i,j,k) for i=10, j=10, k=1:100)
 iqsim(..., hard=well)
 ```
 

@@ -26,10 +26,8 @@ installation. If you have a recent Intel graphics card, consider the open source
 To make sure that everything is working properly, install the `OpenCL.jl` package in Julia and run the tests:
 
 ```julia
-Pkg.add("OpenCL")
-
-using OpenCL # force compilation
-Pkg.test("OpenCL")
+] add OpenCL
+] test OpenCL
 ```
 
 If the tests are successful, proceed to the next section.
@@ -42,10 +40,8 @@ are on Linux, you can also check the repositories of your distribution.
 Install the `CLFFT.jl` package in Julia and run the tests:
 
 ```julia
-Pkg.add("CLFFT")
-
-using CLFFT # force compilation
-Pkg.test("CLFFT")
+] add CLFFT
+] test CLFFT
 ```
 
 If the tests are successful, the installation is complete.
@@ -55,8 +51,7 @@ If the tests are successful, the installation is complete.
 Run the tests to make sure that the GPU implementation is working as expected:
 
 ```julia
-using ImageQuilting # force compilation
-Pkg.test("ImageQuilting")
+] test ImageQuilting
 ```
 
 Pass in the option `gpu=true` to `iqsim` for computations with the GPU.
