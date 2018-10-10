@@ -83,19 +83,19 @@ function iqsim(trainimg::AbstractArray{T,N},
   end
 
   # calculate the overlap size from given percentage
-  ovlsize = ntuple(i -> ceil(Int, overlap[i]*tilesize[i]), N)
+  ovlsize = @. ceil(Int, overlap*tilesize)
 
   # spacing in raster path
-  spacing = ntuple(i -> tilesize[i] - ovlsize[i], N)
+  spacing = @. tilesize - ovlsize
 
   # calculate the number of tiles from grid size
-  ntiles = ntuple(i -> ceil(Int, gridsize[i]/max(spacing[i],1)), N)
+  ntiles = @. ceil(Int, gridsize / max(spacing, 1))
 
   # simulation grid dimensions
-  padsize = ntuple(i -> ntiles[i]*(tilesize[i]-ovlsize[i]) + ovlsize[i], N)
+  padsize = @. ntiles*(tilesize - ovlsize) + ovlsize
 
   # total overlap volume in simulation grid
-  ovlvol = prod(padsize) - prod(padsize[i] - (ntiles[i]-1)*ovlsize[i] for i in 1:N)
+  ovlvol = prod(padsize) - prod(@. padsize - (ntiles - 1)*ovlsize)
 
   # warn in case of 1-voxel overlaps
   if any((tilesize .>  1) .& (ovlsize .== 1))
@@ -112,9 +112,10 @@ function iqsim(trainimg::AbstractArray{T,N},
   # disable tiles in the training image if they contain inactive voxels
   disabled = Vector{CartesianIndex{N}}()
   for ind in findall(NaNTI)
-    start  = ntuple(i -> max(ind[i]-tilesize[i]+1, 1), N)
-    finish = ntuple(i -> min(ind[i], TIsize[i]-tilesize[i]+1), N)
-    append!(disabled, CartesianIndices(ntuple(i -> start[i]:finish[i], N)))
+    start  = @. max(ind.I - tilesize + 1, 1)
+    finish = @. min(ind.I, TIsize - tilesize + 1)
+    tile   = CartesianIndices(ntuple(i -> start[i]:finish[i], N))
+    append!(disabled, tile)
   end
 
   # keep track of hard data and inactive voxels
@@ -144,20 +145,17 @@ function iqsim(trainimg::AbstractArray{T,N},
     @assert any_activated "simulation grid has no active voxel"
 
     # determine tiles that should be skipped and tiles with data
-    for k=1:ntiles[3], j=1:ntiles[2], i=1:ntiles[1]
-      # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
-      iₛ = (i-1)spacing[1] + 1
-      jₛ = (j-1)spacing[2] + 1
-      kₛ = (k-1)spacing[3] + 1
-      iₑ = iₛ + tilesize[1] - 1
-      jₑ = jₛ + tilesize[2] - 1
-      kₑ = kₛ + tilesize[3] - 1
+    for tileind in CartesianIndices(ntiles)
+      # tile corners are given by start and finish
+      start  = @. (tileind.I - 1)*spacing + 1
+      finish = @. start + tilesize - 1
+      tile   = CartesianIndices(ntuple(i -> start[i]:finish[i], N))
 
-      if all(.!activated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
-        push!(skipped, CartesianIndex(i,j,k))
+      if all(.!activated[tile])
+        push!(skipped, tileind)
       else
-        if any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
-          push!(datum, CartesianIndex(i,j,k))
+        if any(preset[tile])
+          push!(datum, tileind)
         end
       end
     end
@@ -200,7 +198,7 @@ function iqsim(trainimg::AbstractArray{T,N},
   voxelreuse   = Vector{Float64}()
 
   # show progress and estimated time duration
-  showprogress && (progress = Progress(nreal, color=:black))
+  showprogress && (progress = Progress(nreal))
 
   # preallocate memory for distance calculations
   distance = Array{Float64}(undef, TIsize .- tilesize .+ 1)
@@ -217,25 +215,24 @@ function iqsim(trainimg::AbstractArray{T,N},
     simpath = genpath(ntiles, path, datum)
 
     # loop simulation grid tile by tile
-    for tileind in simpath
-      i, j, k = Tuple(lin2cart(ntiles, tileind))
+    for ind in simpath
+      tileind = lin2cart(ntiles, ind)
+
+      i, j, k = Tuple(tileind) # TODO: remove this line
 
       # skip tile if all voxels are inactive
-      CartesianIndex(i,j,k) ∈ skipped && continue
+      tileind ∈ skipped && continue
 
       # if not skipped, proceed and paste tile
-      push!(pasted, CartesianIndex(i,j,k))
+      push!(pasted, tileind)
 
-      # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
-      iₛ = (i-1)spacing[1] + 1
-      jₛ = (j-1)spacing[2] + 1
-      kₛ = (k-1)spacing[3] + 1
-      iₑ = iₛ + tilesize[1] - 1
-      jₑ = jₛ + tilesize[2] - 1
-      kₑ = kₛ + tilesize[3] - 1
+      # tile corners are given by start and finish
+      start  = @. (tileind.I - 1)*spacing + 1
+      finish = @. start + tilesize - 1
+      tile   = CartesianIndices(ntuple(i -> start[i]:finish[i], N))
 
       # current simulation dataevent
-      simdev = view(simgrid, iₛ:iₑ,jₛ:jₑ,kₛ:kₑ)
+      simdev = view(simgrid, tile)
 
       # compute overlap distance
       distance[:] .= 0
@@ -275,9 +272,9 @@ function iqsim(trainimg::AbstractArray{T,N},
 
       # compute hard and soft distances
       auxdistances = Vector{Array{Float64,N}}()
-      if !isempty(hard) && any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
-        harddev = hardgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
-        D = convdist(TI, harddev, weights=preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
+      if !isempty(hard) && any(preset[tile])
+        harddev = hardgrid[tile]
+        D = convdist(TI, harddev, weights=preset[tile])
 
         # disable dataevents that contain inactive voxels
         D[disabled] .= Inf
@@ -287,7 +284,7 @@ function iqsim(trainimg::AbstractArray{T,N},
         distance = D
       end
       for n=1:length(softTI)
-        softdev = softgrid[n][iₛ:iₑ,jₛ:jₑ,kₛ:kₑ]
+        softdev = softgrid[n][tile]
         D = convdist(softTI[n], softdev)
 
         # disable dataevents that contain inactive voxels
@@ -304,11 +301,13 @@ function iqsim(trainimg::AbstractArray{T,N},
       patternprobs = tau_model(patterndb, distance, auxdistances)
 
       # pick a pattern at random from the database
-      ind = sample(patterndb, weights(patternprobs))
-      iᵦ, jᵦ, kᵦ = Tuple(lin2cart(size(distance), ind))
+      rind = sample(patterndb, weights(patternprobs))
+      start  = lin2cart(size(distance), rind)
+      finish = @. start.I + tilesize - 1
+      rtile  = CartesianIndices(ntuple(i -> start[i]:finish[i], N))
 
       # selected training image dataevent
-      TIdev = view(TI,iᵦ:iᵦ+tilesize[1]-1,jᵦ:jᵦ+tilesize[2]-1,kᵦ:kᵦ+tilesize[3]-1)
+      TIdev = view(TI, rtile)
 
       # boundary cut mask
       M = falses(size(simdev))
@@ -341,7 +340,7 @@ function iqsim(trainimg::AbstractArray{T,N},
       simdev[.!M] = TIdev[.!M]
 
       # save boundary cut
-      debug && (cutgrid[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ] = M)
+      debug && (cutgrid[tile] = M)
     end
 
     # save voxel reuse
