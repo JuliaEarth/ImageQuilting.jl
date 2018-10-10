@@ -73,10 +73,9 @@ function genpath(extent::Dims{N}, kind::Symbol, datum=[]) where {N}
     shuffle!(datum)
 
     grid = falses(extent)
-    for (i,j,k) in datum
-      pivot = cart2lin(extent, i,j,k)
+    for pivot in datum
       grid[pivot] = true
-      push!(path, pivot)
+      push!(path, LinearIndices(extent)[pivot])
     end
 
     while !all(grid)

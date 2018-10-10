@@ -5,7 +5,7 @@
 
 """
     iqsim(trainimg::AbstractArray{T,N},
-          tilesize::NTuple{N,Int}, gridsize::NTuple{N,Int};
+          tilesize::Dims{N}, gridsize::Dims{N};
           overlap::NTuple{N,Float64}=ntuple(i->1/6,N),
           soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1,
           cut::Symbol=:boykov, path::Symbol=:rasterup, nreal::Integer=1,
@@ -46,7 +46,7 @@ reals, cuts, voxs = iqsim(..., debug=true)
 `cuts[i]` is the boundary cut for `reals[i]` and `voxs[i]` is the associated voxel reuse.
 """
 function iqsim(trainimg::AbstractArray{T,N},
-               tilesize::NTuple{N,Int}, gridsize::NTuple{N,Int};
+               tilesize::Dims{N}, gridsize::Dims{N};
                overlap::NTuple{N,Float64}=ntuple(i->1/6,N),
                soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1,
                cut::Symbol=:boykov, path::Symbol=:rasterup, nreal::Integer=1,
@@ -118,8 +118,8 @@ function iqsim(trainimg::AbstractArray{T,N},
   end
 
   # keep track of hard data and inactive voxels
-  skipped = Set{NTuple{N,Int}}()
-  datum   = Vector{NTuple{N,Int}}()
+  skipped = Set{CartesianIndex{N}}()
+  datum   = Vector{CartesianIndex{N}}()
   if !isempty(hard)
     # hard data in grid format
     hardgrid = zeros(padsize)
@@ -154,10 +154,10 @@ function iqsim(trainimg::AbstractArray{T,N},
       kₑ = kₛ + tilesize[3] - 1
 
       if all(.!activated[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
-        push!(skipped, (i,j,k))
+        push!(skipped, CartesianIndex(i,j,k))
       else
         if any(preset[iₛ:iₑ,jₛ:jₑ,kₛ:kₑ])
-          push!(datum, (i,j,k))
+          push!(datum, CartesianIndex(i,j,k))
         end
       end
     end
@@ -211,7 +211,7 @@ function iqsim(trainimg::AbstractArray{T,N},
     debug && (cutgrid = zeros(padsize))
 
     # keep track of pasted tiles
-    pasted = Set{NTuple{N,Int}}()
+    pasted = Set{CartesianIndex{N}}()
 
     # construct simulation path
     simpath = genpath(ntiles, path, datum)
@@ -221,10 +221,10 @@ function iqsim(trainimg::AbstractArray{T,N},
       i, j, k = Tuple(lin2cart(ntiles, tileind))
 
       # skip tile if all voxels are inactive
-      (i,j,k) ∈ skipped && continue
+      CartesianIndex(i,j,k) ∈ skipped && continue
 
       # if not skipped, proceed and paste tile
-      push!(pasted, (i,j,k))
+      push!(pasted, CartesianIndex(i,j,k))
 
       # tile corners are given by (iₛ,jₛ,kₛ) and (iₑ,jₑ,kₑ)
       iₛ = (i-1)spacing[1] + 1
@@ -239,32 +239,32 @@ function iqsim(trainimg::AbstractArray{T,N},
 
       # compute overlap distance
       distance[:] .= 0
-      if ovlsize[1] > 1 && (i-1,j,k) ∈ pasted
+      if ovlsize[1] > 1 && CartesianIndex(i-1,j,k) ∈ pasted
         ovx = view(simdev,1:ovlsize[1],:,:)
         D = convdist(TI, ovx)
         distance .+= view(D,1:TIsize[1]-tilesize[1]+1,:,:)
       end
-      if ovlsize[1] > 1 && (i+1,j,k) ∈ pasted
+      if ovlsize[1] > 1 && CartesianIndex(i+1,j,k) ∈ pasted
         ovx = view(simdev,spacing[1]+1:tilesize[1],:,:)
         D = convdist(TI, ovx)
         distance .+= view(D,spacing[1]+1:TIsize[1]-ovlsize[1]+1,:,:)
       end
-      if ovlsize[2] > 1 && (i,j-1,k) ∈ pasted
+      if ovlsize[2] > 1 && CartesianIndex(i,j-1,k) ∈ pasted
         ovy = view(simdev,:,1:ovlsize[2],:)
         D = convdist(TI, ovy)
         distance .+= view(D,:,1:TIsize[2]-tilesize[2]+1,:)
       end
-      if ovlsize[2] > 1 && (i,j+1,k) ∈ pasted
+      if ovlsize[2] > 1 && CartesianIndex(i,j+1,k) ∈ pasted
         ovy = view(simdev,:,spacing[2]+1:tilesize[2],:)
         D = convdist(TI, ovy)
         distance .+= view(D,:,spacing[2]+1:TIsize[2]-ovlsize[2]+1,:)
       end
-      if ovlsize[3] > 1 && (i,j,k-1) ∈ pasted
+      if ovlsize[3] > 1 && CartesianIndex(i,j,k-1) ∈ pasted
         ovz = view(simdev,:,:,1:ovlsize[3])
         D = convdist(TI, ovz)
         distance .+= view(D,:,:,1:TIsize[3]-tilesize[3]+1)
       end
-      if ovlsize[3] > 1 && (i,j,k+1) ∈ pasted
+      if ovlsize[3] > 1 && CartesianIndex(i,j,k+1) ∈ pasted
         ovz = view(simdev,:,:,spacing[3]+1:tilesize[3])
         D = convdist(TI, ovz)
         distance .+= view(D,:,:,spacing[3]+1:TIsize[3]-ovlsize[3]+1)
@@ -312,27 +312,27 @@ function iqsim(trainimg::AbstractArray{T,N},
 
       # boundary cut mask
       M = falses(size(simdev))
-      if ovlsize[1] > 1 && (i-1,j,k) ∈ pasted
+      if ovlsize[1] > 1 && CartesianIndex(i-1,j,k) ∈ pasted
         A = view(simdev,1:ovlsize[1],:,:); B = view(TIdev,1:ovlsize[1],:,:)
         M[1:ovlsize[1],:,:] .|= boundary_cut(A, B, :x)
       end
-      if ovlsize[1] > 1 && (i+1,j,k) ∈ pasted
+      if ovlsize[1] > 1 && CartesianIndex(i+1,j,k) ∈ pasted
         A = view(simdev,spacing[1]+1:tilesize[1],:,:); B = view(TIdev,spacing[1]+1:tilesize[1],:,:)
         M[spacing[1]+1:tilesize[1],:,:] .|= reverse(boundary_cut(reverse(A, dims=1), reverse(B, dims=1), :x), dims=1)
       end
-      if ovlsize[2] > 1 && (i,j-1,k) ∈ pasted
+      if ovlsize[2] > 1 && CartesianIndex(i,j-1,k) ∈ pasted
         A = view(simdev,:,1:ovlsize[2],:); B = view(TIdev,:,1:ovlsize[2],:)
         M[:,1:ovlsize[2],:] .|= boundary_cut(A, B, :y)
       end
-      if ovlsize[2] > 1 && (i,j+1,k) ∈ pasted
+      if ovlsize[2] > 1 && CartesianIndex(i,j+1,k) ∈ pasted
         A = view(simdev,:,spacing[2]+1:tilesize[2],:); B = view(TIdev,:,spacing[2]+1:tilesize[2],:)
         M[:,spacing[2]+1:tilesize[2],:] .|= reverse(boundary_cut(reverse(A, dims=2), reverse(B, dims=2), :y), dims=2)
       end
-      if ovlsize[3] > 1 && (i,j,k-1) ∈ pasted
+      if ovlsize[3] > 1 && CartesianIndex(i,j,k-1) ∈ pasted
         A = view(simdev,:,:,1:ovlsize[3]); B = view(TIdev,:,:,1:ovlsize[3])
         M[:,:,1:ovlsize[3]] .|= boundary_cut(A, B, :z)
       end
-      if ovlsize[3] > 1 && (i,j,k+1) ∈ pasted
+      if ovlsize[3] > 1 && CartesianIndex(i,j,k+1) ∈ pasted
         A = view(simdev,:,:,spacing[3]+1:tilesize[3]); B = view(TIdev,:,:,spacing[3]+1:tilesize[3])
         M[:,:,spacing[3]+1:tilesize[3]] .|= reverse(boundary_cut(reverse(A, dims=3), reverse(B, dims=3), :z), dims=3)
       end

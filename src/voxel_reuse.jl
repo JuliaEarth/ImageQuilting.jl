@@ -4,7 +4,7 @@
 # ------------------------------------------------------------------
 
 """
-    voxelreuse(trainimg::AbstractArray{T,N}, tilesize::NTuple{N,Int};
+    voxelreuse(trainimg::AbstractArray{T,N}, tilesize::Dims{N};
                overlap::NTuple{N,Float64}=ntuple(i->1/6,N),
                nreal::Integer=10, kwargs...)
 
