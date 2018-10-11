@@ -4,8 +4,8 @@
 # ------------------------------------------------------------------
 
 """
-    iqsim(trainimg::AbstractArray{T,N},
-          tilesize::Dims{N}, gridsize::Dims{N};
+    iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
+          gridsize::Dims{N}=size(trainimg);
           overlap::NTuple{N,Float64}=ntuple(i->1/6,N),
           soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1,
           cut::Symbol=:boykov, path::Symbol=:rasterup, nreal::Integer=1,
@@ -20,19 +20,19 @@ Performs image quilting simulation as described in Hoffimann et al. 2017.
 
 * `trainimg` is any 3D array (add ghost dimension for 2D)
 * `tilesize` is the tile size (or pattern size)
-* `gridsize` is the size of the simulation grid
 
 ### Optional
 
-* `overlap` is the percentage of overlap
-* `soft` is a vector of `(data,dataTI)` pairs
-* `hard` is an instance of `HardData`
+* `gridsize` is the size of the simulation grid (default to training image size)
+* `overlap` is the percentage of overlap (default to 1/6 of tile size)
+* `soft` is a vector of `(data,dataTI)` pairs (default to none)
+* `hard` is an instance of `HardData` (default to none)
 * `tol` is the initial relaxation tolerance in (0,1] (default to .1)
 * `cut` is the cut algorithm (`:dijkstra` or `:boykov`)
 * `path` is the simulation path (`:rasterup`, `:rasterdown`, `:dilation` or `:random`)
-* `nreal` is the number of realizations
+* `nreal` is the number of realizations (default to 1)
 * `threads` is the number of threads for the FFT (default to all CPU cores)
-* `gpu` informs whether to use the GPU or the CPU
+* `gpu` informs whether to use the GPU or the CPU (default to false)
 * `debug` informs whether to export or not the boundary cuts and voxel reuse
 * `showprogress` informs whether to show or not estimated time duration
 
@@ -45,8 +45,8 @@ reals, cuts, voxs = iqsim(..., debug=true)
 
 `cuts[i]` is the boundary cut for `reals[i]` and `voxs[i]` is the associated voxel reuse.
 """
-function iqsim(trainimg::AbstractArray{T,N},
-               tilesize::Dims{N}, gridsize::Dims{N};
+function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
+               gridsize::Dims{N}=size(trainimg);
                overlap::NTuple{N,Float64}=ntuple(i->1/6,N),
                soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1,
                cut::Symbol=:boykov, path::Symbol=:rasterup, nreal::Integer=1,
