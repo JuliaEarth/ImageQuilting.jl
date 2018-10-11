@@ -26,9 +26,9 @@ function voxelreuse(trainimg::AbstractArray{T,N}, tilesize::Dims{N};
   ntiles = ntuple(i -> ovlsize[i] > 1 ? 2 : 1, N)
 
   # simulation grid dimensions
-  gridsize = @. ntiles*(tilesize - ovlsize) + ovlsize
+  simsize = @. ntiles*(tilesize - ovlsize) + ovlsize
 
-  _, _, voxs = iqsim(trainimg, tilesize, gridsize;
+  _, _, voxs = iqsim(trainimg, tilesize, simsize;
                      overlap=overlap, nreal=nreal, debug=true, kwargs...)
 
   μ = mean(voxs)

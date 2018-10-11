@@ -5,7 +5,7 @@
 
 """
     iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
-          gridsize::Dims{N}=size(trainimg);
+          simsize::Dims{N}=size(trainimg);
           overlap::NTuple{N,Float64}=ntuple(i->1/6,N),
           soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1,
           cut::Symbol=:boykov, path::Symbol=:rasterup, nreal::Integer=1,
@@ -23,7 +23,7 @@ Performs image quilting simulation as described in Hoffimann et al. 2017.
 
 ### Optional
 
-* `gridsize` is the size of the simulation grid (default to training image size)
+* `simsize` is the size of the simulation grid (default to training image size)
 * `overlap` is the percentage of overlap (default to 1/6 of tile size)
 * `soft` is a vector of `(data,dataTI)` pairs (default to none)
 * `hard` is an instance of `HardData` (default to none)
@@ -46,7 +46,7 @@ reals, cuts, voxs = iqsim(..., debug=true)
 `cuts[i]` is the boundary cut for `reals[i]` and `voxs[i]` is the associated voxel reuse.
 """
 function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
-               gridsize::Dims{N}=size(trainimg);
+               simsize::Dims{N}=size(trainimg);
                overlap::NTuple{N,Float64}=ntuple(i->1/6,N),
                soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1,
                cut::Symbol=:boykov, path::Symbol=:rasterup, nreal::Integer=1,
@@ -59,7 +59,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   # sanity checks
   @assert ndims(trainimg) == 3 "image is not 3D (add ghost dimension for 2D)"
   @assert all(0 .< tilesize .≤ size(trainimg)) "invalid tile size"
-  @assert all(gridsize .≥ tilesize) "invalid grid size"
+  @assert all(simsize .≥ tilesize) "invalid grid size"
   @assert all(0 .< overlap .< 1) "overlaps must be in range (0,1)"
   @assert 0 < tol ≤ 1 "tolerance must be in range (0,1]"
   @assert cut ∈ [:dijkstra,:boykov] "invalid cut algorithm"
@@ -70,7 +70,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   if !isempty(soft)
     for (aux, auxTI) in soft
       @assert ndims(aux) == 3 "soft data is not 3D (add ghost dimension for 2D)"
-      @assert all(size(aux) .≥ gridsize) "soft data size < grid size"
+      @assert all(size(aux) .≥ simsize) "soft data size < grid size"
       @assert size(auxTI) == size(trainimg) "auxiliary TI must have the same size as TI"
     end
   end
@@ -78,7 +78,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   # hard data checks
   if !isempty(hard)
     coordinates = [coord[i] for i in 1:N, coord in coords(hard)]
-    @assert all(maximum(coordinates, dims=2) .≤ gridsize) "hard data coordinates outside of grid"
+    @assert all(maximum(coordinates, dims=2) .≤ simsize) "hard data coordinates outside of grid"
     @assert all(minimum(coordinates, dims=2) .> 0) "hard data coordinates must be positive indices"
   end
 
@@ -89,10 +89,13 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   spacing = @. tilesize - ovlsize
 
   # calculate the number of tiles from grid size
-  ntiles = @. ceil(Int, gridsize / max(spacing, 1))
+  ntiles = @. ceil(Int, simsize / max(spacing, 1))
 
   # simulation grid dimensions
   padsize = @. ntiles*(tilesize - ovlsize) + ovlsize
+
+  # training image dimensions
+  TIsize = size(trainimg)
 
   # total overlap volume in simulation grid
   ovlvol = prod(padsize) - prod(@. padsize - (ntiles - 1)*ovlsize)
@@ -104,7 +107,6 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
   # always work with floating point
   TI = Float64.(trainimg)
-  TIsize = size(trainimg)
 
   # inactive voxels in the training image
   NaNTI = isnan.(TI); TI[NaNTI] .= 0
@@ -138,12 +140,12 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
     # deactivate voxels beyond true grid size
     ax = axes(activated)
     for d=1:N
-      slice = ntuple(i -> i == d ? (gridsize[d]+1:padsize[d]) : ax[i], N)
+      slice = ntuple(i -> i == d ? (simsize[d]+1:padsize[d]) : ax[i], N)
       activated[CartesianIndices(slice)] .= false
     end
 
     # grid must contain active voxels
-    any_activated = any(activated[CartesianIndices(gridsize)])
+    any_activated = any(activated[CartesianIndices(simsize)])
     @assert any_activated "simulation grid has no active voxel"
 
     # determine tiles that should be skipped and tiles with data
@@ -358,8 +360,8 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
     end
 
     # throw away voxels that are outside of the grid
-    simgrid = view(simgrid, CartesianIndices(gridsize))
-    debug && (cutgrid = view(cutgrid, CartesianIndices(gridsize)))
+    simgrid = view(simgrid, CartesianIndices(simsize))
+    debug && (cutgrid = view(cutgrid, CartesianIndices(simsize)))
 
     # save and continue
     push!(realizations, simgrid)
