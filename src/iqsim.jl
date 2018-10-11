@@ -119,8 +119,8 @@ function iqsim(trainimg::AbstractArray{T,N},
   end
 
   # keep track of hard data and inactive voxels
+  datum = Vector{CartesianIndex{N}}()
   skipped = Set{CartesianIndex{N}}()
-  datum   = Vector{CartesianIndex{N}}()
   if !isempty(hard)
     # hard data in grid format
     hardgrid = zeros(padsize)
@@ -141,7 +141,7 @@ function iqsim(trainimg::AbstractArray{T,N},
     activated[:,:,gridsize[3]+1:padsize[3]] .= false
 
     # grid must contain active voxels
-    any_activated = any(activated[1:gridsize[1],1:gridsize[2],1:gridsize[3]])
+    any_activated = any(activated[CartesianIndices(gridsize)])
     @assert any_activated "simulation grid has no active voxel"
 
     # determine tiles that should be skipped and tiles with data
@@ -218,8 +218,6 @@ function iqsim(trainimg::AbstractArray{T,N},
     for ind in simpath
       tileind = lin2cart(ntiles, ind)
 
-      i, j, k = Tuple(tileind) # TODO: remove this line
-
       # skip tile if all voxels are inactive
       tileind ∈ skipped && continue
 
@@ -234,8 +232,10 @@ function iqsim(trainimg::AbstractArray{T,N},
       # current simulation dataevent
       simdev = view(simgrid, tile)
 
+      i, j, k = Tuple(tileind) # TODO: remove this line
+
       # compute overlap distance
-      distance[:] .= 0
+      distance .= 0
       if ovlsize[1] > 1 && CartesianIndex(i-1,j,k) ∈ pasted
         ovx = view(simdev,1:ovlsize[1],:,:)
         D = convdist(TI, ovx)
