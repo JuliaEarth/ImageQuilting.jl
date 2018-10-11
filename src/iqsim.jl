@@ -313,27 +313,27 @@ function iqsim(trainimg::AbstractArray{T,N},
       M = falses(size(simdev))
       if ovlsize[1] > 1 && CartesianIndex(i-1,j,k) ∈ pasted
         A = view(simdev,1:ovlsize[1],:,:); B = view(TIdev,1:ovlsize[1],:,:)
-        M[1:ovlsize[1],:,:] .|= boundary_cut(A, B, :x)
+        M[1:ovlsize[1],:,:] .|= boundary_cut(A, B, 1)
       end
       if ovlsize[1] > 1 && CartesianIndex(i+1,j,k) ∈ pasted
         A = view(simdev,spacing[1]+1:tilesize[1],:,:); B = view(TIdev,spacing[1]+1:tilesize[1],:,:)
-        M[spacing[1]+1:tilesize[1],:,:] .|= reverse(boundary_cut(reverse(A, dims=1), reverse(B, dims=1), :x), dims=1)
+        M[spacing[1]+1:tilesize[1],:,:] .|= reverse(boundary_cut(reverse(A, dims=1), reverse(B, dims=1), 1), dims=1)
       end
       if ovlsize[2] > 1 && CartesianIndex(i,j-1,k) ∈ pasted
         A = view(simdev,:,1:ovlsize[2],:); B = view(TIdev,:,1:ovlsize[2],:)
-        M[:,1:ovlsize[2],:] .|= boundary_cut(A, B, :y)
+        M[:,1:ovlsize[2],:] .|= boundary_cut(A, B, 2)
       end
       if ovlsize[2] > 1 && CartesianIndex(i,j+1,k) ∈ pasted
         A = view(simdev,:,spacing[2]+1:tilesize[2],:); B = view(TIdev,:,spacing[2]+1:tilesize[2],:)
-        M[:,spacing[2]+1:tilesize[2],:] .|= reverse(boundary_cut(reverse(A, dims=2), reverse(B, dims=2), :y), dims=2)
+        M[:,spacing[2]+1:tilesize[2],:] .|= reverse(boundary_cut(reverse(A, dims=2), reverse(B, dims=2), 2), dims=2)
       end
       if ovlsize[3] > 1 && CartesianIndex(i,j,k-1) ∈ pasted
         A = view(simdev,:,:,1:ovlsize[3]); B = view(TIdev,:,:,1:ovlsize[3])
-        M[:,:,1:ovlsize[3]] .|= boundary_cut(A, B, :z)
+        M[:,:,1:ovlsize[3]] .|= boundary_cut(A, B, 3)
       end
       if ovlsize[3] > 1 && CartesianIndex(i,j,k+1) ∈ pasted
         A = view(simdev,:,:,spacing[3]+1:tilesize[3]); B = view(TIdev,:,:,spacing[3]+1:tilesize[3])
-        M[:,:,spacing[3]+1:tilesize[3]] .|= reverse(boundary_cut(reverse(A, dims=3), reverse(B, dims=3), :z), dims=3)
+        M[:,:,spacing[3]+1:tilesize[3]] .|= reverse(boundary_cut(reverse(A, dims=3), reverse(B, dims=3), 3), dims=3)
       end
 
       # paste quilted pattern from training image

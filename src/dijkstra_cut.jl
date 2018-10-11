@@ -3,15 +3,15 @@
 # Licensed under the ISC License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-function dijkstra_cut(A1::AbstractArray, A2::AbstractArray, dir::Symbol)
+function dijkstra_cut(A1::AbstractArray, A2::AbstractArray, dim::Integer)
   # permute dimensions so that the algorithm is
   # the same for cuts in x, y and z directions
   B = abs.(A1 - A2)
-  if dir == :x
+  if dim == 1
     B = permutedims(B, [1,2,3])
-  elseif dir == :y
+  elseif dim == 2
     B = permutedims(B, [2,1,3])
-  elseif dir == :z
+  elseif dim == 3
     B = permutedims(B, [3,2,1])
   end
 
@@ -77,11 +77,11 @@ function dijkstra_cut(A1::AbstractArray, A2::AbstractArray, dir::Symbol)
   end
 
   # permute back to original shape
-  if dir == :x
+  if dim == 1
     M = permutedims(M, [1,2,3])
-  elseif dir == :y
+  elseif dim == 2
     M = permutedims(M, [2,1,3])
-  elseif dir == :z
+  elseif dim == 3
     M = permutedims(M, [3,2,1])
   end
 

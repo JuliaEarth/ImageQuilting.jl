@@ -3,16 +3,16 @@
 # Licensed under the ISC License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-function boykov_kolmogorov_cut(A::AbstractArray, B::AbstractArray, dir::Symbol)
+function boykov_kolmogorov_cut(A::AbstractArray, B::AbstractArray, dim::Integer)
   # permute dimensions so that the algorithm is
   # the same for cuts in x, y and z directions
-  if dir == :x
+  if dim == 1
     A = permutedims(A, [1,2,3])
     B = permutedims(B, [1,2,3])
-  elseif dir == :y
+  elseif dim == 2
     A = permutedims(A, [2,1,3])
     B = permutedims(B, [2,1,3])
-  elseif dir == :z
+  elseif dim == 3
     A = permutedims(A, [3,2,1])
     B = permutedims(B, [3,2,1])
   end
@@ -99,11 +99,11 @@ function boykov_kolmogorov_cut(A::AbstractArray, B::AbstractArray, dir::Symbol)
   M[labels .== 0] .= true
 
   # permute back to original shape
-  if dir == :x
+  if dim == 1
     M = permutedims(M, [1,2,3])
-  elseif dir == :y
+  elseif dim == 2
     M = permutedims(M, [2,1,3])
-  elseif dir == :z
+  elseif dim == 3
     M = permutedims(M, [3,2,1])
   end
 
