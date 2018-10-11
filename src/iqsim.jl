@@ -136,9 +136,11 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
     end
 
     # deactivate voxels beyond true grid size
-    activated[gridsize[1]+1:padsize[1],:,:] .= false
-    activated[:,gridsize[2]+1:padsize[2],:] .= false
-    activated[:,:,gridsize[3]+1:padsize[3]] .= false
+    ax = axes(activated)
+    for d=1:N
+      slice = ntuple(i -> i == d ? (gridsize[d]+1:padsize[d]) : ax[i], Val{N}())
+      activated[CartesianIndices(slice)] .= false
+    end
 
     # grid must contain active voxels
     any_activated = any(activated[CartesianIndices(gridsize)])
