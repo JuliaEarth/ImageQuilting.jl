@@ -13,10 +13,10 @@ using ImageQuilting
 using GeoStatsImages
 
 TI = training_image("Strebelle")
-reals = iqsim(TI, (62, 62, 1), size(TI), nreal=3)
+reals = iqsim(TI, (62, 62, 1), nreal=3)
 
 TI = training_image("StoneWall")
-reals, cuts, voxs = iqsim(TI, (13, 13, 1), size(TI), nreal=3, debug=true)
+reals, cuts, voxs = iqsim(TI, (13, 13, 1), nreal=3, debug=true)
 ```
 ![Unconditional simulation](images/unconditional.png)
 
@@ -38,7 +38,7 @@ push!(data, CartesianIndex(190,50,1)=>0)
 push!(data, CartesianIndex(150,170,1)=>1)
 push!(data, CartesianIndex(150,190,1)=>1)
 
-reals, cuts, voxs = iqsim(TI, (30, 30, 1), size(TI), hard=data, debug=true)
+reals, cuts, voxs = iqsim(TI, (30, 30, 1), hard=data, debug=true)
 ```
 ![Hard data conditioning](images/hard.gif)
 
@@ -89,6 +89,6 @@ for i=1:size(TI, 1), j=1:size(TI, 2)
     end
 end
 
-reals = iqsim(TI, (62, 62, 1), size(TI), hard=shape, nreal=3)
+reals = iqsim(TI, (62, 62, 1), hard=shape, nreal=3)
 ```
 ![Masked grids](images/masked.png)
