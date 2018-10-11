@@ -20,7 +20,7 @@ Installation
 Get the latest stable release with Julia's package manager:
 
 ```julia
-Pkg.add("ImageQuilting")
+] add ImageQuilting
 ```
 
 Documentation
