@@ -354,8 +354,8 @@ function iqsim(trainimg::AbstractArray{T,N},
     end
 
     # throw away voxels that are outside of the grid
-    simgrid = view(simgrid,1:gridsize[1],1:gridsize[2],1:gridsize[3])
-    debug && (cutgrid = view(cutgrid,1:gridsize[1],1:gridsize[2],1:gridsize[3]))
+    simgrid = view(simgrid, CartesianIndices(gridsize))
+    debug && (cutgrid = view(cutgrid, CartesianIndices(gridsize)))
 
     # save and continue
     push!(realizations, simgrid)
