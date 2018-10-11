@@ -1,3 +1,8 @@
+# Workaround for JuliaLang/julia/pull/28625
+if Base.HOME_PROJECT[] !== nothing
+  Base.HOME_PROJECT[] = abspath(Base.HOME_PROJECT[])
+end
+
 using Documenter, ImageQuilting
 
 makedocs(
@@ -23,5 +28,5 @@ deploydocs(
   target = "build",
   deps = nothing,
   make = nothing,
-  julia = "0.6"
+  julia = "1.0"
 )
