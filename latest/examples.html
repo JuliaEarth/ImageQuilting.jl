@@ -3,10 +3,10 @@
 using GeoStatsImages
 
 TI = training_image(&quot;Strebelle&quot;)
-reals = iqsim(TI, (62, 62, 1), size(TI), nreal=3)
+reals = iqsim(TI, (62, 62, 1), nreal=3)
 
 TI = training_image(&quot;StoneWall&quot;)
-reals, cuts, voxs = iqsim(TI, (13, 13, 1), size(TI), nreal=3, debug=true)</code></pre><p><img src="images/unconditional.png" alt="Unconditional simulation"/></p><h2><a class="nav-anchor" id="Hard-data-1" href="#Hard-data-1">Hard data</a></h2><p>Hard data (i.e. point data) can be honored during simulation. This can be useful when images represent a spatial property of a physical domain. For example, the subsurface of the Earth is only known with certainty at a few well locations.</p><pre><code class="language-julia">using ImageQuilting
+reals, cuts, voxs = iqsim(TI, (13, 13, 1), nreal=3, debug=true)</code></pre><p><img src="images/unconditional.png" alt="Unconditional simulation"/></p><h2><a class="nav-anchor" id="Hard-data-1" href="#Hard-data-1">Hard data</a></h2><p>Hard data (i.e. point data) can be honored during simulation. This can be useful when images represent a spatial property of a physical domain. For example, the subsurface of the Earth is only known with certainty at a few well locations.</p><pre><code class="language-julia">using ImageQuilting
 using GeoStatsImages
 
 TI = training_image(&quot;Strebelle&quot;)
@@ -17,7 +17,7 @@ push!(data, CartesianIndex(190,50,1)=&gt;0)
 push!(data, CartesianIndex(150,170,1)=&gt;1)
 push!(data, CartesianIndex(150,190,1)=&gt;1)
 
-reals, cuts, voxs = iqsim(TI, (30, 30, 1), size(TI), hard=data, debug=true)</code></pre><p><img src="images/hard.gif" alt="Hard data conditioning"/></p><p><img src="images/hard.png" alt="Hard data conditioning"/></p><h2><a class="nav-anchor" id="Soft-data-1" href="#Soft-data-1">Soft data</a></h2><p>Sometimes it is also useful to incorporate auxiliary variables defined in the domain, which can guide the selection of patterns in the training image. This example shows how to achieve this texture transfer efficiently.</p><pre><code class="language-julia">using ImageQuilting
+reals, cuts, voxs = iqsim(TI, (30, 30, 1), hard=data, debug=true)</code></pre><p><img src="images/hard.gif" alt="Hard data conditioning"/></p><p><img src="images/hard.png" alt="Hard data conditioning"/></p><h2><a class="nav-anchor" id="Soft-data-1" href="#Soft-data-1">Soft data</a></h2><p>Sometimes it is also useful to incorporate auxiliary variables defined in the domain, which can guide the selection of patterns in the training image. This example shows how to achieve this texture transfer efficiently.</p><pre><code class="language-julia">using ImageQuilting
 using GeoStatsImages
 using Images
 
@@ -43,4 +43,4 @@ for i=1:size(TI, 1), j=1:size(TI, 2)
     end
 end
 
-reals = iqsim(TI, (62, 62, 1), size(TI), hard=shape, nreal=3)</code></pre><p><img src="images/masked.png" alt="Masked grids"/></p><footer><hr/><a class="previous" href="concepts.html"><span class="direction">Previous</span><span class="title">Concepts</span></a><a class="next" href="voxel-reuse.html"><span class="direction">Next</span><span class="title">Voxel reuse</span></a></footer></article></body></html>
+reals = iqsim(TI, (62, 62, 1), hard=shape, nreal=3)</code></pre><p><img src="images/masked.png" alt="Masked grids"/></p><footer><hr/><a class="previous" href="concepts.html"><span class="direction">Previous</span><span class="title">Concepts</span></a><a class="next" href="voxel-reuse.html"><span class="direction">Next</span><span class="title">Voxel reuse</span></a></footer></article></body></html>
