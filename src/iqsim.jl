@@ -239,8 +239,6 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       # current simulation dataevent
       simdev = view(simgrid, tile)
 
-      i, j, k = Tuple(tileind) # TODO: remove this line
-
       # compute overlap distance
       distance .= 0
       for d=1:N

@@ -17,7 +17,6 @@ using ProgressMeter: Progress, next!
 using FFTW: set_num_threads
 using CpuId: cpucores
 using RecipesBase
-using LinearAlgebra: I # TODO: eliminate this dependency
 using SparseArrays: spzeros
 using Random: shuffle!
 using Statistics: mean, std
