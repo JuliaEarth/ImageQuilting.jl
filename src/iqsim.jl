@@ -317,29 +317,26 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
       # boundary cut mask
       mask .= false
-      if ovlsize[1] > 1 && CartesianIndex(i-1,j,k) ∈ pasted
-        A = view(simdev,1:ovlsize[1],:,:); B = view(TIdev,1:ovlsize[1],:,:)
-        mask[1:ovlsize[1],:,:] .|= boundary_cut(A, B, 1)
-      end
-      if ovlsize[1] > 1 && CartesianIndex(i+1,j,k) ∈ pasted
-        A = view(simdev,spacing[1]+1:tilesize[1],:,:); B = view(TIdev,spacing[1]+1:tilesize[1],:,:)
-        mask[spacing[1]+1:tilesize[1],:,:] .|= reverse(boundary_cut(reverse(A, dims=1), reverse(B, dims=1), 1), dims=1)
-      end
-      if ovlsize[2] > 1 && CartesianIndex(i,j-1,k) ∈ pasted
-        A = view(simdev,:,1:ovlsize[2],:); B = view(TIdev,:,1:ovlsize[2],:)
-        mask[:,1:ovlsize[2],:] .|= boundary_cut(A, B, 2)
-      end
-      if ovlsize[2] > 1 && CartesianIndex(i,j+1,k) ∈ pasted
-        A = view(simdev,:,spacing[2]+1:tilesize[2],:); B = view(TIdev,:,spacing[2]+1:tilesize[2],:)
-        mask[:,spacing[2]+1:tilesize[2],:] .|= reverse(boundary_cut(reverse(A, dims=2), reverse(B, dims=2), 2), dims=2)
-      end
-      if ovlsize[3] > 1 && CartesianIndex(i,j,k-1) ∈ pasted
-        A = view(simdev,:,:,1:ovlsize[3]); B = view(TIdev,:,:,1:ovlsize[3])
-        mask[:,:,1:ovlsize[3]] .|= boundary_cut(A, B, 3)
-      end
-      if ovlsize[3] > 1 && CartesianIndex(i,j,k+1) ∈ pasted
-        A = view(simdev,:,:,spacing[3]+1:tilesize[3]); B = view(TIdev,:,:,spacing[3]+1:tilesize[3])
-        mask[:,:,spacing[3]+1:tilesize[3]] .|= reverse(boundary_cut(reverse(A, dims=3), reverse(B, dims=3), 3), dims=3)
+      for d=1:N
+        # Cartesian index of previous and next tiles along dimension
+        prev = CartesianIndex(ntuple(i -> i == d ? (tileind[d]-1) : tileind[i], N))
+        next = CartesianIndex(ntuple(i -> i == d ? (tileind[d]+1) : tileind[i], N))
+
+        # compute mask with previous tile
+        if ovlsize[d] > 1 && prev ∈ pasted
+          oslice = ntuple(i -> i == d ? (1:ovlsize[d]) : (1:tilesize[i]), N)
+          inds = CartesianIndices(oslice)
+          A = view(simdev, inds); B = view(TIdev, inds)
+          mask[inds] .|= boundary_cut(A, B, d)
+        end
+
+        # compute mask with next tile
+        if ovlsize[d] > 1 && next ∈ pasted
+          oslice = ntuple(i -> i == d ? (spacing[d]+1:tilesize[d]) : (1:tilesize[i]), N)
+          inds = CartesianIndices(oslice)
+          A = view(simdev, inds); B = view(TIdev, inds)
+          mask[inds] .|= reverse(boundary_cut(reverse(A, dims=d), reverse(B, dims=d), d), dims=d)
+        end
       end
 
       # paste quilted pattern from training image
