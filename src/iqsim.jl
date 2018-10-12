@@ -8,7 +8,7 @@
           simsize::Dims{N}=size(trainimg);
           overlap::NTuple{N,Float64}=ntuple(i->1/6,N),
           soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1,
-          cut::Symbol=:boykov, path::Symbol=:rasterup, nreal::Integer=1,
+          cut::Symbol=:boykov, path::Symbol=:raster, nreal::Integer=1,
           threads::Integer=cpucores(), gpu::Bool=false,
           debug::Bool=false, showprogress::Bool=false)
 
@@ -29,7 +29,7 @@ Performs image quilting simulation as described in Hoffimann et al. 2017.
 * `hard` is an instance of `HardData` (default to none)
 * `tol` is the initial relaxation tolerance in (0,1] (default to .1)
 * `cut` is the cut algorithm (`:dijkstra` or `:boykov`)
-* `path` is the simulation path (`:rasterup`, `:rasterdown`, `:dilation` or `:random`)
+* `path` is the simulation path (`:raster`, `:dilation` or `:random`)
 * `nreal` is the number of realizations (default to 1)
 * `threads` is the number of threads for the FFT (default to all CPU cores)
 * `gpu` informs whether to use the GPU or the CPU (default to false)
@@ -49,7 +49,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
                simsize::Dims{N}=size(trainimg);
                overlap::NTuple{N,Float64}=ntuple(i->1/6,N),
                soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1,
-               cut::Symbol=:boykov, path::Symbol=:rasterup, nreal::Integer=1,
+               cut::Symbol=:boykov, path::Symbol=:raster, nreal::Integer=1,
                threads::Integer=cpucores(), gpu::Bool=false,
                debug::Bool=false, showprogress::Bool=false) where {T,N}
 
@@ -63,7 +63,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   @assert all(0 .< overlap .< 1) "overlaps must be in range (0,1)"
   @assert 0 < tol ≤ 1 "tolerance must be in range (0,1]"
   @assert cut ∈ [:dijkstra,:boykov] "invalid cut algorithm"
-  @assert path ∈ [:rasterup,:rasterdown,:dilation,:random] "invalid simulation path"
+  @assert path ∈ [:raster,:dilation,:random] "invalid simulation path"
   @assert nreal > 0 "invalid number of realizations"
 
   # soft data checks

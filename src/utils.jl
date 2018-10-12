@@ -35,15 +35,9 @@ end
 function genpath(extent::Dims{N}, kind::Symbol, datum=[]) where {N}
   path = Vector{Int}()
 
-  if kind == :rasterup
-    for k=1:extent[3], j=1:extent[2], i=1:extent[1]
-      push!(path, cart2lin(extent, i,j,k))
-    end
-  end
-
-  if kind == :rasterdown
-    for k=extent[3]:-1:1, j=1:extent[2], i=1:extent[1]
-      push!(path, cart2lin(extent, i,j,k))
+  if kind == :raster
+    for ind in LinearIndices(extent)
+      push!(path, ind)
     end
   end
 
@@ -61,7 +55,7 @@ function genpath(extent::Dims{N}, kind::Symbol, datum=[]) where {N}
     push!(path, pivot)
 
     while !all(grid)
-      dilated = dilate(grid, [1,2,3])
+      dilated = dilate(grid)
       append!(path, findall(vec(dilated .& .!grid)))
       grid = dilated
     end
@@ -79,7 +73,7 @@ function genpath(extent::Dims{N}, kind::Symbol, datum=[]) where {N}
     end
 
     while !all(grid)
-      dilated = dilate(grid, [1,2,3])
+      dilated = dilate(grid)
       append!(path, findall(vec(dilated .& .!grid)))
       grid = dilated
     end

@@ -19,7 +19,7 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
 
 * `overlap`  - Overlap size in x, y and z (default to (1/6, 1/6, 1/6))
 * `cut`      - Boundary cut algorithm (:boykov (default) or :dijkstra)
-* `path`     - Simulation path (:rasterup (default), :rasterdown, :dilation, or :random)
+* `path`     - Simulation path (:raster (default), :dilation, or :random)
 * `inactive` - Vector of inactive voxels (i.e. tuples (i,j,k)) in the grid
 * `soft`     - A vector of `(data,dataTI)` pairs
 * `tol`      - Initial relaxation tolerance in (0,1] (default to 0.1)
@@ -37,7 +37,7 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
   @param tilesize
   @param overlap       = (1/6, 1/6, 1/6)
   @param cut           = :boykov
-  @param path          = :rasterup
+  @param path          = :raster
   @param inactive      = nothing
   @param soft          = []
   @param tol           = .1
