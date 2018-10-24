@@ -118,8 +118,8 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   end
 
   # keep track of hard data and inactive voxels
-  datainds = Vector{CartesianIndex{N}}()
   skipped  = Set{CartesianIndex{N}}()
+  datainds = Vector{CartesianIndex{N}}()
   if !isempty(hard)
     # hard data in grid format
     hardgrid = zeros(padsize)
@@ -349,22 +349,18 @@ function preprocess_images(trainimg::AbstractArray{T,N}, soft::AbstractVector,
   TI[isnan.(TI)] .= 0
 
   # soft data
-  SOFT = []
-  if !isempty(soft)
-    for (aux, auxTI) in soft
-      auxpad = padsize .- min.(padsize, size(aux))
+  SOFT = map(soft) do (aux, auxTI)
+    auxpad = padsize .- min.(padsize, size(aux))
 
-      AUX = padarray(aux, Pad(:symmetric, ntuple(i->0, N), auxpad))
-      AUX = parent(AUX)
+    AUX = padarray(aux, Pad(:symmetric, ntuple(i->0, N), auxpad))
+    AUX = parent(AUX)
 
-      AUXTI = copy(auxTI)
+    AUXTI = copy(auxTI)
 
-      # knockout inactive voxels
-      AUX[isnan.(AUX)] .= 0
-      AUXTI[isnan.(AUXTI)] .= 0
+    AUX[isnan.(AUX)] .= 0
+    AUXTI[isnan.(AUXTI)] .= 0
 
-      push!(SOFT, (AUX, AUXTI))
-    end
+    AUX, AUXTI
   end
 
   TI, SOFT
