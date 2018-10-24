@@ -126,8 +126,8 @@ end
       @test length(path) == 1000
     end
 
-    # datum is visited first if present
-    path = ImageQuilting.genpath((10,10,10), :datum, [CartesianIndex(1,1,1),CartesianIndex(10,10,10)])
+    # data is visited first if present
+    path = ImageQuilting.genpath((10,10,10), :data, [CartesianIndex(1,1,1),CartesianIndex(10,10,10)])
     @test path[1:2] == [1,1000] || path[1:2] == [1000,1]
   end
 

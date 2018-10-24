@@ -121,8 +121,8 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   end
 
   # keep track of hard data and inactive voxels
-  datum = Vector{CartesianIndex{N}}()
-  skipped = Set{CartesianIndex{N}}()
+  datainds = Vector{CartesianIndex{N}}()
+  skipped  = Set{CartesianIndex{N}}()
   if !isempty(hard)
     # hard data in grid format
     hardgrid = zeros(padsize)
@@ -159,7 +159,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
         push!(skipped, tileind)
       else
         if any(preset[tile])
-          push!(datum, tileind)
+          push!(datainds, tileind)
         end
       end
     end
@@ -189,7 +189,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   end
 
   # overwrite path option if data is available
-  !isempty(datum) && (path = :datum)
+  !isempty(datainds) && (path = :data)
 
   # select cut algorithm
   boundary_cut = cut == :dijkstra ? dijkstra_cut : boykov_kolmogorov_cut
@@ -219,7 +219,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
     pasted = Set{CartesianIndex{N}}()
 
     # construct simulation path
-    simpath = genpath(ntiles, path, datum)
+    simpath = genpath(ntiles, path, datainds)
 
     # loop simulation grid tile by tile
     for ind in simpath

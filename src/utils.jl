@@ -32,7 +32,7 @@ function convdist(img::AbstractArray, kern::AbstractArray;
   parent(D) # always return a plain simple array
 end
 
-function genpath(extent::Dims{N}, kind::Symbol, datum=[]) where {N}
+function genpath(extent::Dims{N}, kind::Symbol, datainds=[]) where {N}
   path = Vector{Int}()
 
   if kind == :raster
@@ -61,13 +61,13 @@ function genpath(extent::Dims{N}, kind::Symbol, datum=[]) where {N}
     end
   end
 
-  if kind == :datum
-    @assert !isempty(datum) "datum path cannot be generated without data"
+  if kind == :data
+    @assert !isempty(datainds) "data path cannot be generated without data"
 
-    shuffle!(datum)
+    shuffle!(datainds)
 
     grid = falses(extent)
-    for pivot in datum
+    for pivot in datainds
       grid[pivot] = true
       push!(path, LinearIndices(extent)[pivot])
     end
