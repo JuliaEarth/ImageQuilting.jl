@@ -107,13 +107,33 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
   # always work with floating point
   TI = Float64.(trainimg)
+  TI[isnan.(TI)] .= 0
 
-  # inactive voxels in the training image
-  NaNTI = isnan.(TI); TI[NaNTI] .= 0
+  # pad soft data
+  softgrid = []; softTI = []
+  if !isempty(soft)
+    for (aux, auxTI) in soft
+      auxpad = padsize .- min.(padsize, size(aux))
+
+      AUX = padarray(aux, Pad(:symmetric, ntuple(i->0, N), auxpad))
+      AUX = parent(AUX)
+
+      AUXTI = copy(auxTI)
+
+      # always work with floating point
+      AUX   = Float64.(AUX)
+      AUXTI = Float64.(AUXTI)
+      AUX[isnan.(AUX)] .= 0
+      AUXTI[isnan.(AUXTI)] .= 0
+
+      push!(softgrid, AUX)
+      push!(softTI, AUXTI)
+    end
+  end
 
   # disable tiles in the training image if they contain inactive voxels
   disabled = Vector{CartesianIndex{N}}()
-  for ind in findall(NaNTI)
+  for ind in findall(isnan, trainimg)
     start  = @. max(ind.I - tilesize + 1, 1)
     finish = @. min(ind.I, TIsize - tilesize + 1)
     tile   = CartesianIndices(ntuple(i -> start[i]:finish[i], N))
@@ -165,34 +185,14 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
     end
   end
 
-  # preprocess soft data
-  softgrid = Vector{Array{Float64,N}}()
-  softTI   = Vector{Array{Float64,N}}()
-  if !isempty(soft)
-    for (aux, auxTI) in soft
-      auxpad = padsize .- min.(padsize, size(aux))
-
-      AUX = padarray(aux, Pad(:symmetric, ntuple(i->0,N), auxpad))
-      AUX = parent(AUX)
-      AUX[isnan.(AUX)] .= 0
-
-      AUXTI = copy(auxTI)
-      AUXTI[NaNTI] .= 0
-
-      # always work with floating point
-      AUX   = Float64.(AUX)
-      AUXTI = Float64.(AUXTI)
-
-      push!(softgrid, AUX)
-      push!(softTI, AUXTI)
-    end
-  end
-
   # overwrite path option if data is available
   !isempty(datainds) && (path = :data)
 
   # select cut algorithm
   boundary_cut = cut == :dijkstra ? dijkstra_cut : boykov_kolmogorov_cut
+
+  # show progress and estimated time duration
+  showprogress && (progress = Progress(nreal))
 
   # main output is a vector of 3D grids
   realizations = Vector{Array{Float64,N}}()
@@ -200,9 +200,6 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   # for each realization we have:
   boundarycuts = Vector{Array{Float64,N}}()
   voxelreuse   = Vector{Float64}()
-
-  # show progress and estimated time duration
-  showprogress && (progress = Progress(nreal))
 
   # preallocate memory for distance calculations
   distance = Array{Float64}(undef, TIsize .- tilesize .+ 1)
