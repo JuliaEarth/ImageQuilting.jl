@@ -105,31 +105,8 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
     @warn "Overlaps with only 1 voxel, check tilesize/overlap configuration"
   end
 
-  # always work with floating point
-  TI = Float64.(trainimg)
-  TI[isnan.(TI)] .= 0
-
-  # pad soft data
-  softgrid = []; softTI = []
-  if !isempty(soft)
-    for (aux, auxTI) in soft
-      auxpad = padsize .- min.(padsize, size(aux))
-
-      AUX = padarray(aux, Pad(:symmetric, ntuple(i->0, N), auxpad))
-      AUX = parent(AUX)
-
-      AUXTI = copy(auxTI)
-
-      # always work with floating point
-      AUX   = Float64.(AUX)
-      AUXTI = Float64.(AUXTI)
-      AUX[isnan.(AUX)] .= 0
-      AUXTI[isnan.(AUXTI)] .= 0
-
-      push!(softgrid, AUX)
-      push!(softTI, AUXTI)
-    end
-  end
+  # pad input images and knockout inactive voxels
+  TI, SOFT = preprocess_images(trainimg, soft, padsize)
 
   # disable tiles in the training image if they contain inactive voxels
   disabled = Vector{CartesianIndex{N}}()
@@ -165,8 +142,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
     end
 
     # grid must contain active voxels
-    any_activated = any(activated[CartesianIndices(simsize)])
-    @assert any_activated "simulation grid has no active voxel"
+    @assert any(activated[CartesianIndices(simsize)]) "simulation grid has no active voxel"
 
     # determine tiles that should be skipped and tiles with data
     for tileind in CartesianIndices(ntiles)
@@ -284,9 +260,9 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
         push!(auxdistances, distance)
         distance = D
       end
-      for n=1:length(softTI)
-        softdev = view(softgrid[n], tile)
-        D = convdist(softTI[n], softdev)
+      for (AUX, AUXTI) in SOFT
+        softdev = view(AUX, tile)
+        D = convdist(AUXTI, softdev)
 
         # disable dataevents that contain inactive voxels
         D[disabled] .= Inf
@@ -364,4 +340,32 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   end
 
   debug ? (realizations, boundarycuts, voxelreuse) : realizations
+end
+
+function preprocess_images(trainimg::AbstractArray{T,N}, soft::AbstractVector,
+                           padsize::Dims{N}) where {T,N}
+  # training image
+  TI = copy(trainimg)
+  TI[isnan.(TI)] .= 0
+
+  # soft data
+  SOFT = []
+  if !isempty(soft)
+    for (aux, auxTI) in soft
+      auxpad = padsize .- min.(padsize, size(aux))
+
+      AUX = padarray(aux, Pad(:symmetric, ntuple(i->0, N), auxpad))
+      AUX = parent(AUX)
+
+      AUXTI = copy(auxTI)
+
+      # knockout inactive voxels
+      AUX[isnan.(AUX)] .= 0
+      AUXTI[isnan.(AUXTI)] .= 0
+
+      push!(SOFT, (AUX, AUXTI))
+    end
+  end
+
+  TI, SOFT
 end
