@@ -3,21 +3,21 @@
 using GeoStatsImages
 
 TI = training_image(&quot;Strebelle&quot;)
-reals = iqsim(TI, 62, 62, 1, size(TI)..., nreal=3)
+reals = iqsim(TI, (62, 62, 1), nreal=3)
 
 TI = training_image(&quot;StoneWall&quot;)
-reals, cuts, voxs = iqsim(TI, 13, 13, 1, size(TI)..., nreal=3, debug=true)</code></pre><p><img src="images/unconditional.png" alt="Unconditional simulation"/></p><h2><a class="nav-anchor" id="Hard-data-1" href="#Hard-data-1">Hard data</a></h2><p>Hard data (i.e. point data) can be honored during simulation. This can be useful when images represent a spatial property of a physical domain. For example, the subsurface of the Earth is only known with certainty at a few well locations.</p><pre><code class="language-julia">using ImageQuilting
+reals, cuts, voxs = iqsim(TI, (13, 13, 1), nreal=3, debug=true)</code></pre><p><img src="images/unconditional.png" alt="Unconditional simulation"/></p><h2><a class="nav-anchor" id="Hard-data-1" href="#Hard-data-1">Hard data</a></h2><p>Hard data (i.e. point data) can be honored during simulation. This can be useful when images represent a spatial property of a physical domain. For example, the subsurface of the Earth is only known with certainty at a few well locations.</p><pre><code class="language-julia">using ImageQuilting
 using GeoStatsImages
 
 TI = training_image(&quot;Strebelle&quot;)
 
 data = HardData()
-push!(data, (50,50,1)=&gt;1)
-push!(data, (190,50,1)=&gt;0)
-push!(data, (150,170,1)=&gt;1)
-push!(data, (150,190,1)=&gt;1)
+push!(data, CartesianIndex(50,50,1)=&gt;1)
+push!(data, CartesianIndex(190,50,1)=&gt;0)
+push!(data, CartesianIndex(150,170,1)=&gt;1)
+push!(data, CartesianIndex(150,190,1)=&gt;1)
 
-reals, cuts, voxs = iqsim(TI, 30, 30, 1, size(TI)..., hard=data, debug=true)</code></pre><p><img src="images/hard.gif" alt="Hard data conditioning"/></p><p><img src="images/hard.png" alt="Hard data conditioning"/></p><h2><a class="nav-anchor" id="Soft-data-1" href="#Soft-data-1">Soft data</a></h2><p>Sometimes it is also useful to incorporate auxiliary variables defined in the domain, which can guide the selection of patterns in the training image. This example shows how to achieve this texture transfer efficiently.</p><pre><code class="language-julia">using ImageQuilting
+reals, cuts, voxs = iqsim(TI, (30, 30, 1), hard=data, debug=true)</code></pre><p><img src="images/hard.gif" alt="Hard data conditioning"/></p><p><img src="images/hard.png" alt="Hard data conditioning"/></p><h2><a class="nav-anchor" id="Soft-data-1" href="#Soft-data-1">Soft data</a></h2><p>Sometimes it is also useful to incorporate auxiliary variables defined in the domain, which can guide the selection of patterns in the training image. This example shows how to achieve this texture transfer efficiently.</p><pre><code class="language-julia">using ImageQuilting
 using GeoStatsImages
 using Images
 
@@ -29,7 +29,7 @@ G(m) = imfilter(m, KernelFactors.IIRGaussian([10,10,0]))
 data   = G(truth)
 dataTI = G(TI)
 
-reals = iqsim(TI, 27, 27, 1, size(truth)..., soft=[(data,dataTI)], nreal=3)</code></pre><p><img src="images/soft.png" alt="Soft data conditioning"/></p><h2><a class="nav-anchor" id="Masked-grids-1" href="#Masked-grids-1">Masked grids</a></h2><p>Voxels marked with the special symbol <code>NaN</code> are treated as inactive. The algorithm will skip tiles that only contain inactive voxels to save computation and will generate realizations that are consistent with the mask. This is particularly useful with complex 3D models that have large inactive portions.</p><pre><code class="language-julia">using ImageQuilting
+reals = iqsim(TI, (27, 27, 1), size(truth), soft=[(data,dataTI)], nreal=3)</code></pre><p><img src="images/soft.png" alt="Soft data conditioning"/></p><h2><a class="nav-anchor" id="Masked-grids-1" href="#Masked-grids-1">Masked grids</a></h2><p>Voxels marked with the special symbol <code>NaN</code> are treated as inactive. The algorithm will skip tiles that only contain inactive voxels to save computation and will generate realizations that are consistent with the mask. This is particularly useful with complex 3D models that have large inactive portions.</p><pre><code class="language-julia">using ImageQuilting
 using GeoStatsImages
 
 TI = training_image(&quot;Strebelle&quot;)
@@ -39,8 +39,8 @@ nx, ny = size(TI)
 r = 100; shape = HardData()
 for i=1:size(TI, 1), j=1:size(TI, 2)
     if (i-nx÷2)^2 + (j-ny÷2)^2 &lt; radius^2
-        push!(shape, (i,j,1)=&gt;NaN)
+        push!(shape, CartesianIndex(i,j,1)=&gt;NaN)
     end
 end
 
-reals = iqsim(TI, 62, 62, 1, size(TI)..., hard=shape, nreal=3)</code></pre><p><img src="images/masked.png" alt="Masked grids"/></p><footer><hr/><a class="previous" href="concepts.html"><span class="direction">Previous</span><span class="title">Concepts</span></a><a class="next" href="voxel-reuse.html"><span class="direction">Next</span><span class="title">Voxel reuse</span></a></footer></article></body></html>
+reals = iqsim(TI, (62, 62, 1), hard=shape, nreal=3)</code></pre><p><img src="images/masked.png" alt="Masked grids"/></p><footer><hr/><a class="previous" href="concepts.html"><span class="direction">Previous</span><span class="title">Concepts</span></a><a class="next" href="voxel-reuse.html"><span class="direction">Next</span><span class="title">Voxel reuse</span></a></footer></article></body></html>

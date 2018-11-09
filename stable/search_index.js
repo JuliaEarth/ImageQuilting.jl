@@ -37,7 +37,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "ImageQuilting.ImgQuilt",
     "category": "type",
-    "text": "ImgQuilt(var₁=>param₁, var₂=>param₂, ...)\n\nImage quilting simulation solver as described in Hoffimann et al. 2017.\n\nParameters\n\nRequired\n\nTI       - Training image\ntemplate - Template size in x, y and z\n\nOptional\n\noverlap  - Overlap size in x, y and z (default to (1/6, 1/6, 1/6))\ncut      - Boundary cut algorithm (:boykov (default) or :dijkstra)\npath     - Simulation path (:rasterup (default), :rasterdown, :dilation, or :random)\nsimplex  - Whether to apply or not the simplex transform (default to false)\ninactive - Vector of inactive voxels (i.e. tuples (i,j,k)) in the grid\nsoft     - A vector of (data,dataTI) pairs\ntol      - Initial relaxation tolerance in (0,1] (default to 0.1)\n\nGlobal parameters\n\nOptional\n\nthreads      - Number of threads in FFT (default to number of physical CPU cores)\ngpu          - Whether to use the GPU or the CPU (default to false)\nshowprogress - Whether to show or not the estimated time duration (default to false)\n\n\n\n\n\n"
+    "text": "ImgQuilt(var₁=>param₁, var₂=>param₂, ...)\n\nImage quilting simulation solver as described in Hoffimann et al. 2017.\n\nParameters\n\nRequired\n\nTI       - Training image\ntilesize - Tile size in x, y and z\n\nOptional\n\noverlap  - Overlap size in x, y and z (default to (1/6, 1/6, 1/6))\ncut      - Boundary cut algorithm (:boykov (default) or :dijkstra)\npath     - Simulation path (:raster (default), :dilation, or :random)\ninactive - Vector of inactive voxels (i.e. tuples (i,j,k)) in the grid\nsoft     - A vector of (data,dataTI) pairs\ntol      - Initial relaxation tolerance in (0,1] (default to 0.1)\n\nGlobal parameters\n\nOptional\n\nthreads      - Number of threads in FFT (default to number of physical CPU cores)\ngpu          - Whether to use the GPU or the CPU (default to false)\nshowprogress - Whether to show or not the estimated time duration (default to false)\n\n\n\n\n\n\n\n"
 },
 
 {
@@ -53,7 +53,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "ImageQuilting.iqsim",
     "category": "function",
-    "text": "iqsim(training_image::AbstractArray,\n      tplsizex::Integer, tplsizey::Integer, tplsizez::Integer,\n      gridsizex::Integer, gridsizey::Integer, gridsizez::Integer;\n      overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,\n      soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1,\n      cut::Symbol=:boykov, path::Symbol=:rasterup, simplex::Bool=false,\n      nreal::Integer=1, threads::Integer=CPU_PHYSICAL_CORES,\n      gpu::Bool=false, debug::Bool=false, showprogress::Bool=false)\n\nPerforms image quilting simulation as described in Hoffimann et al. 2017.\n\nParameters\n\nRequired\n\ntraining_image can be any 3D array (add ghost dimension for 2D)\ntplsizex,tplsizey,tplsizez is the template size\ngridsizex,gridsizey,gridsizez is the simulation size\n\nOptional\n\noverlapx,overlapy,overlapz is the percentage of overlap\nsoft is a vector of (data,dataTI) pairs\nhard is an instance of HardData\ntol is the initial relaxation tolerance in (0,1] (default to .1)\ncut is the cut algorithm (:dijkstra or :boykov)\npath is the simulation path (:rasterup, :rasterdown, :dilation or :random)\nsimplex informs whether to apply or not the simplex transform to the image\nnreal is the number of realizations\nthreads is the number of threads for the FFT (default to all CPU cores)\ngpu informs whether to use the GPU or the CPU\ndebug informs whether to export or not the boundary cuts and voxel reuse\nshowprogress informs whether to show or not estimated time duration\n\nThe main output reals consists of a list of 3D realizations that can be indexed with reals[1], reals[2], ..., reals[nreal]. If debug=true, additional output is generated:\n\nreals, cuts, voxs = iqsim(..., debug=true)\n\ncuts[i] is the boundary cut for reals[i] and voxs[i] is the associated voxel reuse.\n\n\n\n"
+    "text": "iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},\n      simsize::Dims{N}=size(trainimg);\n      overlap::NTuple{N,Float64}=ntuple(i->1/6,N),\n      soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1,\n      cut::Symbol=:boykov, path::Symbol=:raster, nreal::Integer=1,\n      threads::Integer=cpucores(), gpu::Bool=false,\n      debug::Bool=false, showprogress::Bool=false)\n\nPerforms image quilting simulation as described in Hoffimann et al. 2017.\n\nParameters\n\nRequired\n\ntrainimg is any 3D array (add ghost dimension for 2D)\ntilesize is the tile size (or pattern size)\n\nOptional\n\nsimsize is the size of the simulation grid (default to training image size)\noverlap is the percentage of overlap (default to 1/6 of tile size)\nsoft is a vector of (data,dataTI) pairs (default to none)\nhard is an instance of HardData (default to none)\ntol is the initial relaxation tolerance in (0,1] (default to .1)\ncut is the cut algorithm (:dijkstra or :boykov)\npath is the simulation path (:raster, :dilation or :random)\nnreal is the number of realizations (default to 1)\nthreads is the number of threads for the FFT (default to all CPU cores)\ngpu informs whether to use the GPU or the CPU (default to false)\ndebug informs whether to export or not the boundary cuts and voxel reuse\nshowprogress informs whether to show or not estimated time duration\n\nThe main output reals consists of a list of 3D realizations that can be indexed with reals[1], reals[2], ..., reals[nreal]. If debug=true, additional output is generated:\n\nreals, cuts, voxs = iqsim(..., debug=true)\n\ncuts[i] is the boundary cut for reals[i] and voxs[i] is the associated voxel reuse.\n\n\n\n\n\n"
 },
 
 {
@@ -77,7 +77,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Concepts",
     "title": "Hard data",
     "category": "section",
-    "text": "Voxels can be assigned values that will be honored by the simulation. HardData() is a dictionary of locations and associated values specified by the user:well = HardData((i,j,k)=>value(i,j,k) for i=10, j=10, k=1:100)\niqsim(..., hard=well)"
+    "text": "Voxels can be assigned values that will be honored by the simulation. HardData() is a dictionary of locations and associated values specified by the user:well = HardData(CartesianIndex(i,j,k)=>value(i,j,k) for i=10, j=10, k=1:100)\niqsim(..., hard=well)"
 },
 
 {
@@ -109,7 +109,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Examples",
     "title": "Unconditional",
     "category": "section",
-    "text": "An example of unconditional simulation (i.e. simulation without data). This is the original Efros-Freeman algorithm for texture synthesis with a few additional options.using ImageQuilting\nusing GeoStatsImages\n\nTI = training_image(\"Strebelle\")\nreals = iqsim(TI, 62, 62, 1, size(TI)..., nreal=3)\n\nTI = training_image(\"StoneWall\")\nreals, cuts, voxs = iqsim(TI, 13, 13, 1, size(TI)..., nreal=3, debug=true)(Image: Unconditional simulation)"
+    "text": "An example of unconditional simulation (i.e. simulation without data). This is the original Efros-Freeman algorithm for texture synthesis with a few additional options.using ImageQuilting\nusing GeoStatsImages\n\nTI = training_image(\"Strebelle\")\nreals = iqsim(TI, (62, 62, 1), nreal=3)\n\nTI = training_image(\"StoneWall\")\nreals, cuts, voxs = iqsim(TI, (13, 13, 1), nreal=3, debug=true)(Image: Unconditional simulation)"
 },
 
 {
@@ -117,7 +117,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Examples",
     "title": "Hard data",
     "category": "section",
-    "text": "Hard data (i.e. point data) can be honored during simulation. This can be useful when images represent a spatial property of a physical domain. For example, the subsurface of the Earth is only known with certainty at a few well locations.using ImageQuilting\nusing GeoStatsImages\n\nTI = training_image(\"Strebelle\")\n\ndata = HardData()\npush!(data, (50,50,1)=>1)\npush!(data, (190,50,1)=>0)\npush!(data, (150,170,1)=>1)\npush!(data, (150,190,1)=>1)\n\nreals, cuts, voxs = iqsim(TI, 30, 30, 1, size(TI)..., hard=data, debug=true)(Image: Hard data conditioning)(Image: Hard data conditioning)"
+    "text": "Hard data (i.e. point data) can be honored during simulation. This can be useful when images represent a spatial property of a physical domain. For example, the subsurface of the Earth is only known with certainty at a few well locations.using ImageQuilting\nusing GeoStatsImages\n\nTI = training_image(\"Strebelle\")\n\ndata = HardData()\npush!(data, CartesianIndex(50,50,1)=>1)\npush!(data, CartesianIndex(190,50,1)=>0)\npush!(data, CartesianIndex(150,170,1)=>1)\npush!(data, CartesianIndex(150,190,1)=>1)\n\nreals, cuts, voxs = iqsim(TI, (30, 30, 1), hard=data, debug=true)(Image: Hard data conditioning)(Image: Hard data conditioning)"
 },
 
 {
@@ -125,7 +125,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Examples",
     "title": "Soft data",
     "category": "section",
-    "text": "Sometimes it is also useful to incorporate auxiliary variables defined in the domain, which can guide the selection of patterns in the training image. This example shows how to achieve this texture transfer efficiently.using ImageQuilting\nusing GeoStatsImages\nusing Images\n\nTI    = training_image(\"WalkerLake\")\ntruth = training_image(\"WalkerLakeTruth\")\n\nG(m) = imfilter(m, KernelFactors.IIRGaussian([10,10,0]))\n\ndata   = G(truth)\ndataTI = G(TI)\n\nreals = iqsim(TI, 27, 27, 1, size(truth)..., soft=[(data,dataTI)], nreal=3)(Image: Soft data conditioning)"
+    "text": "Sometimes it is also useful to incorporate auxiliary variables defined in the domain, which can guide the selection of patterns in the training image. This example shows how to achieve this texture transfer efficiently.using ImageQuilting\nusing GeoStatsImages\nusing Images\n\nTI    = training_image(\"WalkerLake\")\ntruth = training_image(\"WalkerLakeTruth\")\n\nG(m) = imfilter(m, KernelFactors.IIRGaussian([10,10,0]))\n\ndata   = G(truth)\ndataTI = G(TI)\n\nreals = iqsim(TI, (27, 27, 1), size(truth), soft=[(data,dataTI)], nreal=3)(Image: Soft data conditioning)"
 },
 
 {
@@ -133,7 +133,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Examples",
     "title": "Masked grids",
     "category": "section",
-    "text": "Voxels marked with the special symbol NaN are treated as inactive. The algorithm will skip tiles that only contain inactive voxels to save computation and will generate realizations that are consistent with the mask. This is particularly useful with complex 3D models that have large inactive portions.using ImageQuilting\nusing GeoStatsImages\n\nTI = training_image(\"Strebelle\")\nnx, ny = size(TI)\n\n# skip circle at the center\nr = 100; shape = HardData()\nfor i=1:size(TI, 1), j=1:size(TI, 2)\n    if (i-nx÷2)^2 + (j-ny÷2)^2 < radius^2\n        push!(shape, (i,j,1)=>NaN)\n    end\nend\n\nreals = iqsim(TI, 62, 62, 1, size(TI)..., hard=shape, nreal=3)(Image: Masked grids)"
+    "text": "Voxels marked with the special symbol NaN are treated as inactive. The algorithm will skip tiles that only contain inactive voxels to save computation and will generate realizations that are consistent with the mask. This is particularly useful with complex 3D models that have large inactive portions.using ImageQuilting\nusing GeoStatsImages\n\nTI = training_image(\"Strebelle\")\nnx, ny = size(TI)\n\n# skip circle at the center\nr = 100; shape = HardData()\nfor i=1:size(TI, 1), j=1:size(TI, 2)\n    if (i-nx÷2)^2 + (j-ny÷2)^2 < radius^2\n        push!(shape, CartesianIndex(i,j,1)=>NaN)\n    end\nend\n\nreals = iqsim(TI, (62, 62, 1), hard=shape, nreal=3)(Image: Masked grids)"
 },
 
 {
@@ -149,7 +149,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Voxel reuse",
     "title": "ImageQuilting.voxelreuse",
     "category": "function",
-    "text": "voxelreuse(training_image::AbstractArray,\n           tplsizex::Integer, tplsizey::Integer, tplsizez::Integer;\n           overlapx::Real=1/6, overlapy::Real=1/6, overlapz::Real=1/6,\n           nreal::Integer=10, kwargs...)\n\nReturns the mean voxel reuse in [0,1] and its standard deviation.\n\nNotes\n\nThe approximation gets better as nreal is made larger.\nKeyword arguments kwargs are passed to iqsim directly.\n\n\n\n"
+    "text": "voxelreuse(trainimg::AbstractArray{T,N}, tilesize::Dims{N};\n           overlap::NTuple{N,Float64}=ntuple(i->1/6,N),\n           nreal::Integer=10, kwargs...)\n\nReturns the mean voxel reuse in [0,1] and its standard deviation.\n\nNotes\n\nThe approximation gets better as nreal is made larger.\nKeyword arguments kwargs are passed to iqsim directly.\n\n\n\n\n\n"
 },
 
 {
@@ -165,7 +165,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Voxel reuse",
     "title": "Plot recipe",
     "category": "section",
-    "text": "A plot recipe is provided for template design in image quilting. In order to plot the voxel reuse of a training image, install Plots.jl and any of its supported backends (e.g. GR.jl):Pkg.add(\"Plots\")\nPkg.add(\"GR\")The example below uses training images from the GeoStatsImages.jl package:using ImageQuilting\nusing GeoStatsImages\nusing Plots\n\nTI₁ = training_image(\"Strebelle\")\nTI₂ = training_image(\"StoneWall\")\n\nvoxelreuseplot(TI₁, label=\"Strebelle\")\nvoxelreuseplot!(TI₂, label=\"StoneWall\")(Image: Voxel reuse plot)"
+    "text": "A plot recipe is provided for tile design in image quilting. In order to plot the voxel reuse of a training image, install Plots.jl and any of its supported backends (e.g. GR.jl):] add Plots GRThe example below uses training images from the GeoStatsImages.jl package:using ImageQuilting\nusing GeoStatsImages\nusing Plots\n\nTI₁ = training_image(\"Strebelle\")\nTI₂ = training_image(\"StoneWall\")\n\nvoxelreuseplot(TI₁, label=\"Strebelle\")\nvoxelreuseplot!(TI₂, label=\"StoneWall\")(Image: Voxel reuse plot)"
 },
 
 {
@@ -181,7 +181,7 @@ var documenterSearchIndex = {"docs": [
     "page": "GPU support",
     "title": "Installing OpenCL driver",
     "category": "section",
-    "text": "The choice of the OpenCL driver is dependent on the graphics card you have. Find what is the model of your graphics card and download the appropriate driver from the links below:Intel\nAMD\nNVIDIAIf you are on Linux like myself, check the repositories of your distribution for a more straightforward installation. If you have a recent Intel graphics card, consider the open source Beignet driver also available in some distributions (e.g. AUR repos in Arch Linux).To make sure that everything is working properly, install the OpenCL.jl package in Julia and run the tests:Pkg.add(\"OpenCL\")\n\nusing OpenCL # force compilation\nPkg.test(\"OpenCL\")If the tests are successful, proceed to the next section."
+    "text": "The choice of the OpenCL driver is dependent on the graphics card you have. Find what is the model of your graphics card and download the appropriate driver from the links below:Intel\nAMD\nNVIDIAIf you are on Linux like myself, check the repositories of your distribution for a more straightforward installation. If you have a recent Intel graphics card, consider the open source Beignet driver also available in some distributions (e.g. AUR repos in Arch Linux).To make sure that everything is working properly, install the OpenCL.jl package in Julia and run the tests:] add OpenCL\n] test OpenCLIf the tests are successful, proceed to the next section."
 },
 
 {
@@ -189,7 +189,7 @@ var documenterSearchIndex = {"docs": [
     "page": "GPU support",
     "title": "Installing clFFT C++ library",
     "category": "section",
-    "text": "Download and install the pre-built binaries. If you are on Linux, you can also check the repositories of your distribution.Install the CLFFT.jl package in Julia and run the tests:Pkg.add(\"CLFFT\")\n\nusing CLFFT # force compilation\nPkg.test(\"CLFFT\")If the tests are successful, the installation is complete."
+    "text": "Download and install the pre-built binaries. If you are on Linux, you can also check the repositories of your distribution.Install the CLFFT.jl package in Julia and run the tests:] add CLFFT\n] test CLFFTIf the tests are successful, the installation is complete."
 },
 
 {
@@ -197,7 +197,7 @@ var documenterSearchIndex = {"docs": [
     "page": "GPU support",
     "title": "Testing GPU implementation",
     "category": "section",
-    "text": "Run the tests to make sure that the GPU implementation is working as expected:using ImageQuilting # force compilation\nPkg.test(\"ImageQuilting\")Pass in the option gpu=true to iqsim for computations with the GPU."
+    "text": "Run the tests to make sure that the GPU implementation is working as expected:] test ImageQuiltingPass in the option gpu=true to iqsim for computations with the GPU."
 },
 
 {
