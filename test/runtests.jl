@@ -127,7 +127,7 @@ end
     end
 
     # data is visited first if present
-    path = ImageQuilting.genpath((10,10,10), :data, [CartesianIndex(1,1,1),CartesianIndex(10,10,10)])
+    path = ImageQuilting.genpath((10,10,10), :data, [1,1000])
     @test path[1:2] == [1,1000] || path[1:2] == [1000,1]
   end
 

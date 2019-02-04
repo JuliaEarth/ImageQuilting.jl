@@ -68,7 +68,7 @@ function genpath(extent::Dims{N}, kind::Symbol, datainds=[]) where {N}
     grid = falses(extent)
     for pivot in datainds
       grid[pivot] = true
-      push!(path, LinearIndices(extent)[pivot])
+      push!(path, pivot)
     end
 
     while !all(grid)

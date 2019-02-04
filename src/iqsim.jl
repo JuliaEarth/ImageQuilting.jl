@@ -118,7 +118,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
   # keep track of hard data and inactive voxels
   skipped  = Set{Int}()
-  datainds = Vector{CartesianIndex{N}}()
+  datainds = Vector{Int}()
   if !isempty(hard)
     # hard data in grid format
     hardgrid = zeros(padsize)
@@ -154,7 +154,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
         push!(skipped, cart2lin(ntiles, tileind))
       else
         if any(preset[tile])
-          push!(datainds, tileind)
+          push!(datainds, cart2lin(ntiles, tileind))
         end
       end
     end
