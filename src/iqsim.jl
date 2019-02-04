@@ -117,7 +117,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   end
 
   # keep track of hard data and inactive voxels
-  skipped  = Set{CartesianIndex{N}}()
+  skipped  = Set{Int}()
   datainds = Vector{CartesianIndex{N}}()
   if !isempty(hard)
     # hard data in grid format
@@ -151,7 +151,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       tile   = CartesianIndices(ntuple(i -> start[i]:finish[i], N))
 
       if all(.!activated[tile])
-        push!(skipped, tileind)
+        push!(skipped, cart2lin(ntiles, tileind))
       else
         if any(preset[tile])
           push!(datainds, tileind)
@@ -195,10 +195,11 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
     # loop simulation grid tile by tile
     for ind in simpath
-      tileind = lin2cart(ntiles, ind)
-
       # skip tile if all voxels are inactive
-      tileind ∈ skipped && continue
+      ind ∈ skipped && continue
+
+      # Cartesian index of tile
+      tileind = lin2cart(ntiles, ind)
 
       # if not skipped, proceed and paste tile
       push!(pasted, tileind)
