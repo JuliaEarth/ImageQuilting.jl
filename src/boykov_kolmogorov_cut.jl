@@ -58,29 +58,29 @@ function boykov_kolmogorov_cut(A::AbstractArray, B::AbstractArray, dim::Integer)
   G = DiGraph(nvox+2)
   C = spzeros(nvox+2, nvox+2)
   for k=1:mz, j=1:my, i=1:mx-1
-    c = cart2lin((mx,my,mz), i, j, k)
-    d = cart2lin((mx,my,mz), i+1, j, k)
+    c = cart2lin((mx,my,mz), CartesianIndex(  i, j, k))
+    d = cart2lin((mx,my,mz), CartesianIndex(i+1, j, k))
     add_edge!(G, c, d)
     add_edge!(G, d, c)
     C[c,d] = C[d,c] = (E[c] + E[d]) / (∇xₐ[c] + ∇xₐ[d] + ∇xᵦ[c] + ∇xᵦ[d])
   end
   for k=1:mz, j=1:my-1, i=1:mx
-    c = cart2lin((mx,my,mz), i, j, k)
-    r = cart2lin((mx,my,mz), i, j+1, k)
+    c = cart2lin((mx,my,mz), CartesianIndex(i,   j, k))
+    r = cart2lin((mx,my,mz), CartesianIndex(i, j+1, k))
     add_edge!(G, c, r)
     add_edge!(G, r, c)
     C[c,r] = C[r,c] = (E[c] + E[r]) / (∇yₐ[c] + ∇yₐ[r] + ∇yᵦ[c] + ∇yᵦ[r])
   end
   for k=1:mz-1, j=1:my, i=1:mx
-    c = cart2lin((mx,my,mz), i, j, k)
-    o = cart2lin((mx,my,mz), i, j, k+1)
+    c = cart2lin((mx,my,mz), CartesianIndex(i, j,   k))
+    o = cart2lin((mx,my,mz), CartesianIndex(i, j, k+1))
     add_edge!(G, c, o)
     add_edge!(G, o, c)
     C[c,o] = C[o,c] = (E[c] + E[o]) / (∇zₐ[c] + ∇zₐ[o] + ∇zᵦ[c] + ∇zᵦ[o])
   end
   for k=1:mz, j=1:my
-    u = cart2lin((mx,my,mz), 1, j, k)
-    v = cart2lin((mx,my,mz), mx, j, k)
+    u = cart2lin((mx,my,mz), CartesianIndex( 1, j, k))
+    v = cart2lin((mx,my,mz), CartesianIndex(mx, j, k))
     add_edge!(G, s, u)
     add_edge!(G, v, t)
     C[s,u] = C[v,t] = Inf

@@ -12,8 +12,8 @@ function get_imfilter_impl(GPU)
   end
 end
 
-cart2lin(dims, ind...) = LinearIndices(dims)[ind...]
-lin2cart(dims, ind)    = CartesianIndices(dims)[ind]
+cart2lin(dims, ind) = LinearIndices(dims)[ind]
+lin2cart(dims, ind) = CartesianIndices(dims)[ind]
 
 function convdist(img::AbstractArray, kern::AbstractArray;
                   weights::AbstractArray=fill(1.0, size(kern)))
