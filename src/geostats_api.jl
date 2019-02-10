@@ -67,13 +67,13 @@ function preprocess(problem::SimulationProblem, solver::ImgQuilt)
     simsize = ndims(pdomain) == 2 ? (size(pdomain)..., 1) : size(pdomain)
 
     # create hard data object
-    hdata = HardData()
+    hdata = Dict{CartesianIndex{3},Real}()
     for (loc, datloc) in datamap(problem, var)
       push!(hdata, lin2cart(simsize, loc) => value(pdata, datloc, var))
     end
 
     # disable inactive voxels
-    shape = HardData()
+    shape = Dict{CartesianIndex{3},Real}()
     if varparams.inactive ≠ nothing
       for icoords in varparams.inactive
         push!(shape, icoords => NaN)

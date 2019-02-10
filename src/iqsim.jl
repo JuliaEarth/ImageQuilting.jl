@@ -6,7 +6,7 @@
     iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
           simsize::Dims{N}=size(trainimg);
           overlap::NTuple{N,Float64}=ntuple(i->1/6,N),
-          soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1,
+          soft::AbstractVector=[], hard::Dict=Dict(), tol::Real=.1,
           cut::Symbol=:boykov, path::Symbol=:raster, nreal::Integer=1,
           threads::Integer=cpucores(), gpu::Bool=false,
           debug::Bool=false, showprogress::Bool=false)
@@ -25,7 +25,7 @@ Performs image quilting simulation as described in Hoffimann et al. 2017.
 * `simsize` is the size of the simulation grid (default to training image size)
 * `overlap` is the percentage of overlap (default to 1/6 of tile size)
 * `soft` is a vector of `(data,dataTI)` pairs (default to none)
-* `hard` is an instance of `HardData` (default to none)
+* `hard` is a dictionary mapping coordinates to data values (default to none)
 * `tol` is the initial relaxation tolerance in (0,1] (default to .1)
 * `cut` is the cut algorithm (`:dijkstra` or `:boykov`)
 * `path` is the simulation path (`:raster`, `:dilation` or `:random`)
@@ -47,7 +47,7 @@ reals, cuts, voxs = iqsim(..., debug=true)
 function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
                simsize::Dims{N}=size(trainimg);
                overlap::NTuple{N,Float64}=ntuple(i->1/6,N),
-               soft::AbstractVector=[], hard::HardData=HardData(), tol::Real=.1,
+               soft::AbstractVector=[], hard::Dict=Dict(), tol::Real=.1,
                cut::Symbol=:boykov, path::Symbol=:raster, nreal::Integer=1,
                threads::Integer=cpucores(), gpu::Bool=false,
                debug::Bool=false, showprogress::Bool=false) where {T,N}
@@ -76,9 +76,9 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
   # hard data checks
   if !isempty(hard)
-    coordinates = [coord[i] for i in 1:N, coord in coords(hard)]
-    @assert all(maximum(coordinates, dims=2) .≤ simsize) "hard data coordinates outside of grid"
-    @assert all(minimum(coordinates, dims=2) .> 0) "hard data coordinates must be positive indices"
+    coords = [coord[i] for i in 1:N, coord in keys(hard)]
+    @assert all(maximum(coords, dims=2) .≤ simsize) "hard data coordinates outside of grid"
+    @assert all(minimum(coords, dims=2) .> 0) "hard data coordinates must be positive indices"
   end
 
   # calculate the overlap size from given percentage
@@ -118,7 +118,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
     hardgrid = zeros(padsize)
     preset = falses(padsize)
     activated = trues(padsize)
-    for coord in coords(hard)
+    for coord in keys(hard)
       if isnan(hard[coord])
         activated[coord] = false
       else

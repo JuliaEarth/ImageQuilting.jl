@@ -26,7 +26,6 @@ using GeoStatsDevTools
 import GeoStatsBase: preprocess, solve_single
 
 include("utils.jl")
-include("datatypes.jl")
 include("plot_recipes.jl")
 include("imfilter_cpu.jl")
 include("relaxation.jl")
@@ -42,9 +41,6 @@ export
   # functions
   iqsim,
   voxelreuse,
-
-  # data types
-  HardData,
 
   # geostats solver
   ImgQuilt
