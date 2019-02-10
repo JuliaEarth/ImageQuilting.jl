@@ -32,11 +32,12 @@ using GeoStatsImages
 
 TI = training_image("Strebelle")
 
-data = HardData()
-push!(data, CartesianIndex(50,50,1)=>1)
-push!(data, CartesianIndex(190,50,1)=>0)
-push!(data, CartesianIndex(150,170,1)=>1)
-push!(data, CartesianIndex(150,190,1)=>1)
+data = Dict(
+  CartesianIndex(50,50,1)   => 1,
+  CartesianIndex(190,50,1)  => 0,
+  CartesianIndex(150,170,1) => 1,
+  CartesianIndex(150,190,1) => 1
+)
 
 reals, cuts, voxs = iqsim(TI, (30, 30, 1), hard=data, debug=true)
 ```
@@ -82,13 +83,13 @@ TI = training_image("Strebelle")
 nx, ny = size(TI)
 
 # skip circle at the center
-r = 100; shape = HardData()
+r = 100; circle = []
 for i=1:size(TI, 1), j=1:size(TI, 2)
     if (i-nx÷2)^2 + (j-ny÷2)^2 < radius^2
-        push!(shape, CartesianIndex(i,j,1)=>NaN)
+        push!(circle, CartesianIndex(i,j,1)=>NaN)
     end
 end
 
-reals = iqsim(TI, (62, 62, 1), hard=shape, nreal=3)
+reals = iqsim(TI, (62, 62, 1), hard=Dict(circle), nreal=3)
 ```
 ![Masked grids](images/masked.png)

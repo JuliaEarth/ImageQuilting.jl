@@ -3,11 +3,10 @@ are used, please consult the [Examples](examples.md) section.
 
 ## Hard data
 
-Voxels can be assigned values that will be honored by the simulation. `HardData()` is
-a dictionary of locations and associated values specified by the user:
+Voxels can be assigned values that will be honored by the simulation:
 
 ```julia
-well = HardData(CartesianIndex(i,j,k)=>value(i,j,k) for i=10, j=10, k=1:100)
+well = Dict(CartesianIndex(i,j,k)=>value(i,j,k) for i=10, j=10, k=1:100)
 iqsim(..., hard=well)
 ```
 
