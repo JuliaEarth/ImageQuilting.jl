@@ -142,7 +142,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       # tile corners are given by start and finish
       start  = @. (tileind.I - 1)*spacing + 1
       finish = @. start + tilesize - 1
-      tile   = CartesianIndices(ntuple(i -> start[i]:finish[i], N))
+      tile   = CartesianIndex(start):CartesianIndex(finish)
 
       if all(.!activated[tile])
         push!(skipped, cart2lin(ntiles, tileind))
@@ -198,7 +198,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       # tile corners are given by start and finish
       start  = @. (tileind.I - 1)*spacing + 1
       finish = @. start + tilesize - 1
-      tile   = CartesianIndices(ntuple(i -> start[i]:finish[i], N))
+      tile   = CartesianIndex(start):CartesianIndex(finish)
 
       # current simulation dataevent
       simdev = view(simgrid, tile)
@@ -272,7 +272,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       rind = sample(patterndb, weights(patternprobs))
       start  = lin2cart(size(distance), rind)
       finish = @. start.I + tilesize - 1
-      rtile  = CartesianIndices(ntuple(i -> start[i]:finish[i], N))
+      rtile  = CartesianIndex(start):CartesianIndex(finish)
 
       # selected training image dataevent
       TIdev = view(TI, rtile)
@@ -363,7 +363,7 @@ function find_disabled(trainimg::AbstractArray{T,N}, tilesize::Dims{N}) where {T
   for ind in findall(isnan, trainimg)
     start  = @. max(ind.I - tilesize + 1, 1)
     finish = @. min(ind.I, TIsize - tilesize + 1)
-    tile   = CartesianIndices(ntuple(i -> start[i]:finish[i], N))
+    tile   = CartesianIndex(start):CartesianIndex(finish)
     disabled[tile] .= true
   end
 
