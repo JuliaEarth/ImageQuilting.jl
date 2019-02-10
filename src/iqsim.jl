@@ -154,8 +154,8 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
     end
   end
 
-  # overwrite path option if data is available
-  !isempty(datainds) && (path = :data)
+  # construct simulation path
+  simpath = genpath(ntiles, path, datainds)
 
   # select cut algorithm
   boundary_cut = cut == :dijkstra ? dijkstra_cut : boykov_kolmogorov_cut
@@ -183,9 +183,6 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
     # keep track of pasted tiles
     pasted = Set{CartesianIndex{N}}()
-
-    # construct simulation path
-    simpath = genpath(ntiles, path, datainds)
 
     # loop simulation grid tile by tile
     for ind in simpath

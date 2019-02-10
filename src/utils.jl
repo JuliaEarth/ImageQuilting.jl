@@ -31,38 +31,37 @@ function convdist(img::AbstractArray, kern::AbstractArray;
   parent(D) # always return a plain simple array
 end
 
-function genpath(extent::Dims{N}, kind::Symbol, datainds=[]) where {N}
+function genpath(extent::Dims{N}, kind::Symbol, datainds::AbstractVector{Int}) where {N}
   path = Vector{Int}()
 
-  if kind == :raster
-    for ind in LinearIndices(extent)
-      push!(path, ind)
+  if isempty(datainds)
+    if kind == :raster
+      for ind in LinearIndices(extent)
+        push!(path, ind)
+      end
     end
-  end
 
-  if kind == :random
-    nelm = prod(extent)
-    path = nthperm!(collect(1:nelm), rand(1:factorial(big(nelm))))
-  end
-
-  if kind == :dilation
-    nelm = prod(extent)
-    pivot = rand(1:nelm)
-
-    grid = falses(extent)
-    grid[pivot] = true
-    push!(path, pivot)
-
-    while !all(grid)
-      dilated = dilate(grid)
-      append!(path, findall(vec(dilated .& .!grid)))
-      grid = dilated
+    if kind == :random
+      nelm = prod(extent)
+      path = nthperm!(collect(1:nelm), rand(1:factorial(big(nelm))))
     end
-  end
 
-  if kind == :data
-    @assert !isempty(datainds) "data path cannot be generated without data"
+    if kind == :dilation
+      nelm = prod(extent)
+      pivot = rand(1:nelm)
 
+      grid = falses(extent)
+      grid[pivot] = true
+      push!(path, pivot)
+
+      while !all(grid)
+        dilated = dilate(grid)
+        append!(path, findall(vec(dilated .& .!grid)))
+        grid = dilated
+      end
+    end
+  else
+    # data-first path
     shuffle!(datainds)
 
     grid = falses(extent)

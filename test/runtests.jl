@@ -122,7 +122,7 @@ end
   @testset "Simulation paths" begin
     # different simulation paths
     for kind in [:raster,:dilation,:random]
-      path = ImageQuilting.genpath((10,10,10), kind)
+      path = ImageQuilting.genpath((10,10,10), kind, Int[])
       @test length(path) == 1000
     end
 
