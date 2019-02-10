@@ -108,13 +108,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   TI, SOFT = preprocess_images(trainimg, soft, padsize)
 
   # disable tiles in the training image if they contain inactive voxels
-  disabled = falses(TIsize .- tilesize .+ 1)
-  for ind in findall(isnan, trainimg)
-    start  = @. max(ind.I - tilesize + 1, 1)
-    finish = @. min(ind.I, TIsize - tilesize + 1)
-    tile   = CartesianIndices(ntuple(i -> start[i]:finish[i], N))
-    disabled[tile] .= true
-  end
+  disabled = find_disabled(trainimg, tilesize)
 
   # keep track of hard data and inactive voxels
   skipped  = Set{Int}()
@@ -364,4 +358,17 @@ function preprocess_images(trainimg::AbstractArray{T,N}, soft::AbstractVector,
   end
 
   TI, SOFT
+end
+
+function find_disabled(trainimg::AbstractArray{T,N}, tilesize::Dims{N}) where {T,N}
+  TIsize = size(trainimg)
+  disabled = falses(TIsize .- tilesize .+ 1)
+  for ind in findall(isnan, trainimg)
+    start  = @. max(ind.I - tilesize + 1, 1)
+    finish = @. min(ind.I, TIsize - tilesize + 1)
+    tile   = CartesianIndices(ntuple(i -> start[i]:finish[i], N))
+    disabled[tile] .= true
+  end
+
+  disabled
 end
