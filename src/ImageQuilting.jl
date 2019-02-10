@@ -23,15 +23,12 @@ using Statistics: mean, std
 # GeoStats.jl interface
 using GeoStatsBase
 using GeoStatsDevTools
-
 import GeoStatsBase: preprocess, solve_single
 
 include("utils.jl")
-# include("utils_gpu.jl")
 include("datatypes.jl")
 include("plot_recipes.jl")
 include("imfilter_cpu.jl")
-# include("imfilter_gpu.jl")
 include("relaxation.jl")
 include("tau_model.jl")
 include("dijkstra_cut.jl")
