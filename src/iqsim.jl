@@ -7,7 +7,7 @@
           simsize::Dims{N}=size(trainimg);
           overlap::NTuple{N,Float64}=ntuple(i->1/6,N),
           soft::AbstractVector=[], hard::Dict=Dict(), tol::Real=.1,
-          cut::Symbol=:boykov, path::Symbol=:raster, nreal::Integer=1,
+          path::Symbol=:raster, nreal::Integer=1,
           threads::Integer=cpucores(), gpu::Bool=false,
           debug::Bool=false, showprogress::Bool=false)
 
@@ -27,7 +27,6 @@ Performs image quilting simulation as described in Hoffimann et al. 2017.
 * `soft` is a vector of `(data,dataTI)` pairs (default to none)
 * `hard` is a dictionary mapping coordinates to data values (default to none)
 * `tol` is the initial relaxation tolerance in (0,1] (default to .1)
-* `cut` is the cut algorithm (`:dijkstra` or `:boykov`)
 * `path` is the simulation path (`:raster`, `:dilation` or `:random`)
 * `nreal` is the number of realizations (default to 1)
 * `threads` is the number of threads for the FFT (default to all CPU cores)
@@ -48,7 +47,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
                simsize::Dims{N}=size(trainimg);
                overlap::NTuple{N,Float64}=ntuple(i->1/6,N),
                soft::AbstractVector=[], hard::Dict=Dict(), tol::Real=.1,
-               cut::Symbol=:boykov, path::Symbol=:raster, nreal::Integer=1,
+               path::Symbol=:raster, nreal::Integer=1,
                threads::Integer=cpucores(), gpu::Bool=false,
                debug::Bool=false, showprogress::Bool=false) where {T,N}
 
@@ -61,7 +60,6 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   @assert all(simsize .≥ tilesize) "invalid grid size"
   @assert all(0 .< overlap .< 1) "overlaps must be in range (0,1)"
   @assert 0 < tol ≤ 1 "tolerance must be in range (0,1]"
-  @assert cut ∈ [:dijkstra,:boykov] "invalid cut algorithm"
   @assert path ∈ [:raster,:dilation,:random] "invalid simulation path"
   @assert nreal > 0 "invalid number of realizations"
 
@@ -156,9 +154,6 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
   # construct simulation path
   simpath = genpath(ntiles, path, datainds)
-
-  # select cut algorithm
-  boundary_cut = cut == :dijkstra ? dijkstra_cut : boykov_kolmogorov_cut
 
   # show progress and estimated time duration
   showprogress && (progress = Progress(nreal))
@@ -289,7 +284,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
           oslice = ntuple(i -> i == d ? (1:ovlsize[d]) : (1:tilesize[i]), N)
           inds = CartesianIndices(oslice)
           A = view(simdev, inds); B = view(TIdev, inds)
-          mask[inds] .|= boundary_cut(A, B, d)
+          mask[inds] .|= boykov_kolmogorov_cut(A, B, d)
         end
 
         # compute mask with next tile
@@ -297,7 +292,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
           oslice = ntuple(i -> i == d ? (spacing[d]+1:tilesize[d]) : (1:tilesize[i]), N)
           inds = CartesianIndices(oslice)
           A = view(simdev, inds); B = view(TIdev, inds)
-          mask[inds] .|= reverse(boundary_cut(reverse(A, dims=d), reverse(B, dims=d), d), dims=d)
+          mask[inds] .|= reverse(boykov_kolmogorov_cut(reverse(A, dims=d), reverse(B, dims=d), d), dims=d)
         end
       end
 

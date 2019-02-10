@@ -17,7 +17,6 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
 ### Optional
 
 * `overlap`  - Overlap size in x, y and z (default to (1/6, 1/6, 1/6))
-* `cut`      - Boundary cut algorithm (:boykov (default) or :dijkstra)
 * `path`     - Simulation path (:raster (default), :dilation, or :random)
 * `inactive` - Vector of inactive voxels (i.e. tuples (i,j,k)) in the grid
 * `soft`     - A vector of `(data,dataTI)` pairs
@@ -35,7 +34,6 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
   @param TI
   @param tilesize
   @param overlap       = (1/6, 1/6, 1/6)
-  @param cut           = :boykov
   @param path          = :raster
   @param inactive      = nothing
   @param soft          = []
@@ -93,9 +91,8 @@ function solve_single(problem::SimulationProblem, var::Symbol,
 
   # run image quilting core function
   reals = iqsim(par.TI, par.tilesize, simsize;
-                overlap=par.overlap,
+                overlap=par.overlap, path=par.path,
                 soft=par.soft, hard=hard, tol=par.tol,
-                cut=par.cut, path=par.path,
                 threads=solver.threads, gpu=solver.gpu,
                 showprogress=solver.showprogress)
 

@@ -113,10 +113,8 @@ end
   @testset "Minimum error cut" begin
     # 3D cut
     TI = ones(20,20,20)
-    for cut in [:dijkstra,:boykov]
-      _, _, voxs = iqsim(TI, (10,10,10), size(TI), overlap=(1/3,1/3,1/3), cut=cut, debug=true)
-      @test 0 ≤ voxs[1] ≤ 1
-    end
+    _, _, voxs = iqsim(TI, (10,10,10), overlap=(1/3,1/3,1/3), debug=true)
+    @test 0 ≤ voxs[1] ≤ 1
   end
 
   @testset "Simulation paths" begin
