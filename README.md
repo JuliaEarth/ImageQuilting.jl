@@ -3,7 +3,7 @@ ImageQuilting.jl
 
 *A Julia package for fast 3D image quilting simulation.*
 
-[![][travis-img]][travis-url] [![][julia-pkg-img]][julia-pkg-url] [![][codecov-img]][codecov-url] [![][docs-stable-img]][docs-stable-url] [![][docs-latest-img]][docs-latest-url]
+[![][travis-img]][travis-url] [![][codecov-img]][codecov-url] [![][docs-stable-img]][docs-stable-url] [![][docs-latest-img]][docs-latest-url]
 
 ![3D Quilting Animation](docs/src/images/quilting.gif)
 
@@ -79,9 +79,6 @@ Please [open an issue](https://github.com/juliohm/ImageQuilting.jl/issues) if yo
 
 [travis-img]: https://travis-ci.org/juliohm/ImageQuilting.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/juliohm/ImageQuilting.jl
-
-[julia-pkg-img]: http://pkg.julialang.org/badges/ImageQuilting_0.7.svg
-[julia-pkg-url]: http://pkg.julialang.org/?pkg=ImageQuilting
 
 [codecov-img]: https://codecov.io/gh/juliohm/ImageQuilting.jl/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/juliohm/ImageQuilting.jl
