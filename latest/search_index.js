@@ -13,7 +13,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Overview",
     "category": "section",
-    "text": "A Julia package for fast 3D image quilting simulation.(Image: Build Status) (Image: ImageQuilting) (Image: Coverage Status) (Image: Stable Documentation) (Image: Latest Documentation)This package implements an extension to the famous Efros-Freeman algorithm for texture synthesis and transfer in computer vision. Unlike the original algorithm developed for 2D images, our method can also handle 3D masked grids and pre-existing point-data very efficiently (the fastest in the literature). For more details, please refer to our paper in Citation.(Image: 3D Quilting Animation)"
+    "text": "A Julia package for fast 3D image quilting simulation.(Image: Build Status) (Image: Coverage Status) (Image: Stable Documentation) (Image: Latest Documentation)This package implements an extension to the famous Efros-Freeman algorithm for texture synthesis and transfer in computer vision. Unlike the original algorithm developed for 2D images, our method can also handle 3D masked grids and pre-existing point-data very efficiently (the fastest in the literature). For more details, please refer to our paper in Citation.(Image: 3D Quilting Animation)"
 },
 
 {
