@@ -7,15 +7,12 @@ using Plots; gr()
 using VisualRegressionTests
 using Test, Pkg, Random
 
-# list of maintainers
-maintainers = ["juliohm"]
-
 # environment settings
+islinux = Sys.islinux()
 istravis = "TRAVIS" ∈ keys(ENV)
-ismaintainer = "USER" ∈ keys(ENV) && ENV["USER"] ∈ maintainers
 datadir = joinpath(@__DIR__,"data")
-
-if ismaintainer
+visualtests = !istravis || (istravis && islinux)
+if !istravis
   Pkg.add("Gtk")
   using Gtk
 end
@@ -136,36 +133,18 @@ end
     @test 0 ≤ μ ≤ 1
   end
 
-  if ismaintainer || istravis
-    @testset "Visual tests" begin
-      for TIname in ["StoneWall","WalkerLake"]
-        function plot_voxel_reuse(fname)
-          Random.seed!(2017)
-          TI = training_image(TIname)[1:20,1:20,:]
-          voxelreuseplot(TI)
-          png(fname)
-        end
-        refimg = joinpath(datadir, "Voxel"*TIname*".png")
-
-        @test test_images(VisualTest(plot_voxel_reuse, refimg), popup=!istravis, tol=0.1) |> success
-      end
-
-      for TIname in ["Strebelle","StoneWall"]
-        function plot_reals(fname)
-          Random.seed!(2017)
-          TI = training_image(TIname)[1:50,1:50,:]
-          reals = iqsim(TI, (30,30,1), size(TI), nreal=4)
-          ps = []
-          for real in reals
-            push!(ps, heatmap(real[:,:,1]))
-          end
-          plot(ps...)
-          png(fname)
-        end
-        refimg = joinpath(datadir, "Reals"*TIname*".png")
-
-        @test test_images(VisualTest(plot_reals, refimg), popup=!istravis, tol=0.2) |> success
-      end
+  if visualtests
+    for TIname in ["Strebelle","StoneWall"]
+      Random.seed!(2017)
+      TI = training_image(TIname)[1:50,1:50,:]
+      reals = iqsim(TI, (30,30,1), size(TI), nreal=4)
+      ps = [heatmap(real[:,:,1]) for real in reals]
+      @plottest plot(ps...) joinpath(datadir,"Reals"*TIname*".png") !istravis
+    end
+    for TIname in ["StoneWall","WalkerLake"]
+      Random.seed!(2017)
+      TI = training_image(TIname)[1:20,1:20,:]
+      @plottest voxelreuseplot(TI) joinpath(datadir,"Voxel"*TIname*".png") !istravis
     end
   end
 
@@ -185,7 +164,7 @@ end
     incomplete_solver = ImgQuilt()
     @test_throws AssertionError solve(problem, incomplete_solver)
 
-    if ismaintainer || istravis
+    if visualtests
       function plot_solution(fname)
         plot(solution, size=(1000,300))
         png(fname)
