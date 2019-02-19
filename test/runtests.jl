@@ -165,13 +165,7 @@ end
     @test_throws AssertionError solve(problem, incomplete_solver)
 
     if visualtests
-      function plot_solution(fname)
-        plot(solution, size=(1000,300))
-        png(fname)
-      end
-      refimg = joinpath(datadir, "GeoStatsAPI.png")
-
-      @test test_images(VisualTest(plot_solution, refimg), popup=!istravis, tol=0.2) |> success
+      @plottest plot(solution,size=(1000,300)) joinpath(datadir,"GeoStatsAPI.png") !istravis
     end
   end
 
