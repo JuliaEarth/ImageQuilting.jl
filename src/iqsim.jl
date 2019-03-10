@@ -102,32 +102,21 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   # total overlap volume in simulation grid
   ovlvol = prod(padsize) - prod(@. padsize - (ntiles - 1)*ovlsize)
 
+  # geometric configuration
+  geoconfig = (ntiles=ntiles, tilesize=tilesize, ovlsize=ovlsize, spacing=spacing,
+               TIsize=TIsize, simsize=simsize, padsize=padsize)
+
   # pad input images and knockout inactive voxels
-  TI, SOFT = preprocess_images(trainimg, soft, padsize)
+  TI, SOFT = preprocess_images(trainimg, soft, geoconfig)
 
   # disable tiles in the training image if they contain inactive voxels
-  disabled = find_disabled(trainimg, tilesize)
+  disabled = find_disabled(trainimg, geoconfig)
 
-  # keep track of hard data and inactive voxels
-  skipped  = Set{Int}()
-  datainds = Vector{Int}()
+  # determine tiles that should be skipped and tiles with data
   if !isempty(hard)
-    # determine tiles that should be skipped and tiles with data
-    for tileind in CartesianIndices(ntiles)
-      # tile corners are given by start and finish
-      start  = @. (tileind.I - 1)*spacing + 1
-      finish = @. start + tilesize - 1
-      tile   = CartesianIndex(start):CartesianIndex(finish)
-
-      # skip tile if either
-      #   1) tile is beyond true simulation size
-      #   2) all values in the tile are NaN
-      if any(start .> simsize) || !any(activation(hard, tile))
-        push!(skipped, cart2lin(ntiles, tileind))
-      elseif any(indicator(hard, tile))
-        push!(datainds, cart2lin(ntiles, tileind))
-      end
-    end
+    skipped, datainds = find_skipped(hard, geoconfig)
+  else
+    skipped, datainds = Set{Int}(), Vector{Int}()
   end
 
   # construct simulation path
@@ -136,26 +125,20 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   # show progress and estimated time duration
   showprogress && (progress = Progress(nreal))
 
-  # main output is a vector of 3D grids
+  # main output is a vector of grids
   realizations = Vector{Array{Float64,N}}()
 
   # for each realization we have:
   boundarycuts = Vector{Array{Float64,N}}()
   voxelreuse   = Vector{Float64}()
 
-  # preallocate memory for distance calculations
+  # preallocate memory for auxiliary variables
   distance = Array{Float64}(undef, TIsize .- tilesize .+ 1)
+  harddev  = Array{Float64}(undef, tilesize)
+  hardind  = Array{Bool}(undef, tilesize)
+  mask     = Array{Bool}(undef, tilesize)
 
-  # preallocate memory for hard data event
-  harddev = Array{Float64}(undef, tilesize)
-
-  # preallocate memory for indicator variable
-  hardind = Array{Bool}(undef, tilesize)
-
-  # preallocate memory for cut mask
-  mask = Array{Bool}(undef, tilesize)
-
-  for real=1:nreal
+  for real in 1:nreal
     # allocate memory for current simulation
     simgrid = zeros(padsize)
     debug && (cutgrid = zeros(padsize))
@@ -323,7 +306,9 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 end
 
 function preprocess_images(trainimg::AbstractArray{T,N}, soft::AbstractVector,
-                           padsize::Dims{N}) where {T,N}
+                           geoconfig::NamedTuple) where {T,N}
+  padsize = geoconfig.padsize
+
   # training image
   TI = copy(trainimg)
   TI[isnan.(TI)] .= 0
@@ -346,8 +331,10 @@ function preprocess_images(trainimg::AbstractArray{T,N}, soft::AbstractVector,
   TI, SOFT
 end
 
-function find_disabled(trainimg::AbstractArray{T,N}, tilesize::Dims{N}) where {T,N}
-  TIsize = size(trainimg)
+function find_disabled(trainimg::AbstractArray{T,N}, geoconfig::NamedTuple) where {T,N}
+  TIsize = geoconfig.TIsize
+  tilesize = geoconfig.tilesize
+
   disabled = falses(TIsize .- tilesize .+ 1)
   for ind in findall(isnan, trainimg)
     start  = @. max(ind.I - tilesize + 1, 1)
@@ -357,4 +344,31 @@ function find_disabled(trainimg::AbstractArray{T,N}, tilesize::Dims{N}) where {T
   end
 
   disabled
+end
+
+function find_skipped(hard::Dict, geoconfig::NamedTuple)
+  ntiles = geoconfig.ntiles
+  tilesize = geoconfig.tilesize
+  spacing = geoconfig.spacing
+  simsize = geoconfig.simsize
+
+  skipped = Set{Int}()
+  datainds = Vector{Int}()
+  for tileind in CartesianIndices(ntiles)
+    # tile corners are given by start and finish
+    start  = @. (tileind.I - 1)*spacing + 1
+    finish = @. start + tilesize - 1
+    tile   = CartesianIndex(start):CartesianIndex(finish)
+
+    # skip tile if either
+    #   1) tile is beyond true simulation size
+    #   2) all values in the tile are NaN
+    if any(start .> simsize) || !any(activation(hard, tile))
+      push!(skipped, cart2lin(ntiles, tileind))
+    elseif any(indicator(hard, tile))
+      push!(datainds, cart2lin(ntiles, tileind))
+    end
+  end
+
+  skipped, datainds
 end
