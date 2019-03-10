@@ -113,7 +113,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   datainds = Vector{Int}()
   if !isempty(hard)
     # hard data in grid format
-    hardgrid, preset = gridify(hard, padsize)
+    preset = gridify(hard, padsize)
 
     # determine tiles that should be skipped and tiles with data
     for tileind in CartesianIndices(ntiles)
@@ -125,7 +125,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       # skip tile if either
       #   1) tile is beyond true simulation size
       #   2) all values in the data event are NaN
-      if any(start .> simsize) || all(isnan.(event(hard, tile, 0.)))
+      if any(start .> simsize) || all(isnan.(event(hard, tile)))
         push!(skipped, cart2lin(ntiles, tileind))
       elseif any(preset[tile])
         push!(datainds, cart2lin(ntiles, tileind))
@@ -148,6 +148,9 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
   # preallocate memory for distance calculations
   distance = Array{Float64}(undef, TIsize .- tilesize .+ 1)
+
+  # preallocate memory for hard data event
+  harddev = Array{Float64}(undef, tilesize)
 
   # preallocate memory for cut mask
   mask = Array{Bool}(undef, tilesize)
@@ -217,7 +220,9 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       # compute hard and soft distances
       auxdistances = Vector{Array{Float64,N}}()
       if !isempty(hard) && any(preset[tile])
-        harddev = view(hardgrid, tile)
+        # update hard data event
+        event!(harddev, hard, tile)
+
         D = convdist(TI, harddev, weights=preset[tile])
 
         # disable dataevents that contain inactive voxels
@@ -352,15 +357,13 @@ function find_disabled(trainimg::AbstractArray{T,N}, tilesize::Dims{N}) where {T
 end
 
 function gridify(hard::Dict, padsize::Dims{N}) where {N}
-  hardgrid = zeros(padsize)
   preset = falses(padsize)
 
   for (coord, val) in hard
     if !isnan(val)
-      hardgrid[coord] = val
       preset[coord] = true
     end
   end
 
-  hardgrid, preset
+  preset
 end

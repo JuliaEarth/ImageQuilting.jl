@@ -15,13 +15,13 @@ end
 cart2lin(dims, ind) = LinearIndices(dims)[ind]
 lin2cart(dims, ind) = CartesianIndices(dims)[ind]
 
-function event!(buff, hard::Dict, tile::CartesianIndices, def::Float64=NaN)
+function event!(buff, hard::Dict, tile::CartesianIndices, def::Float64=0.0)
   for (i, coord) in enumerate(tile)
     buff[i] = get(hard, coord, def)
   end
 end
 
-function event(hard::Dict, tile::CartesianIndices, def::Float64=NaN)
+function event(hard::Dict, tile::CartesianIndices, def::Float64=0.0)
   buff = Array{Float64}(undef, size(tile))
   event!(buff, hard, tile, def)
   buff
