@@ -15,6 +15,18 @@ end
 cart2lin(dims, ind) = LinearIndices(dims)[ind]
 lin2cart(dims, ind) = CartesianIndices(dims)[ind]
 
+function event!(buff, hard::Dict, tile::CartesianIndices, def::Float64=NaN)
+  for (i, coord) in enumerate(tile)
+    buff[i] = get(hard, coord, def)
+  end
+end
+
+function event(hard::Dict, tile::CartesianIndices, def::Float64=NaN)
+  buff = Array{Float64}(undef, size(tile))
+  event!(buff, hard, tile, def)
+  buff
+end
+
 function convdist(img::AbstractArray, kern::AbstractArray;
                   weights::AbstractArray=fill(1.0, size(kern)))
   # choose among imfilter implementations

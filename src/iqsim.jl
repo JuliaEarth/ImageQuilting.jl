@@ -113,7 +113,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   datainds = Vector{Int}()
   if !isempty(hard)
     # hard data in grid format
-    hardgrid, preset, activated = gridify(hard, simsize, padsize)
+    hardgrid, preset = gridify(hard, padsize)
 
     # determine tiles that should be skipped and tiles with data
     for tileind in CartesianIndices(ntiles)
@@ -122,7 +122,10 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       finish = @. start + tilesize - 1
       tile   = CartesianIndex(start):CartesianIndex(finish)
 
-      if !any(activated[tile])
+      # skip tile if either
+      #   1) tile is beyond true simulation size
+      #   2) all values in the data event are NaN
+      if any(start .> simsize) || all(isnan.(event(hard, tile, 0.)))
         push!(skipped, cart2lin(ntiles, tileind))
       elseif any(preset[tile])
         push!(datainds, cart2lin(ntiles, tileind))
@@ -286,12 +289,12 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
     # hard data and shape correction
     if !isempty(hard)
-      for (loc, val) in hard
-        simgrid[loc] = val
+      for (coord, val) in hard
+        simgrid[coord] = val
       end
       if debug
-        for (loc, val) in hard
-          isnan(val) && (cutgrid[loc] = val)
+        for (coord, val) in hard
+          isnan(val) && (cutgrid[coord] = val)
         end
       end
     end
@@ -348,26 +351,16 @@ function find_disabled(trainimg::AbstractArray{T,N}, tilesize::Dims{N}) where {T
   disabled
 end
 
-function gridify(hard::Dict, simsize::Dims{N}, padsize::Dims{N}) where {N}
-  hardgrid  = zeros(padsize)
-  preset    = falses(padsize)
-  activated = trues(padsize)
+function gridify(hard::Dict, padsize::Dims{N}) where {N}
+  hardgrid = zeros(padsize)
+  preset = falses(padsize)
 
-  for coord in keys(hard)
-    if isnan(hard[coord])
-      activated[coord] = false
-    else
-      hardgrid[coord] = hard[coord]
+  for (coord, val) in hard
+    if !isnan(val)
+      hardgrid[coord] = val
       preset[coord] = true
     end
   end
 
-  # deactivate voxels beyond true grid size
-  ax = axes(activated)
-  for d=1:N
-    slice = ntuple(i -> i == d ? (simsize[d]+1:padsize[d]) : ax[i], N)
-    activated[CartesianIndices(slice)] .= false
-  end
-
-  hardgrid, preset, activated
+  hardgrid, preset
 end
