@@ -115,9 +115,6 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
     # hard data in grid format
     hardgrid, preset, activated = gridify(hard, simsize, padsize)
 
-    # grid must contain active voxels
-    @assert any(activated[CartesianIndices(simsize)]) "simulation grid has no active voxel"
-
     # determine tiles that should be skipped and tiles with data
     for tileind in CartesianIndices(ntiles)
       # tile corners are given by start and finish
