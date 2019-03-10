@@ -122,7 +122,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       finish = @. start + tilesize - 1
       tile   = CartesianIndex(start):CartesianIndex(finish)
 
-      if all(.!activated[tile])
+      if !any(activated[tile])
         push!(skipped, cart2lin(ntiles, tileind))
       else
         if any(preset[tile])
