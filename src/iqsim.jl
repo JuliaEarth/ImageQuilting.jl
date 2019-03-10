@@ -88,7 +88,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   # calculate the number of tiles from grid size
   ntiles = @. ceil(Int, simsize / max(spacing, 1))
 
-  # simulation grid dimensions
+  # padded simulation grid size
   padsize = @. ntiles*(tilesize - ovlsize) + ovlsize
 
   # training image dimensions
@@ -113,24 +113,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   datainds = Vector{Int}()
   if !isempty(hard)
     # hard data in grid format
-    hardgrid = zeros(padsize)
-    preset = falses(padsize)
-    activated = trues(padsize)
-    for coord in keys(hard)
-      if isnan(hard[coord])
-        activated[coord] = false
-      else
-        hardgrid[coord] = hard[coord]
-        preset[coord] = true
-      end
-    end
-
-    # deactivate voxels beyond true grid size
-    ax = axes(activated)
-    for d=1:N
-      slice = ntuple(i -> i == d ? (simsize[d]+1:padsize[d]) : ax[i], N)
-      activated[CartesianIndices(slice)] .= false
-    end
+    hardgrid, preset, activated = gridify(hard, simsize, padsize)
 
     # grid must contain active voxels
     @assert any(activated[CartesianIndices(simsize)]) "simulation grid has no active voxel"
@@ -363,4 +346,28 @@ function find_disabled(trainimg::AbstractArray{T,N}, tilesize::Dims{N}) where {T
   end
 
   disabled
+end
+
+function gridify(hard::Dict, simsize::Dims{N}, padsize::Dims{N}) where {N}
+  hardgrid  = zeros(padsize)
+  preset    = falses(padsize)
+  activated = trues(padsize)
+
+  for coord in keys(hard)
+    if isnan(hard[coord])
+      activated[coord] = false
+    else
+      hardgrid[coord] = hard[coord]
+      preset[coord] = true
+    end
+  end
+
+  # deactivate voxels beyond true grid size
+  ax = axes(activated)
+  for d=1:N
+    slice = ntuple(i -> i == d ? (simsize[d]+1:padsize[d]) : ax[i], N)
+    activated[CartesianIndices(slice)] .= false
+  end
+
+  hardgrid, preset, activated
 end
