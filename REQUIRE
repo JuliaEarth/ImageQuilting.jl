@@ -6,7 +6,6 @@ ImageMorphology 0.1.1
 LightGraphs 0.6.1
 LightGraphsFlows 0.0.5
 Primes 0.4.0
-Combinatorics 0.7.0
 StatsBase 0.25.0
 ProgressMeter 0.6.0
 FFTW 0.2.4

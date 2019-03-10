@@ -42,8 +42,7 @@ function genpath(extent::Dims{N}, kind::Symbol, datainds::AbstractVector{Int}) w
     end
 
     if kind == :random
-      nelm = prod(extent)
-      path = nthperm!(collect(1:nelm), rand(1:factorial(big(nelm))))
+      path = randperm(prod(extent))
     end
 
     if kind == :dilation
