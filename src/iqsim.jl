@@ -112,9 +112,6 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   skipped  = Set{Int}()
   datainds = Vector{Int}()
   if !isempty(hard)
-    # hard data in grid format
-    preset = gridify(hard, padsize)
-
     # determine tiles that should be skipped and tiles with data
     for tileind in CartesianIndices(ntiles)
       # tile corners are given by start and finish
@@ -124,10 +121,10 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
       # skip tile if either
       #   1) tile is beyond true simulation size
-      #   2) all values in the data event are NaN
-      if any(start .> simsize) || all(isnan.(event(hard, tile)))
+      #   2) all values in the tile are NaN
+      if any(start .> simsize) || !any(activation(hard, tile))
         push!(skipped, cart2lin(ntiles, tileind))
-      elseif any(preset[tile])
+      elseif any(indicator(hard, tile))
         push!(datainds, cart2lin(ntiles, tileind))
       end
     end
@@ -151,6 +148,9 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
   # preallocate memory for hard data event
   harddev = Array{Float64}(undef, tilesize)
+
+  # preallocate memory for indicator variable
+  hardind = Array{Bool}(undef, tilesize)
 
   # preallocate memory for cut mask
   mask = Array{Bool}(undef, tilesize)
@@ -217,13 +217,16 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       # disable dataevents that contain inactive voxels
       distance[disabled] .= Inf
 
+      # update indicator variable for tile
+      indicator!(hardind, hard, tile)
+
       # compute hard and soft distances
       auxdistances = Vector{Array{Float64,N}}()
-      if !isempty(hard) && any(preset[tile])
+      if !isempty(hard) && any(hardind)
         # update hard data event
         event!(harddev, hard, tile)
 
-        D = convdist(TI, harddev, weights=preset[tile])
+        D = convdist(TI, harddev, weights=hardind)
 
         # disable dataevents that contain inactive voxels
         D[disabled] .= Inf
@@ -354,16 +357,4 @@ function find_disabled(trainimg::AbstractArray{T,N}, tilesize::Dims{N}) where {T
   end
 
   disabled
-end
-
-function gridify(hard::Dict, padsize::Dims{N}) where {N}
-  preset = falses(padsize)
-
-  for (coord, val) in hard
-    if !isnan(val)
-      preset[coord] = true
-    end
-  end
-
-  preset
 end

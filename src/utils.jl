@@ -15,15 +15,51 @@ end
 cart2lin(dims, ind) = LinearIndices(dims)[ind]
 lin2cart(dims, ind) = CartesianIndices(dims)[ind]
 
-function event!(buff, hard::Dict, tile::CartesianIndices, def::Float64=0.0)
+function event!(buff, hard::Dict, tile::CartesianIndices)
   for (i, coord) in enumerate(tile)
-    buff[i] = get(hard, coord, def)
+    if isnan(get(hard, coord, NaN))
+      buff[i] = 0.0
+    else
+      buff[i] = hard[coord]
+    end
   end
 end
 
-function event(hard::Dict, tile::CartesianIndices, def::Float64=0.0)
+function event(hard::Dict, tile::CartesianIndices)
   buff = Array{Float64}(undef, size(tile))
   event!(buff, hard, tile, def)
+  buff
+end
+
+function indicator!(buff, hard::Dict, tile::CartesianIndices)
+  for (i, coord) in enumerate(tile)
+    if isnan(get(hard, coord, NaN))
+      buff[i] = false
+    else
+      buff[i] = true
+    end
+  end
+end
+
+function indicator(hard::Dict, tile::CartesianIndices)
+  buff = Array{Bool}(undef, size(tile))
+  indicator!(buff, hard, tile)
+  buff
+end
+
+function activation!(buff, hard::Dict, tile::CartesianIndices)
+  for (i, coord) in enumerate(tile)
+    if coord ∈ keys(hard) && isnan(hard[coord])
+      buff[i] = false
+    else
+      buff[i] = true
+    end
+  end
+end
+
+function activation(hard::Dict, tile::CartesianIndices)
+  buff = Array{Bool}(undef, size(tile))
+  activation!(buff, hard, tile)
   buff
 end
 
