@@ -286,9 +286,14 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
     # hard data and shape correction
     if !isempty(hard)
-      simgrid[preset] = hardgrid[preset]
-      simgrid[.!activated] .= NaN
-      debug && (cutgrid[.!activated] .= NaN)
+      for (loc, val) in hard
+        simgrid[loc] = val
+      end
+      if debug
+        for (loc, val) in hard
+          isnan(val) && (cutgrid[loc] = val)
+        end
+      end
     end
 
     # throw away voxels that are outside of the grid
