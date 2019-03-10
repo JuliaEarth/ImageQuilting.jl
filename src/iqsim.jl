@@ -54,6 +54,14 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   # number of threads in FFTW
   set_num_threads(threads)
 
+  # calculate the overlap size from given percentage
+  ovlsize = @. ceil(Int, overlap*tilesize)
+
+  # warn in case of 1-voxel overlaps
+  if any((tilesize .>  1) .& (ovlsize .== 1))
+    @warn "Overlaps with only 1 voxel, check tilesize/overlap configuration"
+  end
+
   # sanity checks
   @assert ndims(trainimg) == 3 "image is not 3D (add ghost dimension for 2D)"
   @assert all(0 .< tilesize .≤ size(trainimg)) "invalid tile size"
@@ -79,9 +87,6 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
     @assert all(minimum(coords, dims=2) .> 0) "hard data coordinates must be positive indices"
   end
 
-  # calculate the overlap size from given percentage
-  ovlsize = @. ceil(Int, overlap*tilesize)
-
   # spacing in raster path
   spacing = @. tilesize - ovlsize
 
@@ -96,11 +101,6 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
   # total overlap volume in simulation grid
   ovlvol = prod(padsize) - prod(@. padsize - (ntiles - 1)*ovlsize)
-
-  # warn in case of 1-voxel overlaps
-  if any((tilesize .>  1) .& (ovlsize .== 1))
-    @warn "Overlaps with only 1 voxel, check tilesize/overlap configuration"
-  end
 
   # pad input images and knockout inactive voxels
   TI, SOFT = preprocess_images(trainimg, soft, padsize)
@@ -124,10 +124,8 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
       if !any(activated[tile])
         push!(skipped, cart2lin(ntiles, tileind))
-      else
-        if any(preset[tile])
-          push!(datainds, cart2lin(ntiles, tileind))
-        end
+      elseif any(preset[tile])
+        push!(datainds, cart2lin(ntiles, tileind))
       end
     end
   end
