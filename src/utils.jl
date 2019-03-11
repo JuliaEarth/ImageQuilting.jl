@@ -16,7 +16,7 @@ cart2lin(dims, ind) = LinearIndices(dims)[ind]
 lin2cart(dims, ind) = CartesianIndices(dims)[ind]
 
 function event!(buff, hard::Dict, tile::CartesianIndices)
-  for (i, coord) in enumerate(tile)
+  @inbounds for (i, coord) in enumerate(tile)
     if isnan(get(hard, coord, NaN))
       buff[i] = 0.0
     else
@@ -32,7 +32,7 @@ function event(hard::Dict, tile::CartesianIndices)
 end
 
 function indicator!(buff, hard::Dict, tile::CartesianIndices)
-  for (i, coord) in enumerate(tile)
+  @inbounds for (i, coord) in enumerate(tile)
     if isnan(get(hard, coord, NaN))
       buff[i] = false
     else
@@ -48,7 +48,7 @@ function indicator(hard::Dict, tile::CartesianIndices)
 end
 
 function activation!(buff, hard::Dict, tile::CartesianIndices)
-  for (i, coord) in enumerate(tile)
+  @inbounds for (i, coord) in enumerate(tile)
     if coord ∈ keys(hard) && isnan(hard[coord])
       buff[i] = false
     else

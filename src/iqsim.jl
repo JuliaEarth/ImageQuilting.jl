@@ -54,14 +54,6 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   # number of threads in FFTW
   set_num_threads(threads)
 
-  # calculate the overlap size from given percentage
-  ovlsize = @. ceil(Int, overlap*tilesize)
-
-  # warn in case of 1-voxel overlaps
-  if any((tilesize .>  1) .& (ovlsize .== 1))
-    @warn "Overlaps with only 1 voxel, check tilesize/overlap configuration"
-  end
-
   # sanity checks
   @assert ndims(trainimg) == 3 "image is not 3D (add ghost dimension for 2D)"
   @assert all(0 .< tilesize .≤ size(trainimg)) "invalid tile size"
@@ -85,6 +77,14 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
     coords = [coord[i] for i in 1:N, coord in keys(hard)]
     @assert all(maximum(coords, dims=2) .≤ simsize) "hard data coordinates outside of grid"
     @assert all(minimum(coords, dims=2) .> 0) "hard data coordinates must be positive indices"
+  end
+
+  # calculate the overlap size from given percentage
+  ovlsize = @. ceil(Int, overlap*tilesize)
+
+  # warn in case of 1-voxel overlaps
+  if any((tilesize .>  1) .& (ovlsize .== 1))
+    @warn "Overlaps with only 1 voxel, check tilesize/overlap configuration"
   end
 
   # spacing in raster path
@@ -113,11 +113,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   disabled = find_disabled(trainimg, geoconfig)
 
   # determine tiles that should be skipped and tiles with data
-  if !isempty(hard)
-    skipped, datainds = find_skipped(hard, geoconfig)
-  else
-    skipped, datainds = Set{Int}(), Vector{Int}()
-  end
+  skipped, datainds = find_skipped(hard, geoconfig)
 
   # construct simulation path
   simpath = genpath(ntiles, path, datainds)
@@ -200,23 +196,25 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       # disable dataevents that contain inactive voxels
       distance[disabled] .= Inf
 
-      # update indicator variable for tile
-      indicator!(hardind, hard, tile)
-
       # compute hard and soft distances
       auxdistances = Vector{Array{Float64,N}}()
-      if !isempty(hard) && any(hardind)
-        # update hard data event
-        event!(harddev, hard, tile)
+      if !isempty(hard)
+        # update indicator variable for tile
+        indicator!(hardind, hard, tile)
 
-        D = convdist(TI, harddev, weights=hardind)
+        if any(hardind)
+          # update hard data event
+          event!(harddev, hard, tile)
 
-        # disable dataevents that contain inactive voxels
-        D[disabled] .= Inf
+          D = convdist(TI, harddev, weights=hardind)
 
-        # swap overlap and hard distances
-        push!(auxdistances, distance)
-        distance = D
+          # disable dataevents that contain inactive voxels
+          D[disabled] .= Inf
+
+          # swap overlap and hard distances
+          push!(auxdistances, distance)
+          distance = D
+        end
       end
       for (AUX, AUXTI) in SOFT
         softdev = view(AUX, tile)
