@@ -131,7 +131,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   # preallocate memory for auxiliary variables
   distance = Array{Float64}(undef, TIsize .- tilesize .+ 1)
   harddev  = Array{Float64}(undef, tilesize)
-  hardind  = Array{Bool}(undef, tilesize)
+  hardmask = Array{Bool}(undef, tilesize)
   mask     = Array{Bool}(undef, tilesize)
 
   for real in 1:nreal
@@ -162,36 +162,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       simdev = view(simgrid, tile)
 
       # compute overlap distance
-      distance .= 0
-      for d=1:N
-        # Cartesian index of previous and next tiles along dimension
-        prev = CartesianIndex(ntuple(i -> i == d ? (tileind[d]-1) : tileind[i], N))
-        next = CartesianIndex(ntuple(i -> i == d ? (tileind[d]+1) : tileind[i], N))
-
-        # compute overlap distance with previous tile
-        if ovlsize[d] > 1 && prev ∈ pasted
-          oslice = ntuple(i -> i == d ? (1:ovlsize[d]) : (1:tilesize[i]), N)
-          ovl = view(simdev, CartesianIndices(oslice))
-
-          D = convdist(TI, ovl)
-
-          ax = axes(D)
-          dslice = ntuple(i -> i == d ? (1:TIsize[d]-tilesize[d]+1) : ax[i], N)
-          distance .+= view(D, CartesianIndices(dslice))
-        end
-
-        # compute overlap distance with next tile
-        if ovlsize[d] > 1 && next ∈ pasted
-          oslice = ntuple(i -> i == d ? (spacing[d]+1:tilesize[d]) : (1:tilesize[i]), N)
-          ovl = view(simdev, CartesianIndices(oslice))
-
-          D = convdist(TI, ovl)
-
-          ax = axes(D)
-          dslice = ntuple(i -> i == d ? (spacing[d]+1:TIsize[d]-ovlsize[d]+1) : ax[i], N)
-          distance .+= view(D, CartesianIndices(dslice))
-        end
-      end
+      overlap_distance!(distance, TI, simdev, tileind, pasted, geoconfig)
 
       # disable dataevents that contain inactive voxels
       distance[disabled] .= Inf
@@ -200,13 +171,13 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       auxdistances = Vector{Array{Float64,N}}()
       if !isempty(hard)
         # update indicator variable for tile
-        indicator!(hardind, hard, tile)
+        indicator!(hardmask, hard, tile)
 
-        if any(hardind)
+        if any(hardmask)
           # update hard data event
           event!(harddev, hard, tile)
 
-          D = convdist(TI, harddev, weights=hardind)
+          D = convdist(TI, harddev, weights=hardmask)
 
           # disable dataevents that contain inactive voxels
           D[disabled] .= Inf
@@ -308,7 +279,7 @@ function preprocess_images(trainimg::AbstractArray{T,N}, soft::AbstractVector,
   padsize = geoconfig.padsize
 
   # training image
-  TI = copy(trainimg)
+  TI = Float64.(trainimg)
   TI[isnan.(TI)] .= 0
 
   # soft data
@@ -318,7 +289,7 @@ function preprocess_images(trainimg::AbstractArray{T,N}, soft::AbstractVector,
     AUX = padarray(aux, Pad(:symmetric, ntuple(i->0, N), auxpad))
     AUX = parent(AUX)
 
-    AUXTI = copy(auxTI)
+    AUXTI = Float64.(auxTI)
 
     AUX[isnan.(AUX)] .= 0
     AUXTI[isnan.(AUXTI)] .= 0
@@ -369,4 +340,45 @@ function find_skipped(hard::Dict, geoconfig::NamedTuple)
   end
 
   skipped, datainds
+end
+
+function overlap_distance!(distance::AbstractArray{T,N},
+                           TI::AbstractArray{T,N}, simdev::AbstractArray{T,N},
+                           tileind::CartesianIndex{N}, pasted::Set{CartesianIndex{N}},
+                           geoconfig::NamedTuple) where {N,T<:Real}
+  TIsize = geoconfig.TIsize
+  tilesize = geoconfig.tilesize
+  ovlsize = geoconfig.ovlsize
+  spacing = geoconfig.spacing
+
+  distance .= 0
+  for d=1:N
+    # Cartesian index of previous and next tiles along dimension
+    prev = CartesianIndex(ntuple(i -> i == d ? (tileind[d]-1) : tileind[i], N))
+    next = CartesianIndex(ntuple(i -> i == d ? (tileind[d]+1) : tileind[i], N))
+
+    # compute overlap distance with previous tile
+    if ovlsize[d] > 1 && prev ∈ pasted
+      oslice = ntuple(i -> i == d ? (1:ovlsize[d]) : (1:tilesize[i]), N)
+      ovl = view(simdev, CartesianIndices(oslice))
+
+      D = convdist(TI, ovl)
+
+      ax = axes(D)
+      dslice = ntuple(i -> i == d ? (1:TIsize[d]-tilesize[d]+1) : ax[i], N)
+      distance .+= view(D, CartesianIndices(dslice))
+    end
+
+    # compute overlap distance with next tile
+    if ovlsize[d] > 1 && next ∈ pasted
+      oslice = ntuple(i -> i == d ? (spacing[d]+1:tilesize[d]) : (1:tilesize[i]), N)
+      ovl = view(simdev, CartesianIndices(oslice))
+
+      D = convdist(TI, ovl)
+
+      ax = axes(D)
+      dslice = ntuple(i -> i == d ? (spacing[d]+1:TIsize[d]-ovlsize[d]+1) : ax[i], N)
+      distance .+= view(D, CartesianIndices(dslice))
+    end
+  end
 end
