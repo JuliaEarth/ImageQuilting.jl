@@ -132,7 +132,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   distance = Array{Float64}(undef, TIsize .- tilesize .+ 1)
   harddev  = Array{Float64}(undef, tilesize)
   hardmask = Array{Bool}(undef, tilesize)
-  mask     = Array{Bool}(undef, tilesize)
+  cutmask  = Array{Bool}(undef, tilesize)
 
   for real in 1:nreal
     # allocate memory for current simulation
@@ -214,7 +214,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       TIdev = view(TI, rtile)
 
       # boundary cut mask
-      mask .= false
+      cutmask .= false
       for d=1:N
         # Cartesian index of previous and next tiles along dimension
         prev = CartesianIndex(ntuple(i -> i == d ? (tileind[d]-1) : tileind[i], N))
@@ -225,7 +225,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
           oslice = ntuple(i -> i == d ? (1:ovlsize[d]) : (1:tilesize[i]), N)
           inds = CartesianIndices(oslice)
           A = view(simdev, inds); B = view(TIdev, inds)
-          mask[inds] .|= boykov_kolmogorov_cut(A, B, d)
+          cutmask[inds] .|= boykov_kolmogorov_cut(A, B, d)
         end
 
         # compute mask with next tile
@@ -233,15 +233,15 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
           oslice = ntuple(i -> i == d ? (spacing[d]+1:tilesize[d]) : (1:tilesize[i]), N)
           inds = CartesianIndices(oslice)
           A = view(simdev, inds); B = view(TIdev, inds)
-          mask[inds] .|= reverse(boykov_kolmogorov_cut(reverse(A, dims=d), reverse(B, dims=d), d), dims=d)
+          cutmask[inds] .|= reverse(boykov_kolmogorov_cut(reverse(A, dims=d), reverse(B, dims=d), d), dims=d)
         end
       end
 
       # paste quilted pattern from training image
-      simdev[.!mask] = TIdev[.!mask]
+      simdev[.!cutmask] = TIdev[.!cutmask]
 
       # save boundary cut
-      debug && (cutgrid[tile] = mask)
+      debug && (cutgrid[tile] = cutmask)
     end
 
     # save voxel reuse
