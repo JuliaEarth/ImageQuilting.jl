@@ -5,7 +5,7 @@
 """
     iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
           simsize::Dims{N}=size(trainimg);
-          overlap::NTuple{N,Float64}=ntuple(i->1/6,N),
+          overlap::NTuple{N,<:Real}=ntuple(i->1/6,N),
           soft::AbstractVector=[], hard::Dict=Dict(), tol::Real=.1,
           path::Symbol=:raster, nreal::Integer=1,
           threads::Integer=cpucores(), gpu::Bool=false,
@@ -45,7 +45,7 @@ reals, cuts, voxs = iqsim(..., debug=true)
 """
 function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
                simsize::Dims{N}=size(trainimg);
-               overlap::NTuple{N,Float64}=ntuple(i->1/6,N),
+               overlap::NTuple{N,<:Real}=ntuple(i->1/6,N),
                soft::AbstractVector=[], hard::Dict=Dict(), tol::Real=.1,
                path::Symbol=:raster, nreal::Integer=1,
                threads::Integer=cpucores(), gpu::Bool=false,
@@ -128,11 +128,14 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   boundarycuts = Vector{Array{Float64,N}}()
   voxelreuse   = Vector{Float64}()
 
-  # preallocate memory for auxiliary variables
+  # preallocate memory whenever possible
   distance = Array{Float64}(undef, TIsize .- tilesize .+ 1)
-  harddev  = Array{Float64}(undef, tilesize)
-  hardmask = Array{Bool}(undef, tilesize)
   cutmask  = Array{Bool}(undef, tilesize)
+  if !isempty(hard)
+    harddist = Array{Float64}(undef, TIsize .- tilesize .+ 1)
+    harddev  = Array{Float64}(undef, tilesize)
+    hardmask = Array{Bool}(undef, tilesize)
+  end
 
   for real in 1:nreal
     # allocate memory for current simulation
@@ -149,9 +152,6 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
       # Cartesian index of tile
       tileind = lin2cart(ntiles, ind)
-
-      # if not skipped, proceed and paste tile
-      push!(pasted, tileind)
 
       # tile corners are given by start and finish
       start  = @. (tileind.I - 1)*spacing + 1
@@ -172,11 +172,9 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       if !isempty(hard)
         # update indicator variable for tile
         indicator!(hardmask, hard, tile)
-
         if any(hardmask)
           # update hard data event
           event!(harddev, hard, tile)
-
           D = convdist(TI, harddev, weights=hardmask)
 
           # disable dataevents that contain inactive voxels
@@ -242,6 +240,9 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
       # save boundary cut
       debug && (cutgrid[tile] = cutmask)
+
+      # mark tile as pasted
+      push!(pasted, tileind)
     end
 
     # save voxel reuse
@@ -380,5 +381,15 @@ function overlap_distance!(distance::AbstractArray{T,N},
       dslice = ntuple(i -> i == d ? (spacing[d]+1:TIsize[d]-ovlsize[d]+1) : ax[i], N)
       distance .+= view(D, CartesianIndices(dslice))
     end
+  end
+end
+
+function hard_distance!(harddist::AbstractArray{T,N},
+                        TI::AbstractArray{T,N},
+                        harddev::AbstractArray{T,N},
+                        hardmask::AbstractArray{Bool,N}) where {N,T<:Real}
+  harddist .= 0
+  if any(hardmask)
+    harddist .= convdist(TI, harddev, weights=hardmask)
   end
 end
