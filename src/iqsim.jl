@@ -128,13 +128,14 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   boundarycuts = Vector{Array{Float64,N}}()
   voxelreuse   = Vector{Float64}()
 
-  # preallocate memory whenever possible
-  distance = Array{Float64}(undef, TIsize .- tilesize .+ 1)
-  cutmask  = Array{Bool}(undef, tilesize)
+  # preallocate memory
+  cutmask   = Array{Bool}(undef, tilesize)
+  ovldist   = Array{Float64}(undef, TIsize .- tilesize .+ 1)
+  softdists = [Array{Float64}(undef, TIsize .- tilesize .+ 1) for i in 1:length(soft)]
   if !isempty(hard)
-    harddist = Array{Float64}(undef, TIsize .- tilesize .+ 1)
     harddev  = Array{Float64}(undef, tilesize)
     hardmask = Array{Bool}(undef, tilesize)
+    harddist = Array{Float64}(undef, TIsize .- tilesize .+ 1)
   end
 
   for real in 1:nreal
@@ -161,50 +162,46 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       # current simulation dataevent
       simdev = view(simgrid, tile)
 
-      # compute overlap distance
-      overlap_distance!(distance, TI, simdev, tileind, pasted, geoconfig)
+      # overlap distance
+      overlap_distance!(ovldist, TI, simdev, tileind, pasted, geoconfig)
+      ovldist[disabled] .= Inf
 
-      # disable dataevents that contain inactive voxels
-      distance[disabled] .= Inf
-
-      # compute hard and soft distances
-      auxdistances = Vector{Array{Float64,N}}()
+      # hard distance
+      hardtile = false
       if !isempty(hard)
-        # update indicator variable for tile
         indicator!(hardmask, hard, tile)
         if any(hardmask)
-          # update hard data event
           event!(harddev, hard, tile)
-          D = convdist(TI, harddev, weights=hardmask)
-
-          # disable dataevents that contain inactive voxels
-          D[disabled] .= Inf
-
-          # swap overlap and hard distances
-          push!(auxdistances, distance)
-          distance = D
+          hard_distance!(harddist, TI, harddev, hardmask)
+          harddist[disabled] .= Inf
+          hardtile = true
         end
       end
-      for (AUX, AUXTI) in SOFT
+
+      # soft distance
+      for s in eachindex(SOFT)
+        AUX, AUXTI = SOFT[s]
         softdev = view(AUX, tile)
-        D = convdist(AUXTI, softdev)
+        soft_distance!(softdists[s], AUXTI, softdev)
+        softdists[s][disabled] .= Inf
+      end
 
-        # disable dataevents that contain inactive voxels
-        D[disabled] .= Inf
-
-        push!(auxdistances, D)
+      # main and auxiliary distances
+      if hardtile
+        D, Ds = harddist, [ovldist, softdists...]
+      else
+        D, Ds = ovldist, softdists
       end
 
       # current pattern database
-      patterndb = isempty(auxdistances) ? findall(vec(distance .≤ (1+tol)minimum(distance))) :
-                                          relaxation(distance, auxdistances, tol)
+      patterndb = isempty(Ds) ? findall(vec(D .≤ (1+tol)minimum(D))) : relaxation(D, Ds, tol)
 
       # pattern probability
-      patternprobs = tau_model(patterndb, distance, auxdistances)
+      patternprobs = tau_model(patterndb, D, Ds)
 
       # pick a pattern at random from the database
-      rind = sample(patterndb, weights(patternprobs))
-      start  = lin2cart(size(distance), rind)
+      rind   = sample(patterndb, weights(patternprobs))
+      start  = lin2cart(size(D), rind)
       finish = @. start.I + tilesize - 1
       rtile  = CartesianIndex(start):CartesianIndex(finish)
 
@@ -279,21 +276,18 @@ function preprocess_images(trainimg::AbstractArray{T,N}, soft::AbstractVector,
                            geoconfig::NamedTuple) where {T,N}
   padsize = geoconfig.padsize
 
-  # training image
   TI = Float64.(trainimg)
-  TI[isnan.(TI)] .= 0
+  replace!(TI, NaN => 0.)
 
-  # soft data
   SOFT = map(soft) do (aux, auxTI)
-    auxpad = padsize .- min.(padsize, size(aux))
+    prepend = ntuple(i->0, N)
+    append  = padsize .- min.(padsize, size(aux))
+    padding = Pad(:symmetric, prepend, append)
 
-    AUX = padarray(aux, Pad(:symmetric, ntuple(i->0, N), auxpad))
-    AUX = parent(AUX)
-
+    AUX   = Float64.(padarray(aux, padding))
     AUXTI = Float64.(auxTI)
-
-    AUX[isnan.(AUX)] .= 0
-    AUXTI[isnan.(AUXTI)] .= 0
+    replace!(AUX, NaN => 0.)
+    replace!(AUXTI, NaN => 0.)
 
     AUX, AUXTI
   end
@@ -384,12 +378,15 @@ function overlap_distance!(distance::AbstractArray{T,N},
   end
 end
 
-function hard_distance!(harddist::AbstractArray{T,N},
+function hard_distance!(distance::AbstractArray{T,N},
                         TI::AbstractArray{T,N},
                         harddev::AbstractArray{T,N},
                         hardmask::AbstractArray{Bool,N}) where {N,T<:Real}
-  harddist .= 0
-  if any(hardmask)
-    harddist .= convdist(TI, harddev, weights=hardmask)
-  end
+  distance .= convdist(TI, harddev, weights=hardmask)
+end
+
+function soft_distance!(distance::AbstractArray{T,N},
+                        TI::AbstractArray{T,N},
+                        softdev::AbstractArray{T,N}) where {N,T<:Real}
+  distance .= convdist(TI, softdev)
 end
