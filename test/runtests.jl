@@ -3,9 +3,11 @@ using GeoStatsDevTools
 using GeoStatsImages
 using Statistics
 using ImageQuilting
-using Plots; gr()
-using VisualRegressionTests
+using Plots, VisualRegressionTests
 using Test, Pkg, Random
+
+# workaround GR warnings
+ENV["GKSwstype"] = "100"
 
 # environment settings
 islinux = Sys.islinux()
