@@ -99,12 +99,15 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   # training image dimensions
   TIsize = size(trainimg)
 
+  # distance matrix size
+  distsize = TIsize .- tilesize .+ 1
+
   # total overlap volume in simulation grid
   ovlvol = prod(padsize) - prod(@. padsize - (ntiles - 1)*ovlsize)
 
   # geometric configuration
   geoconfig = (ntiles=ntiles, tilesize=tilesize, ovlsize=ovlsize, spacing=spacing,
-               TIsize=TIsize, simsize=simsize, padsize=padsize)
+               TIsize=TIsize, simsize=simsize, padsize=padsize, distsize=distsize)
 
   # pad input images and knockout inactive voxels
   TI, SOFT = preprocess_images(trainimg, soft, geoconfig)
@@ -130,12 +133,12 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
   # preallocate memory
   cutmask   = Array{Bool}(undef, tilesize)
-  ovldist   = Array{Float64}(undef, TIsize .- tilesize .+ 1)
-  softdists = [Array{Float64}(undef, TIsize .- tilesize .+ 1) for i in 1:length(soft)]
+  ovldist   = Array{Float64}(undef, distsize)
+  softdists = [Array{Float64}(undef, distsize) for i in 1:length(soft)]
   if !isempty(hard)
-    harddev  = Array{Float64}(undef, tilesize)
     hardmask = Array{Bool}(undef, tilesize)
-    harddist = Array{Float64}(undef, TIsize .- tilesize .+ 1)
+    harddev  = Array{Float64}(undef, tilesize)
+    harddist = Array{Float64}(undef, distsize)
   end
 
   for real in 1:nreal
@@ -298,11 +301,12 @@ end
 function find_disabled(trainimg::AbstractArray{T,N}, geoconfig::NamedTuple) where {T,N}
   TIsize = geoconfig.TIsize
   tilesize = geoconfig.tilesize
+  distsize = geoconfig.distsize
 
-  disabled = falses(TIsize .- tilesize .+ 1)
+  disabled = falses(distsize)
   for ind in findall(isnan, trainimg)
     start  = @. max(ind.I - tilesize + 1, 1)
-    finish = @. min(ind.I, TIsize - tilesize + 1)
+    finish = @. min(ind.I, distsize)
     tile   = CartesianIndex(start):CartesianIndex(finish)
     disabled[tile] .= true
   end
