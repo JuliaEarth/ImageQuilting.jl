@@ -212,28 +212,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       TIdev = view(TI, rtile)
 
       # boundary cut mask
-      cutmask .= false
-      for d=1:N
-        # Cartesian index of previous and next tiles along dimension
-        prev = CartesianIndex(ntuple(i -> i == d ? (tileind[d]-1) : tileind[i], N))
-        next = CartesianIndex(ntuple(i -> i == d ? (tileind[d]+1) : tileind[i], N))
-
-        # compute mask with previous tile
-        if ovlsize[d] > 1 && prev ∈ pasted
-          oslice = ntuple(i -> i == d ? (1:ovlsize[d]) : (1:tilesize[i]), N)
-          inds = CartesianIndices(oslice)
-          A = view(simdev, inds); B = view(TIdev, inds)
-          cutmask[inds] .|= boykov_kolmogorov_cut(A, B, d)
-        end
-
-        # compute mask with next tile
-        if ovlsize[d] > 1 && next ∈ pasted
-          oslice = ntuple(i -> i == d ? (spacing[d]+1:tilesize[d]) : (1:tilesize[i]), N)
-          inds = CartesianIndices(oslice)
-          A = view(simdev, inds); B = view(TIdev, inds)
-          cutmask[inds] .|= reverse(boykov_kolmogorov_cut(reverse(A, dims=d), reverse(B, dims=d), d), dims=d)
-        end
-      end
+      cut!(cutmask, simdev, TIdev, tileind, pasted, geoconfig)
 
       # paste quilted pattern from training image
       simdev[.!cutmask] = TIdev[.!cutmask]
@@ -299,7 +278,7 @@ function preprocess_images(trainimg::AbstractArray{T,N}, soft::AbstractVector,
 end
 
 function find_disabled(trainimg::AbstractArray{T,N}, geoconfig::NamedTuple) where {T,N}
-  TIsize = geoconfig.TIsize
+  TIsize   = geoconfig.TIsize
   tilesize = geoconfig.tilesize
   distsize = geoconfig.distsize
 
@@ -315,10 +294,10 @@ function find_disabled(trainimg::AbstractArray{T,N}, geoconfig::NamedTuple) wher
 end
 
 function find_skipped(hard::Dict, geoconfig::NamedTuple)
-  ntiles = geoconfig.ntiles
+  ntiles   = geoconfig.ntiles
   tilesize = geoconfig.tilesize
-  spacing = geoconfig.spacing
-  simsize = geoconfig.simsize
+  spacing  = geoconfig.spacing
+  simsize  = geoconfig.simsize
 
   skipped = Set{Int}()
   datainds = Vector{Int}()
@@ -345,10 +324,10 @@ function overlap_distance!(distance::AbstractArray{T,N},
                            TI::AbstractArray{T,N}, simdev::AbstractArray{T,N},
                            tileind::CartesianIndex{N}, pasted::Set{CartesianIndex{N}},
                            geoconfig::NamedTuple) where {N,T<:Real}
-  TIsize = geoconfig.TIsize
+  TIsize   = geoconfig.TIsize
   tilesize = geoconfig.tilesize
-  ovlsize = geoconfig.ovlsize
-  spacing = geoconfig.spacing
+  ovlsize  = geoconfig.ovlsize
+  spacing  = geoconfig.spacing
 
   distance .= 0
   for d=1:N
@@ -393,4 +372,36 @@ function soft_distance!(distance::AbstractArray{T,N},
                         TI::AbstractArray{T,N},
                         softdev::AbstractArray{T,N}) where {N,T<:Real}
   distance .= convdist(TI, softdev)
+end
+
+function cut!(cutmask::AbstractArray{Bool,N},
+              simdev::AbstractArray{T,N}, TIdev::AbstractArray{T,N},
+              tileind::CartesianIndex{N}, pasted::Set{CartesianIndex{N}},
+              geoconfig::NamedTuple) where {N,T<:Real}
+  tilesize = geoconfig.tilesize
+  ovlsize  = geoconfig.ovlsize
+  spacing  = geoconfig.spacing
+
+  cutmask .= false
+  for d=1:N
+    # Cartesian index of previous and next tiles along dimension
+    prev = CartesianIndex(ntuple(i -> i == d ? (tileind[d]-1) : tileind[i], N))
+    next = CartesianIndex(ntuple(i -> i == d ? (tileind[d]+1) : tileind[i], N))
+
+    # compute mask with previous tile
+    if ovlsize[d] > 1 && prev ∈ pasted
+      oslice = ntuple(i -> i == d ? (1:ovlsize[d]) : (1:tilesize[i]), N)
+      inds = CartesianIndices(oslice)
+      A = view(simdev, inds); B = view(TIdev, inds)
+      cutmask[inds] .|= boykov_kolmogorov_cut(A, B, d)
+    end
+
+    # compute mask with next tile
+    if ovlsize[d] > 1 && next ∈ pasted
+      oslice = ntuple(i -> i == d ? (spacing[d]+1:tilesize[d]) : (1:tilesize[i]), N)
+      inds = CartesianIndices(oslice)
+      A = view(simdev, inds); B = view(TIdev, inds)
+      cutmask[inds] .|= reverse(boykov_kolmogorov_cut(reverse(A, dims=d), reverse(B, dims=d), d), dims=d)
+    end
+  end
 end
