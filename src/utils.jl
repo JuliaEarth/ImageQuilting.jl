@@ -63,22 +63,6 @@ function activation(hard::Dict, tile::CartesianIndices)
   buff
 end
 
-function convdist(img::AbstractArray, kern::AbstractArray;
-                  weights::AbstractArray=fill(1.0, size(kern)))
-  # choose among imfilter implementations
-  imfilter_impl = get_imfilter_impl(GPU)
-
-  wkern = weights.*kern
-
-  A² = imfilter_impl(img.^2, weights)
-  AB = imfilter_impl(img, wkern)
-  B² = sum(abs2, wkern)
-
-  D = abs.(A² .- 2AB .+ B²)
-
-  parent(D) # always return a plain simple array
-end
-
 function genpath(extent::Dims{N}, kind::Symbol, datainds::AbstractVector{Int}) where {N}
   path = Vector{Int}()
 

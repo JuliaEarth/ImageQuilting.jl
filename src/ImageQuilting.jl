@@ -20,6 +20,7 @@ using Random: shuffle!, randperm
 using Statistics: mean, std
 
 include("utils.jl")
+include("distances.jl")
 include("plot_recipes.jl")
 include("imfilter_cpu.jl")
 include("relaxation.jl")
