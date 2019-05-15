@@ -1,0 +1,50 @@
+name = "ImageQuilting"
+uuid = "e8712464-036d-575c-85ac-952ae31322ab"
+author = "Júlio Hoffimann <julio.hoffimann@gmail.com>"
+version = "0.8.0"
+
+[deps]
+CpuId = "adafc99b-e345-5852-983c-f28acb93d879"
+FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
+ImageFiltering = "6a3955dd-da59-5b1f-98d4-e7296123deb5"
+ImageMorphology = "787d08f9-d448-5407-9aad-5290dd7ab264"
+LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
+LightGraphsFlows = "2f5eb75a-258c-59e0-affc-f41c55f75335"
+Primes = "27ebfcd6-29c5-5fa9-bf4b-fb8fc14df3ae"
+ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
+Requires = "ae029012-a4dd-5104-9daa-d747884805df"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+
+[extras]
+GeoStatsBase = "323cb8eb-fbf6-51c0-afd0-f8fba70507b2"
+GeoStatsDevTools = "19e549d1-356f-5655-9f3d-c1d6136da705"
+GeoStatsImages = "7cd16168-b42c-5e7d-a585-4f59d326662d"
+ImageMagick = "6218d12a-5da1-5696-b52f-db25d2ecc6d1"
+Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+QuartzImageIO = "dca85d43-d64c-5e67-8c65-017450d5d020"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+VisualRegressionTests = "34922c18-7c2a-561c-bac1-01e79b2c4c92"
+
+[targets]
+test = ["GeoStatsImages", "Pkg", "Statistics", "GeoStatsDevTools", "Test", "Random", "VisualRegressionTests", "GeoStatsBase", "Plots", "ImageMagick", "QuartzImageIO"]
+
+[compat]
+CpuId = "≥ 0.2.0"
+FFTW = "≥ 0.2.4"
+ImageFiltering = "≥ 0.4.1"
+ImageMorphology = "≥ 0.1.1"
+LightGraphs = "≥ 0.6.1"
+LightGraphsFlows = "≥ 0.0.5"
+Primes = "≥ 0.4.0"
+ProgressMeter = "≥ 0.6.0"
+RecipesBase = "≥ 0.5.0"
+Requires = "≥ 0.5.2"
+StatsBase = "≥ 0.25.0"
+julia = "1"
