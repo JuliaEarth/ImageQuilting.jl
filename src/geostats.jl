@@ -2,6 +2,9 @@
 # Licensed under the ISC License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
+using .GeoStatsBase
+import .GeoStatsBase: preprocess, solve_single
+
 """
     ImgQuilt(var₁=>param₁, var₂=>param₂, ...)
 
@@ -49,7 +52,6 @@ function preprocess(problem::SimulationProblem, solver::ImgQuilt)
   pdomain = domain(problem)
 
   # sanity checks
-  @assert pdomain isa RegularGrid "ImgQuilt solver only supports regular grids"
   @assert ndims(pdomain) ∈ [2,3] "Number of dimensions must be 2 or 3"
 
   # result of preprocessing
