@@ -25,7 +25,7 @@ include("plot_recipes.jl")
 include("imfilter_cpu.jl")
 include("relaxation.jl")
 include("tau_model.jl")
-include("boykov_kolmogorov_cut.jl")
+include("graphcuts.jl")
 include("voxel_reuse.jl")
 include("iqsim.jl")
 

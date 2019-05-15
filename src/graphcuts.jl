@@ -2,6 +2,38 @@
 # Licensed under the ISC License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
+function cut!(cutmask::AbstractArray{Bool,N},
+              simdev::AbstractArray{T,N}, TIdev::AbstractArray{T,N},
+              tileind::CartesianIndex{N}, pasted::Set{CartesianIndex{N}},
+              geoconfig::NamedTuple) where {N,T<:Real}
+  tilesize = geoconfig.tilesize
+  ovlsize  = geoconfig.ovlsize
+  spacing  = geoconfig.spacing
+
+  cutmask .= false
+  for d=1:N
+    # Cartesian index of previous and next tiles along dimension
+    prev = CartesianIndex(ntuple(i -> i == d ? (tileind[d]-1) : tileind[i], N))
+    next = CartesianIndex(ntuple(i -> i == d ? (tileind[d]+1) : tileind[i], N))
+
+    # compute mask with previous tile
+    if ovlsize[d] > 1 && prev ∈ pasted
+      oslice = ntuple(i -> i == d ? (1:ovlsize[d]) : (1:tilesize[i]), N)
+      inds = CartesianIndices(oslice)
+      A = view(simdev, inds); B = view(TIdev, inds)
+      cutmask[inds] .|= boykov_kolmogorov_cut(A, B, d)
+    end
+
+    # compute mask with next tile
+    if ovlsize[d] > 1 && next ∈ pasted
+      oslice = ntuple(i -> i == d ? (spacing[d]+1:tilesize[d]) : (1:tilesize[i]), N)
+      inds = CartesianIndices(oslice)
+      A = view(simdev, inds); B = view(TIdev, inds)
+      cutmask[inds] .|= reverse(boykov_kolmogorov_cut(reverse(A, dims=d), reverse(B, dims=d), d), dims=d)
+    end
+  end
+end
+
 function boykov_kolmogorov_cut(A::AbstractArray, B::AbstractArray, dim::Integer)
   # permute dimensions so that the algorithm is
   # the same for cuts in x, y and z directions
