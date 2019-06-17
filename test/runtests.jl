@@ -1,8 +1,7 @@
+using ImageQuilting
 using GeoStatsBase
-using GeoStatsDevTools
 using GeoStatsImages
 using Statistics
-using ImageQuilting
 using Plots, VisualRegressionTests
 using Test, Pkg, Random
 

@@ -1,7 +1,7 @@
 name = "ImageQuilting"
 uuid = "e8712464-036d-575c-85ac-952ae31322ab"
 author = "Júlio Hoffimann <julio.hoffimann@gmail.com>"
-version = "0.8.0"
+version = "0.8.1"
 
 [deps]
 CpuId = "adafc99b-e345-5852-983c-f28acb93d879"
@@ -21,7 +21,6 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [extras]
 GeoStatsBase = "323cb8eb-fbf6-51c0-afd0-f8fba70507b2"
-GeoStatsDevTools = "19e549d1-356f-5655-9f3d-c1d6136da705"
 GeoStatsImages = "7cd16168-b42c-5e7d-a585-4f59d326662d"
 ImageMagick = "6218d12a-5da1-5696-b52f-db25d2ecc6d1"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
@@ -33,18 +32,8 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 VisualRegressionTests = "34922c18-7c2a-561c-bac1-01e79b2c4c92"
 
 [targets]
-test = ["GeoStatsImages", "Pkg", "Statistics", "GeoStatsDevTools", "Test", "Random", "VisualRegressionTests", "GeoStatsBase", "Plots", "ImageMagick", "QuartzImageIO"]
+test = ["GeoStatsImages", "Pkg", "Statistics", "Test", "Random", "VisualRegressionTests", "GeoStatsBase", "Plots", "ImageMagick", "QuartzImageIO"]
 
 [compat]
-CpuId = "≥ 0.2.0"
-FFTW = "≥ 0.2.4"
-ImageFiltering = "≥ 0.4.1"
-ImageMorphology = "≥ 0.1.1"
-LightGraphs = "≥ 0.6.1"
-LightGraphsFlows = "≥ 0.0.5"
-Primes = "≥ 0.4.0"
-ProgressMeter = "≥ 0.6.0"
-RecipesBase = "≥ 0.5.0"
-Requires = "≥ 0.5.2"
-StatsBase = "≥ 0.25.0"
+GeoStatsBase = "≥ 0.5.0"
 julia = "1"
