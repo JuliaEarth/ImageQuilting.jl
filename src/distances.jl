@@ -13,9 +13,7 @@ function convdist(img::AbstractArray, kern::AbstractArray;
   AB = imfilter_impl(img, wkern)
   B² = sum(abs2, wkern)
 
-  D = abs.(A² .- 2AB .+ B²)
-
-  parent(D) # always return a plain simple array
+  parent(abs.(A² .- 2AB .+ B²))
 end
 
 function overlap_distance!(distance::AbstractArray{T,N},
@@ -67,8 +65,8 @@ function hard_distance!(distance::AbstractArray{T,N},
 end
 
 function soft_distance!(distance::AbstractArray{T,N},
-                        TI::AbstractArray{T,N},
+                        AUXTI::AbstractArray{T,N},
                         softdev::AbstractArray{T,N}) where {N,T<:Real}
-  distance .= convdist(TI, softdev)
+  distance .= convdist(AUXTI, softdev)
 end
 
