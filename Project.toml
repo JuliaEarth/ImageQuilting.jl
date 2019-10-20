@@ -36,13 +36,13 @@ test = ["GeoStatsImages", "Pkg", "Statistics", "Test", "Random", "VisualRegressi
 
 [compat]
 CpuId = "^0.2"
-FFTW = "^0.2"
+FFTW = "^1.0"
 ImageFiltering = "^0.6"
 ImageMorphology = "^0.2"
 LightGraphs = "^1.2"
 LightGraphsFlows = "^0.3"
 Primes = "^0.4"
-ProgressMeter = "^1.0"
+ProgressMeter = "^1.1"
 RecipesBase = "^0.6"
 Requires = "^0.5"
 StatsBase = "^0.30"
