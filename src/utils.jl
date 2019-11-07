@@ -12,6 +12,19 @@ function get_imfilter_impl(GPU)
   end
 end
 
+function convdist(img::AbstractArray, kern::AbstractArray;
+                  weights::AbstractArray=fill(1.0, size(kern)))
+  imfilter_impl = get_imfilter_impl(GPU)
+
+  wkern = weights.*kern
+
+  A² = imfilter_impl(img.^2, weights)
+  AB = imfilter_impl(img, wkern)
+  B² = sum(wkern .* kern)
+
+  parent(abs.(A² .- 2AB .+ B²))
+end
+
 cart2lin(dims, ind) = LinearIndices(dims)[ind]
 lin2cart(dims, ind) = CartesianIndices(dims)[ind]
 

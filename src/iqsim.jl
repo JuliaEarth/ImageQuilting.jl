@@ -132,6 +132,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   voxelreuse   = Vector{Float64}()
 
   # preallocate memory
+  ovlmask   = Array{Bool}(undef, tilesize)
   cutmask   = Array{Bool}(undef, tilesize)
   ovldist   = Array{Float64}(undef, distsize)
   softdists = [Array{Float64}(undef, distsize) for i in 1:length(soft)]
@@ -166,7 +167,25 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       simdev = view(simgrid, tile)
 
       # overlap distance
-      overlap_distance!(ovldist, TI, simdev, tileind, pasted, geoconfig)
+      ovlmask .= false
+      for d=1:N
+        # Cartesian index of previous and next tiles along dimension
+        prev = CartesianIndex(ntuple(i -> i == d ? (tileind[d]-1) : tileind[i], N))
+        next = CartesianIndex(ntuple(i -> i == d ? (tileind[d]+1) : tileind[i], N))
+
+        # overlap with previous tile
+        if ovlsize[d] > 1 && prev ∈ pasted
+          oslice = ntuple(i -> i == d ? (1:ovlsize[d]) : (1:tilesize[i]), N)
+          ovlmask[CartesianIndices(oslice)] .= true
+        end
+
+        # overlap with next tile
+        if ovlsize[d] > 1 && next ∈ pasted
+          oslice = ntuple(i -> i == d ? (spacing[d]+1:tilesize[d]) : (1:tilesize[i]), N)
+          ovlmask[CartesianIndices(oslice)] .= true
+        end
+      end
+      ovldist .= convdist(TI, simdev, weights=ovlmask)
       ovldist[disabled] .= Inf
 
       # hard distance
@@ -175,7 +194,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
         indicator!(hardmask, hard, tile)
         if any(hardmask)
           event!(harddev, hard, tile)
-          hard_distance!(harddist, TI, harddev, hardmask)
+          harddist .= convdist(TI, harddev, weights=hardmask)
           harddist[disabled] .= Inf
           hardtile = true
         end
@@ -185,7 +204,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       for s in eachindex(SOFT)
         AUX, AUXTI = SOFT[s]
         softdev = view(AUX, tile)
-        soft_distance!(softdists[s], AUXTI, softdev)
+        softdists[s] .= convdist(AUXTI, softdev)
         softdists[s][disabled] .= Inf
       end
 
@@ -204,7 +223,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
       # pick a pattern at random from the database
       rind   = sample(patterndb, weights(patternprobs))
-      start  = lin2cart(size(D), rind)
+      start  = lin2cart(distsize, rind)
       finish = @. start.I + tilesize - 1
       rtile  = CartesianIndex(start):CartesianIndex(finish)
 
