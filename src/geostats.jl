@@ -52,6 +52,7 @@ function preprocess(problem::SimulationProblem, solver::ImgQuilt)
   pdomain = domain(problem)
 
   # sanity checks
+  @assert pdomain isa RegularGrid "ImgQuilt requires RegularGrid domain"
   @assert ndims(pdomain) ∈ [2,3] "Number of dimensions must be 2 or 3"
 
   # result of preprocessing
@@ -69,7 +70,7 @@ function preprocess(problem::SimulationProblem, solver::ImgQuilt)
     # create hard data object
     hdata = Dict{CartesianIndex{3},Real}()
     for (loc, datloc) in datamap(problem, var)
-      push!(hdata, lin2cart(simsize, loc) => value(pdata, datloc, var))
+      push!(hdata, lin2cart(simsize, loc) => pdata[datloc,var])
     end
 
     # disable inactive voxels
