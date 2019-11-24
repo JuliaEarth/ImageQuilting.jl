@@ -231,7 +231,28 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       TIdev = view(TI, rtile)
 
       # boundary cut mask
-      cut!(cutmask, simdev, TIdev, tileind, pasted, geoconfig)
+      cutmask .= false
+      for d=1:N
+        # Cartesian index of previous and next tiles along dimension
+        prev = CartesianIndex(ntuple(i -> i == d ? (tileind[d]-1) : tileind[i], N))
+        next = CartesianIndex(ntuple(i -> i == d ? (tileind[d]+1) : tileind[i], N))
+
+        # compute mask with previous tile
+        if ovlsize[d] > 1 && prev ∈ pasted
+          oslice = ntuple(i -> i == d ? (1:ovlsize[d]) : (1:tilesize[i]), N)
+          inds = CartesianIndices(oslice)
+          A = view(simdev, inds); B = view(TIdev, inds)
+          cutmask[inds] .|= boykov_kolmogorov_cut(A, B, d)
+        end
+
+        # compute mask with next tile
+        if ovlsize[d] > 1 && next ∈ pasted
+          oslice = ntuple(i -> i == d ? (spacing[d]+1:tilesize[d]) : (1:tilesize[i]), N)
+          inds = CartesianIndices(oslice)
+          A = view(simdev, inds); B = view(TIdev, inds)
+          cutmask[inds] .|= reverse(boykov_kolmogorov_cut(reverse(A, dims=d), reverse(B, dims=d), d), dims=d)
+        end
+      end
 
       # paste quilted pattern from training image
       simdev[.!cutmask] = TIdev[.!cutmask]
