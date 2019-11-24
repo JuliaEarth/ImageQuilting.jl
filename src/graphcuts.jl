@@ -2,88 +2,69 @@
 # Licensed under the ISC License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-function boykov_kolmogorov_cut(A::AbstractArray, B::AbstractArray, dim::Integer)
-  # permute dimensions so that the algorithm is
-  # the same for cuts in x, y and z directions
-  if dim == 1
-    A = permutedims(A, [1,2,3])
-    B = permutedims(B, [1,2,3])
-  elseif dim == 2
-    A = permutedims(A, [2,1,3])
-    B = permutedims(B, [2,1,3])
-  elseif dim == 3
-    A = permutedims(A, [3,2,1])
-    B = permutedims(B, [3,2,1])
-  end
+function boykov_kolmogorov_cut(A::AbstractArray{T,N}, B::AbstractArray{T,N}, dim::Integer) where {N,T}
+  @assert size(A) == size(B) "arrays must have the same size for cut"
 
-  E = abs.(A - B)
+  # size and number of voxels
+  sz   = size(A)
+  nvox = prod(sz)
 
-  mx, my, mz = size(E)
-  nvox = mx*my*mz
-
-  # compute gradients
-  ∇xₐ = similar(E); ∇yₐ = similar(E); ∇zₐ = similar(E)
-  ∇xᵦ = similar(E); ∇yᵦ = similar(E); ∇zᵦ = similar(E)
-  for k=1:mz, j=1:my, i=1:mx-1
-    ∇xₐ[i,j,k] = A[i+1,j,k] - A[i,j,k]
-    ∇xᵦ[i,j,k] = B[i+1,j,k] - B[i,j,k]
-  end
-  for k=1:mz, j=1:my-1, i=1:mx
-    ∇yₐ[i,j,k] = A[i,j+1,k] - A[i,j,k]
-    ∇yᵦ[i,j,k] = B[i,j+1,k] - B[i,j,k]
-  end
-  for k=1:mz-1, j=1:my, i=1:mx
-    ∇zₐ[i,j,k] = A[i,j,k+1] - A[i,j,k]
-    ∇zᵦ[i,j,k] = B[i,j,k+1] - B[i,j,k]
-  end
-  if mx > 1
-    ∇xₐ[mx,:,:] = ∇xₐ[mx-1,:,:]
-    ∇xᵦ[mx,:,:] = ∇xᵦ[mx-1,:,:]
-  end
-  if my > 1
-    ∇yₐ[:,my,:] = ∇yₐ[:,my-1,:]
-    ∇yᵦ[:,my,:] = ∇yᵦ[:,my-1,:]
-  end
-  if mz > 1
-    ∇zₐ[:,:,mz] = ∇zₐ[:,:,mz-1]
-    ∇zᵦ[:,:,mz] = ∇zᵦ[:,:,mz-1]
-  end
-  map!(abs, ∇xₐ, ∇xₐ); map!(abs, ∇yₐ, ∇yₐ); map!(abs, ∇zₐ, ∇zₐ)
-  map!(abs, ∇xᵦ, ∇xᵦ); map!(abs, ∇yᵦ, ∇yᵦ); map!(abs, ∇zᵦ, ∇zᵦ)
-
-  # add source and sink terminals
+  # source and sink terminals
   s = nvox + 1; t = nvox + 2
 
-  # construct graph and capacity matrix
+  # lattice graph and capacity matrix
   G = DiGraph(nvox+2)
   C = spzeros(nvox+2, nvox+2)
-  for k=1:mz, j=1:my, i=1:mx-1
-    c = cart2lin((mx,my,mz), CartesianIndex(  i, j, k))
-    d = cart2lin((mx,my,mz), CartesianIndex(i+1, j, k))
-    add_edge!(G, c, d)
-    add_edge!(G, d, c)
-    C[c,d] = C[d,c] = (E[c] + E[d]) / (∇xₐ[c] + ∇xₐ[d] + ∇xᵦ[c] + ∇xᵦ[d])
+
+  # fill lattice graph with original vertices
+  for d=1:N
+    # loop over all indices except the borders using an increment direction
+    inds = CartesianIndices(ntuple(i -> i == d ? (1:sz[d]-1) : (1:sz[i]), N))
+    incr = CartesianIndex(ntuple(i -> i == d ? 1 : 0, N))
+
+    for ind in inds
+      # adjacent vertices along direction
+      u = cart2lin(sz, ind)
+      v = cart2lin(sz, ind + incr)
+
+      # simple difference
+      Du = abs(A[u] - B[u])
+      Dv = abs(A[v] - B[v])
+
+      # gradient along direction
+      ∇Au = abs(A[v] - A[u])
+      ∇Bu = abs(B[v] - B[u])
+
+      # next vertex along direction
+      w = ind + 2incr
+
+      # repeat gradient on the border when
+      # outside valid indices for arrays
+      ok = all(w.I .≤ sz)
+      ∇Av = ok ? abs(A[w] - A[v]) : ∇Au
+      ∇Bv = ok ? abs(B[w] - B[v]) : ∇Bu
+
+      add_edge!(G, u, v)
+      add_edge!(G, v, u)
+
+      C[u,v] = C[v,u] = (Du + Dv) / (∇Au + ∇Av + ∇Bu + ∇Bv)
+    end
   end
-  for k=1:mz, j=1:my-1, i=1:mx
-    c = cart2lin((mx,my,mz), CartesianIndex(i,   j, k))
-    r = cart2lin((mx,my,mz), CartesianIndex(i, j+1, k))
-    add_edge!(G, c, r)
-    add_edge!(G, r, c)
-    C[c,r] = C[r,c] = (E[c] + E[r]) / (∇yₐ[c] + ∇yₐ[r] + ∇yᵦ[c] + ∇yᵦ[r])
-  end
-  for k=1:mz-1, j=1:my, i=1:mx
-    c = cart2lin((mx,my,mz), CartesianIndex(i, j,   k))
-    o = cart2lin((mx,my,mz), CartesianIndex(i, j, k+1))
-    add_edge!(G, c, o)
-    add_edge!(G, o, c)
-    C[c,o] = C[o,c] = (E[c] + E[o]) / (∇zₐ[c] + ∇zₐ[o] + ∇zᵦ[c] + ∇zᵦ[o])
-  end
-  for k=1:mz, j=1:my
-    u = cart2lin((mx,my,mz), CartesianIndex( 1, j, k))
-    v = cart2lin((mx,my,mz), CartesianIndex(mx, j, k))
+
+  # fill edges from source terminal to left slice
+  linds = CartesianIndices(ntuple(i -> i == dim ? 1 : (1:sz[i]), N))
+  for ind in linds
+    u = cart2lin(sz, ind)
     add_edge!(G, s, u)
+    C[s,u] = Inf
+  end
+
+  # fill edges from right slice to sink terminal
+  rinds = CartesianIndices(ntuple(i -> i == dim ? sz[dim] : (1:sz[i]), N))
+  for ind in rinds
+    v = cart2lin(sz, ind)
     add_edge!(G, v, t)
-    C[s,u] = C[v,t] = Inf
+    C[v,t] = Inf
   end
 
   # Boykov-Kolmogorov max-flow/min-cut
@@ -93,18 +74,9 @@ function boykov_kolmogorov_cut(A::AbstractArray, B::AbstractArray, dim::Integer)
   labels = labels[1:end-2]
 
   # cut mask
-  M = falses(size(E))
+  M = falses(size(A))
   M[labels .== 1] .= true
   M[labels .== 0] .= true
-
-  # permute back to original shape
-  if dim == 1
-    M = permutedims(M, [1,2,3])
-  elseif dim == 2
-    M = permutedims(M, [2,1,3])
-  elseif dim == 3
-    M = permutedims(M, [3,2,1])
-  end
 
   M
 end
