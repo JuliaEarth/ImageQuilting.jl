@@ -150,13 +150,13 @@ end
   end
 
   @testset "GeoStats.jl API" begin
-    geodata = PointSetData(Dict(:variable => [1.,0.,1.]), [25. 50. 75.; 25. 75. 50.])
-    grid    = RegularGrid{Float64}(100,100)
-    problem = SimulationProblem(geodata, grid, :variable, 3)
+    sdata   = PointSetData(Dict(:variable => [1.,0.,1.]), [25. 50. 75.; 25. 75. 50.])
+    sdomain = RegularGrid{Float64}(100,100)
+    problem = SimulationProblem(sdata, sdomain, :variable, 3)
 
-    TI = training_image("Strebelle")
-    inactive = [CartesianIndex(i,j,1) for i in 1:30 for j in 1:30]
-    solver = ImgQuilt(:variable => (TI=TI, tilesize=(30,30,1), inactive=inactive))
+    TI = training_image("Strebelle")[:,:,1]
+    inactive = [CartesianIndex(i,j) for i in 1:30 for j in 1:30]
+    solver = ImgQuilt(:variable => (TI=TI, tilesize=(30,30), inactive=inactive))
 
     Random.seed!(2017)
     solution = solve(problem, solver)

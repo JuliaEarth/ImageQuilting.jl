@@ -17,8 +17,8 @@ Performs image quilting simulation as described in Hoffimann et al. 2017.
 
 ### Required
 
-* `trainimg` is any 3D array (add ghost dimension for 2D)
-* `tilesize` is the tile size (or pattern size)
+* `trainimg` is any Julia array
+* `tilesize` is the tile size
 
 ### Optional
 
@@ -34,7 +34,7 @@ Performs image quilting simulation as described in Hoffimann et al. 2017.
 * `debug` informs whether to export or not the boundary cuts and voxel reuse
 * `showprogress` informs whether to show or not estimated time duration
 
-The main output `reals` consists of a list of 3D realizations that can be indexed with
+The main output `reals` consists of a list of realizations that can be indexed with
 `reals[1], reals[2], ..., reals[nreal]`. If `debug=true`, additional output is generated:
 
 ```julia
@@ -55,7 +55,6 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   set_num_threads(threads)
 
   # sanity checks
-  @assert ndims(trainimg) == 3 "image is not 3D (add ghost dimension for 2D)"
   @assert all(0 .< tilesize .≤ size(trainimg)) "invalid tile size"
   @assert all(simsize .≥ tilesize) "invalid grid size"
   @assert all(0 .< overlap .< 1) "overlaps must be in range (0,1)"
@@ -66,7 +65,6 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   # soft data checks
   if !isempty(soft)
     for (aux, auxTI) in soft
-      @assert ndims(aux) == 3 "soft data is not 3D (add ghost dimension for 2D)"
       @assert all(size(aux) .≥ simsize) "soft data size < grid size"
       @assert size(auxTI) == size(trainimg) "auxiliary TI must have the same size as TI"
     end

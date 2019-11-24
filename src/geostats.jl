@@ -19,7 +19,7 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
 
 ### Optional
 
-* `overlap`  - Overlap size in x, y and z (default to (1/6, 1/6, 1/6))
+* `overlap`  - Overlap size in x, y and z (default to (1/6, 1/6, ..., 1/6))
 * `path`     - Simulation path (:raster (default), :dilation, or :random)
 * `inactive` - Vector of inactive voxels (i.e. tuples (i,j,k)) in the grid
 * `soft`     - A vector of `(data,dataTI)` pairs
@@ -36,7 +36,7 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
 @simsolver ImgQuilt begin
   @param TI
   @param tilesize
-  @param overlap       = (1/6, 1/6, 1/6)
+  @param overlap       = nothing
   @param path          = :raster
   @param inactive      = nothing
   @param soft          = []
@@ -53,7 +53,6 @@ function preprocess(problem::SimulationProblem, solver::ImgQuilt)
 
   # sanity checks
   @assert pdomain isa RegularGrid "ImgQuilt requires RegularGrid domain"
-  @assert ndims(pdomain) ∈ [2,3] "Number of dimensions must be 2 or 3"
 
   # result of preprocessing
   preproc = Dict{Symbol,Tuple}()
@@ -64,24 +63,30 @@ function preprocess(problem::SimulationProblem, solver::ImgQuilt)
     # get user parameters
     varparams = solver.params[var]
 
-    # add ghost dimension to simulation grid if necessary
-    simsize = ndims(pdomain) == 2 ? (size(pdomain)..., 1) : size(pdomain)
+    # number of dimensions
+    N = ndims(pdomain)
+
+    # simulation size
+    simsize = size(pdomain)
+
+    # default overlap
+    overlap = varparams.overlap ≠ nothing ? varparams.overlap : ntuple(i->1/6, N)
 
     # create hard data object
-    hdata = Dict{CartesianIndex{3},Real}()
+    hdata = Dict{CartesianIndex{N},Real}()
     for (loc, datloc) in datamap(problem, var)
       push!(hdata, lin2cart(simsize, loc) => pdata[datloc,var])
     end
 
     # disable inactive voxels
-    shape = Dict{CartesianIndex{3},Real}()
+    shape = Dict{CartesianIndex{N},Real}()
     if varparams.inactive ≠ nothing
       for icoords in varparams.inactive
         push!(shape, icoords => NaN)
       end
     end
 
-    preproc[var] = (varparams, simsize, merge(hdata, shape))
+    preproc[var] = (varparams, simsize, overlap, merge(hdata, shape))
   end
 
   preproc
@@ -90,11 +95,11 @@ end
 function solve_single(problem::SimulationProblem, var::Symbol,
                       solver::ImgQuilt, preproc)
   # unpack preprocessed parameters
-  par, simsize, hard = preproc[var]
+  par, simsize, overlap, hard = preproc[var]
 
   # run image quilting core function
   reals = iqsim(par.TI, par.tilesize, simsize;
-                overlap=par.overlap, path=par.path,
+                overlap=overlap, path=par.path,
                 soft=par.soft, hard=hard, tol=par.tol,
                 threads=solver.threads, gpu=solver.gpu,
                 showprogress=solver.showprogress)
