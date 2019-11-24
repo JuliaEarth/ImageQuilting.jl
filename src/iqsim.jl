@@ -250,7 +250,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
           oslice = ntuple(i -> i == d ? (spacing[d]+1:tilesize[d]) : (1:tilesize[i]), N)
           inds = CartesianIndices(oslice)
           A = view(simdev, inds); B = view(TIdev, inds)
-          cutmask[inds] .|= reverse(boykov_kolmogorov_cut(reverse(A, dims=d), reverse(B, dims=d), d), dims=d)
+          cutmask[inds] .|= .!boykov_kolmogorov_cut(A, B, d)
         end
       end
 
