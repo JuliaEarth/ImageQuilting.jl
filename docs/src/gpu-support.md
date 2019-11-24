@@ -4,6 +4,11 @@
     of [OpenCL](https://www.khronos.org/opencl) in this package, drivers for graphics cards are
     problematic and vendors such as NVIDIA do not officially support widely known operating systems.
 
+!!! warning "GPU option temporarily unavailable"
+
+    Updates in Julia > v1.0 require a major update in the GPU option,
+    see issue [#16](https://github.com/juliohm/ImageQuilting.jl/issues/16).
+
 Two external dependencies need to be manually installed:
 
 * OpenCL driver

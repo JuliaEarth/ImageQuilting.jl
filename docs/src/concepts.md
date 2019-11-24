@@ -6,17 +6,19 @@ are used, please consult the [Examples](examples.md) section.
 Voxels can be assigned values that will be honored by the simulation:
 
 ```julia
+# hard data along a vertical well
 well = Dict(CartesianIndex(i,j,k)=>value(i,j,k) for i=10, j=10, k=1:100)
+
 iqsim(..., hard=well)
 ```
 
 ## Soft data
 
-Given 3D data of the same size of the simulation grid (e.g. `seismic`) and data of the same
+Given data of the same size of the simulation grid (e.g. `seismic`) and data of the same
 of the training image (e.g. `seismicTI`), local relaxation can be performed with:
 
 ```julia
-# 3D seismic as auxiliary data
+# seismic as auxiliary data
 iqsim(..., soft=[(seismic,seismicTI)])
 ```
 

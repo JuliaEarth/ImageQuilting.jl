@@ -1,14 +1,14 @@
-# Workaround for JuliaLang/julia/pull/28625
-if Base.HOME_PROJECT[] !== nothing
-  Base.HOME_PROJECT[] = abspath(Base.HOME_PROJECT[])
-end
+# Workaround for GR warnings
+ENV["GKSwstype"] = "100"
 
-using Documenter, ImageQuilting
+using Documenter, ImageQuilting, GeoStatsBase
+
+istravis = "TRAVIS" ∈ keys(ENV)
 
 makedocs(
-  format = :html,
+  format = Documenter.HTML(prettyurls=istravis),
   sitename = "ImageQuilting.jl",
-  authors = "Júlio Hoffimann Mendes",
+  authors = "Júlio Hoffimann",
   pages = [
     "Home" => "index.md",
     "Concepts" => "concepts.md",
@@ -23,10 +23,4 @@ makedocs(
   ]
 )
 
-deploydocs(
-  repo  = "github.com/juliohm/ImageQuilting.jl.git",
-  target = "build",
-  deps = nothing,
-  make = nothing,
-  julia = "1.0"
-)
+deploydocs(repo="github.com/juliohm/ImageQuilting.jl.git")

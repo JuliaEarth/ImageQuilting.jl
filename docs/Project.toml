@@ -1,5 +1,6 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+GeoStatsBase = "323cb8eb-fbf6-51c0-afd0-f8fba70507b2"
 
 [compat]
-Documenter = "~0.19"
+Documenter = "^0.23"

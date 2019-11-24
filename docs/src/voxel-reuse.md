@@ -24,8 +24,8 @@ using ImageQuilting
 using GeoStatsImages
 using Plots
 
-TI₁ = training_image("Strebelle")
-TI₂ = training_image("StoneWall")
+TI₁ = training_image("Strebelle")[:,:,1]
+TI₂ = training_image("StoneWall")[:,:,1]
 
 voxelreuseplot(TI₁, label="Strebelle")
 voxelreuseplot!(TI₂, label="StoneWall")

@@ -25,7 +25,7 @@ efficiently (the fastest in the literature). For more details, please refer to o
 Get the latest stable release with Julia's package manager:
 
 ```julia
-Pkg.add("ImageQuilting")
+] add ImageQuilting
 ```
 
 For even faster computation with GPUs, please follow the instructions in [GPU support](gpu-support.md).
