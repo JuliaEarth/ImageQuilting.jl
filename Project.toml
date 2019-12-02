@@ -19,6 +19,21 @@ SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
+[compat]
+CpuId = "^0.2"
+FFTW = "^1.0"
+ImageFiltering = "^0.6"
+ImageMorphology = "^0.2"
+LightGraphs = "^1.2"
+LightGraphsFlows = "^0.3"
+Primes = "^0.4"
+ProgressMeter = "^1.1"
+RecipesBase = "^0.7"
+Requires = "^0.5"
+StatsBase = "^0.32"
+GeoStatsBase = "^0.7"
+julia = "1"
+
 [extras]
 GeoStatsBase = "323cb8eb-fbf6-51c0-afd0-f8fba70507b2"
 GeoStatsImages = "7cd16168-b42c-5e7d-a585-4f59d326662d"
@@ -33,18 +48,3 @@ VisualRegressionTests = "34922c18-7c2a-561c-bac1-01e79b2c4c92"
 
 [targets]
 test = ["GeoStatsImages", "Pkg", "Statistics", "Test", "Random", "VisualRegressionTests", "GeoStatsBase", "Plots", "ImageMagick", "QuartzImageIO"]
-
-[compat]
-CpuId = "^0.2"
-FFTW = "^1.0"
-ImageFiltering = "^0.6"
-ImageMorphology = "^0.2"
-LightGraphs = "^1.2"
-LightGraphsFlows = "^0.3"
-Primes = "^0.4"
-ProgressMeter = "^1.1"
-RecipesBase = "^0.7"
-Requires = "^0.5"
-StatsBase = "^0.32"
-GeoStatsBase = "^0.6"
-julia = "1"
