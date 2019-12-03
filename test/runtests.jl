@@ -13,10 +13,7 @@ islinux = Sys.islinux()
 istravis = "TRAVIS" ∈ keys(ENV)
 datadir = joinpath(@__DIR__,"data")
 visualtests = !istravis || (istravis && islinux)
-if !istravis
-  Pkg.add("Gtk")
-  using Gtk
-end
+!istravis && Pkg.add("Gtk")
 
 @testset "ImageQuilting.jl" begin
   @testset "Basic checks" begin
