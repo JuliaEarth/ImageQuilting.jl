@@ -17,7 +17,7 @@ any of its supported backends (e.g. [GR.jl](https://github.com/jheinen/GR.jl)):
 ```
 
 The example below uses training images from the
-[GeoStatsImages.jl](https://github.com/juliohm/GeoStatsImages.jl) package:
+[GeoStatsImages.jl](https://github.com/JuliaEarth/GeoStatsImages.jl) package:
 
 ```julia
 using ImageQuilting

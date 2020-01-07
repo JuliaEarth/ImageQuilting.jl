@@ -7,7 +7,7 @@
 !!! warning "GPU option temporarily unavailable"
 
     Updates in Julia > v1.0 require a major update in the GPU option,
-    see issue [#16](https://github.com/juliohm/ImageQuilting.jl/issues/16).
+    see issue [#16](https://github.com/JuliaEarth/ImageQuilting.jl/issues/16).
 
 Two external dependencies need to be manually installed:
 

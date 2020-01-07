@@ -10,7 +10,7 @@ ImageQuilting.jl
 ## Latest News
 - ImageQuilting.jl won the [Syvitski Modeler Award 2018](https://csdms.colorado.edu/wiki/Student_Modeler_Award_2018).
 - ImageQuilting.jl can now be used as one of the many solvers in the
-[GeoStats.jl](https://github.com/juliohm/GeoStats.jl) framework.
+[GeoStats.jl](https://github.com/JuliaEarth/GeoStats.jl) framework.
 For more information, please type `?ImgQuilt` in the Julia prompt
 after loading the package.
 
@@ -75,16 +75,16 @@ Contributing
 
 Contributions are very welcome, as are feature requests and suggestions.
 
-Please [open an issue](https://github.com/juliohm/ImageQuilting.jl/issues) if you encounter any problems.
+Please [open an issue](https://github.com/JuliaEarth/ImageQuilting.jl/issues) if you encounter any problems.
 
-[travis-img]: https://travis-ci.org/juliohm/ImageQuilting.jl.svg?branch=master
-[travis-url]: https://travis-ci.org/juliohm/ImageQuilting.jl
+[travis-img]: https://travis-ci.org/JuliaEarth/ImageQuilting.jl.svg?branch=master
+[travis-url]: https://travis-ci.org/JuliaEarth/ImageQuilting.jl
 
-[codecov-img]: https://codecov.io/gh/juliohm/ImageQuilting.jl/branch/master/graph/badge.svg
-[codecov-url]: https://codecov.io/gh/juliohm/ImageQuilting.jl
+[codecov-img]: https://codecov.io/gh/JuliaEarth/ImageQuilting.jl/branch/master/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/JuliaEarth/ImageQuilting.jl
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
-[docs-stable-url]: https://juliohm.github.io/ImageQuilting.jl/stable
+[docs-stable-url]: https://JuliaEarth.github.io/ImageQuilting.jl/stable
 
 [docs-latest-img]: https://img.shields.io/badge/docs-latest-blue.svg
-[docs-latest-url]: https://juliohm.github.io/ImageQuilting.jl/latest
+[docs-latest-url]: https://JuliaEarth.github.io/ImageQuilting.jl/latest

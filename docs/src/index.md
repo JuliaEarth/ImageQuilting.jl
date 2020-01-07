@@ -2,10 +2,10 @@
 
 *A Julia package for fast 3D image quilting simulation.*
 
-[![Build Status](https://travis-ci.org/juliohm/ImageQuilting.jl.svg?branch=master)](https://travis-ci.org/juliohm/ImageQuilting.jl)
-[![Coverage Status](https://coveralls.io/repos/juliohm/ImageQuilting.jl/badge.svg?branch=master)](https://coveralls.io/r/juliohm/ImageQuilting.jl?branch=master)
-[![Stable Documentation](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliohm.github.io/ImageQuilting.jl/stable)
-[![Latest Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://juliohm.github.io/ImageQuilting.jl/latest)
+[![Build Status](https://travis-ci.org/JuliaEarth/ImageQuilting.jl.svg?branch=master)](https://travis-ci.org/JuliaEarth/ImageQuilting.jl)
+[![Coverage Status](https://coveralls.io/repos/JuliaEarth/ImageQuilting.jl/badge.svg?branch=master)](https://coveralls.io/r/JuliaEarth/ImageQuilting.jl?branch=master)
+[![Stable Documentation](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaEarth.github.io/ImageQuilting.jl/stable)
+[![Latest Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaEarth.github.io/ImageQuilting.jl/latest)
 
 This package implements an extension to the famous Efros-Freeman algorithm for texture synthesis and transfer in computer vision.
 Unlike the original algorithm developed for 2D images, our method can also handle 3D masked grids and pre-existing point-data very
@@ -32,7 +32,7 @@ For even faster computation with GPUs, please follow the instructions in [GPU su
 
 ## Usage
 
-This package is part of the [GeoStats.jl](https://github.com/juliohm/GeoStats.jl) framework. Solver
+This package is part of the [GeoStats.jl](https://github.com/JuliaEarth/GeoStats.jl) framework. Solver
 options are displayed below:
 
 ```@docs

@@ -1,6 +1,6 @@
 !!! note
 
-    Consider installing the [GeoStatsImages.jl](https://github.com/juliohm/GeoStatsImages.jl) package.
+    Consider installing the [GeoStatsImages.jl](https://github.com/JuliaEarth/GeoStatsImages.jl) package.
 
 ## Unconditional
 

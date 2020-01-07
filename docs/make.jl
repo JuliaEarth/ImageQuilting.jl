@@ -23,4 +23,4 @@ makedocs(
   ]
 )
 
-deploydocs(repo="github.com/juliohm/ImageQuilting.jl.git")
+deploydocs(repo="github.com/JuliaEarth/ImageQuilting.jl.git")
