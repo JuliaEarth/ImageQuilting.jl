@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------
 
 using .GeoStatsBase
-import .GeoStatsBase: preprocess, solve_single
+import .GeoStatsBase: preprocess, solvesingle
 
 """
     ImgQuilt(var₁=>param₁, var₂=>param₂, ...)
@@ -50,6 +50,8 @@ function preprocess(problem::SimulationProblem, solver::ImgQuilt)
   # retrieve problem info
   pdata = data(problem)
   pdomain = domain(problem)
+  dims = ndims(pdomain)
+  simsize = size(pdomain)
 
   # sanity checks
   @assert pdomain isa RegularGrid "ImgQuilt requires RegularGrid domain"
@@ -57,53 +59,52 @@ function preprocess(problem::SimulationProblem, solver::ImgQuilt)
   # result of preprocessing
   preproc = Dict{Symbol,Tuple}()
 
-  for (var, V) in variables(problem)
-    @assert var ∈ keys(solver.params) "Parameters for variable `$var` not found"
+  for covars in covariables(problem, solver)
+    for var in covars.names
+      # get user parameters
+      varparams = covars.params[(var,)]
 
-    # get user parameters
-    varparams = solver.params[var]
+      # default overlap
+      overlap = varparams.overlap ≠ nothing ? varparams.overlap :
+                                              ntuple(i->1/6, dims)
 
-    # number of dimensions
-    N = ndims(pdomain)
-
-    # simulation size
-    simsize = size(pdomain)
-
-    # default overlap
-    overlap = varparams.overlap ≠ nothing ? varparams.overlap : ntuple(i->1/6, N)
-
-    # create hard data object
-    hdata = Dict{CartesianIndex{N},Real}()
-    for (loc, datloc) in datamap(problem, var)
-      push!(hdata, lin2cart(simsize, loc) => pdata[datloc,var])
-    end
-
-    # disable inactive voxels
-    shape = Dict{CartesianIndex{N},Real}()
-    if varparams.inactive ≠ nothing
-      for icoords in varparams.inactive
-        push!(shape, icoords => NaN)
+      # create hard data object
+      hdata = Dict{CartesianIndex{dims},Real}()
+      for (loc, datloc) in datamap(problem, var)
+        push!(hdata, lin2cart(simsize, loc) => pdata[datloc,var])
       end
-    end
 
-    preproc[var] = (varparams, simsize, overlap, merge(hdata, shape))
+      # disable inactive voxels
+      shape = Dict{CartesianIndex{dims},Real}()
+      if varparams.inactive ≠ nothing
+        for icoords in varparams.inactive
+          push!(shape, icoords => NaN)
+        end
+      end
+
+      preproc[var] = (varparams, simsize, overlap, merge(hdata, shape))
+    end
   end
 
   preproc
 end
 
-function solve_single(problem::SimulationProblem, var::Symbol,
-                      solver::ImgQuilt, preproc)
-  # unpack preprocessed parameters
-  par, simsize, overlap, hard = preproc[var]
+function solvesingle(problem::SimulationProblem, covars::NamedTuple,
+                     solver::ImgQuilt, preproc)
+  varreal = map(covars.names) do var
+    # unpack preprocessed parameters
+    par, simsize, overlap, hard = preproc[var]
 
-  # run image quilting core function
-  reals = iqsim(par.TI, par.tilesize, simsize;
-                overlap=overlap, path=par.path,
-                soft=par.soft, hard=hard, tol=par.tol,
-                threads=solver.threads, gpu=solver.gpu,
-                showprogress=solver.showprogress)
+    # run image quilting core function
+    reals = iqsim(par.TI, par.tilesize, simsize;
+                  overlap=overlap, path=par.path,
+                  soft=par.soft, hard=hard, tol=par.tol,
+                  threads=solver.threads, gpu=solver.gpu,
+                  showprogress=solver.showprogress)
 
-  # flatten result
-  reals[1][:]
+    # flatten result
+    var => vec(reals[1])
+  end
+
+  Dict(varreal)
 end

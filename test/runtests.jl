@@ -147,7 +147,7 @@ visualtests = !istravis || (istravis && islinux)
   end
 
   @testset "GeoStats.jl API" begin
-    sdata   = PointSetData(Dict(:variable => [1.,0.,1.]), [25. 50. 75.; 25. 75. 50.])
+    sdata   = PointSetData(OrderedDict(:variable => [1.,0.,1.]), [25. 50. 75.; 25. 75. 50.])
     sdomain = RegularGrid{Float64}(100,100)
     problem = SimulationProblem(sdata, sdomain, :variable, 3)
 
@@ -160,7 +160,7 @@ visualtests = !istravis || (istravis && islinux)
     @test keys(solution.realizations) ⊆ [:variable]
 
     incomplete_solver = ImgQuilt()
-    @test_throws AssertionError solve(problem, incomplete_solver)
+    @test_throws ErrorException solve(problem, incomplete_solver)
 
     if visualtests
       @plottest plot(solution,size=(1000,300)) joinpath(datadir,"GeoStatsAPI.png") !istravis
