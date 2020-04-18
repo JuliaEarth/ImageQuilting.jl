@@ -23,7 +23,7 @@ function gpu_setup()
   dev = []
   devnames = map(d -> d[:platform][:name], devs)
   for vendor in ["NVIDIA","AMD","Intel"], (idx,name) in enumerate(devnames)
-    if contains(name, vendor)
+    if occursin(vendor, name)
       dev = devs[idx]
       break
     end
@@ -32,7 +32,7 @@ function gpu_setup()
   devtype = uppercase(string(dev[:device_type]))
   devname = dev[:name]
 
-  info("using $devtype $devname")
+  @info "using $devtype $devname"
 
   ctx = cl.Context(dev)
   queue = cl.CmdQueue(ctx)
@@ -42,7 +42,7 @@ function gpu_setup()
 end
 
 function basic_kernels(ctx)
-  const mult_kernel = "
+  mult_kernel = "
     __kernel void mult(__global const float2 *a,
                        __global const float2 *b,
                        __global float2 *c)
