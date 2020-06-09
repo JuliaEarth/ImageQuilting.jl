@@ -49,22 +49,22 @@
   ymax = ymin + .008
 
   @series begin
-    seriestype := :shape
-    linewidth := 0
-    fillalpha := .5
+    seriestype --> :shape
+    linewidth --> 0
+    fillalpha --> .5
     label --> "Optimum range: [$xmin, $xmax]"
 
     [xmin, xmax, xmax, xmin], [ymin, ymin, ymax, ymax]
   end
 
-  seriestype := :path
-  primary := false
-  ribbon := σs
-  fillalpha := .5
-  xlim := (0, tmax)
-  ylim := (ymin, Inf)
-  xlabel --> "Tile size"
-  ylabel --> "Voxel reuse"
+  seriestype --> :path
+  primary --> false
+  ribbon --> σs
+  fillalpha --> .5
+  xlims --> (0, tmax)
+  ylims --> (ymin, Inf)
+  xguide --> "Tile size"
+  yguide --> "Voxel reuse"
 
   ts, μs
 end
