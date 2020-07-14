@@ -135,26 +135,32 @@ end
   end
 
   if visualtests
-    for TIname in ["Strebelle","StoneWall"]
+    for (TIname,var) in [("Strebelle",:facies),("StoneWall",:Z)]
       Random.seed!(2017)
-      TI = training_image(TIname)[1:50,1:50,:]
+      sdata = geostatsimage(TIname)
+      dims  = size(domain(sdata))
+      TI = reshape(sdata[var], dims)[1:50,1:50,:]
       reals = iqsim(TI, (30,30,1), size(TI), nreal=4)
       ps = [heatmap(real[:,:,1]) for real in reals]
       @plottest plot(ps...) joinpath(datadir,"Reals"*TIname*".png") !istravis
     end
     for TIname in ["StoneWall","WalkerLake"]
       Random.seed!(2017)
-      TI = training_image(TIname)[1:20,1:20,:]
+      sdata = geostatsimage(TIname)
+      dims  = size(domain(sdata))
+      TI = reshape(sdata[:Z], dims)[1:20,1:20,:]
       @plottest voxelreuseplot(TI) joinpath(datadir,"Voxel"*TIname*".png") !istravis
     end
   end
 
   @testset "GeoStats.jl API" begin
-    sdata   = PointSetData(OrderedDict(:variable => [1.,0.,1.]), [25. 50. 75.; 25. 75. 50.])
-    sdomain = RegularGrid{Float64}(100,100)
+    sdata   = georef((variable=[1.,0.,1.],), [25. 50. 75.; 25. 75. 50.])
+    sdomain = RegularGrid(100,100)
     problem = SimulationProblem(sdata, sdomain, :variable, 3)
 
-    TI = training_image("Strebelle")[:,:,1]
+    sdata = geostatsimage("Strebelle")
+    dims  = size(domain(sdata))
+    TI = reshape(sdata[:facies], dims)
     inactive = [CartesianIndex(i,j) for i in 1:30 for j in 1:30]
     solver = ImgQuilt(:variable => (TI=TI, tilesize=(30,30), inactive=inactive))
 
@@ -166,18 +172,7 @@ end
     @test_throws ErrorException solve(problem, incomplete_solver)
 
     if visualtests
-      @plottest plot(solution,size=(1000,300)) joinpath(datadir,"GeoStatsAPI.png") !istravis
+      @plottest plot(solution,size=(900,300)) joinpath(datadir,"GeoStatsAPI.png") !istravis
     end
   end
-
-  # if ImageQuilting.cl ≠ nothing && ImageQuilting.clfft ≠ nothing
-    # @testset "GPU support" begin
-      # # CPU and GPU give same results
-      # TI = ones(20,20,20)
-      # TI[10:end,:,:] = 2
-      # Random.seed!(0); realscpu = iqsim(TI, (10,10,10), size(TI), gpu=false)
-      # Random.seed!(0); realsgpu = iqsim(TI, (10,10,10), size(TI), gpu=true)
-      # @test realscpu[1] == realsgpu[1]
-    # end
-  # end
 end
