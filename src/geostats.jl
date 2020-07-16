@@ -14,12 +14,12 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
 
 ### Required
 
-* `TI`       - Training image
-* `tilesize` - Tile size in x, y and z
+* `TI`       - Training image from which to extract tiles
+* `tilesize` - Tuple with tile size for each dimension
 
 ### Optional
 
-* `overlap`  - Overlap size in x, y and z (default to (1/6, 1/6, ..., 1/6))
+* `overlap`  - Overlap size (default to (1/6, 1/6, ..., 1/6))
 * `path`     - Simulation path (:raster (default), :dilation, or :random)
 * `inactive` - Vector of inactive voxels (i.e. tuples (i,j,k)) in the grid
 * `soft`     - A vector of `(data,dataTI)` pairs
