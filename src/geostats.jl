@@ -50,7 +50,7 @@ function preprocess(problem::SimulationProblem, solver::ImgQuilt)
   # retrieve problem info
   pdata = data(problem)
   pdomain = domain(problem)
-  dims = ndims(pdomain)
+  dims = ncoords(pdomain)
   simsize = size(pdomain)
 
   # sanity checks
