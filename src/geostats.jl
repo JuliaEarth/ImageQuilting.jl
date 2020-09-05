@@ -71,7 +71,7 @@ function preprocess(problem::SimulationProblem, solver::ImgQuilt)
       # create hard data object
       hdata = Dict{CartesianIndex{dims},Real}()
       for (loc, datloc) in datamap(problem, var)
-        push!(hdata, lin2cart(simsize, loc) => pdata[datloc,var])
+        push!(hdata, lin2cart(simsize, loc) => pdata[var][datloc])
       end
 
       # disable inactive voxels

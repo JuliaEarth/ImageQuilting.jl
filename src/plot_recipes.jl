@@ -16,8 +16,8 @@
   idx = [extent...] .> 1
 
   # default support
-  tmin == nothing && (tmin = 7)
-  tmax == nothing && (tmax = min(100, minimum(extent[idx])))
+  isnothing(tmin) && (tmin = 7)
+  isnothing(tmax) && (tmax = min(100, minimum(extent[idx])))
 
   @assert tmin > 0 "tmin must be positive"
   @assert tmin < tmax "tmin must be smaller than tmax"
@@ -28,7 +28,7 @@
   # compute voxel reuse for each tile size
   μs = Vector{Float64}()
   σs = Vector{Float64}()
-  p = Progress(length(ts), color=:black)
+  p = Progress(length(ts))
   for t in ts
     tilesize = ntuple(i -> idx[i] ? t : 1, 3)
 
