@@ -13,7 +13,7 @@ reuse of a training image, install [Plots.jl](https://github.com/JuliaPlots/Plot
 any of its supported backends (e.g. [GR.jl](https://github.com/jheinen/GR.jl)):
 
 ```julia
-] add Plots GR
+] add Plots
 ```
 
 The example below uses training images from the
@@ -24,8 +24,8 @@ using ImageQuilting
 using GeoStatsImages
 using Plots
 
-TI₁ = training_image("Strebelle")[:,:,1]
-TI₂ = training_image("StoneWall")[:,:,1]
+TI₁ = geostatsimage("Strebelle")
+TI₂ = geostatsimage("StoneWall")
 
 voxelreuseplot(TI₁, label="Strebelle")
 voxelreuseplot!(TI₂, label="StoneWall")

@@ -1,7 +1,7 @@
 # Workaround for GR warnings
 ENV["GKSwstype"] = "100"
 
-using Documenter, ImageQuilting, GeoStatsBase
+using Documenter, ImageQuilting
 
 istravis = "TRAVIS" ∈ keys(ENV)
 
@@ -11,7 +11,6 @@ makedocs(
   authors = "Júlio Hoffimann",
   pages = [
     "Home" => "index.md",
-    "Concepts" => "concepts.md",
     "Examples" => "examples.md",
     "Voxel reuse" => "voxel-reuse.md",
     "GPU support" => "gpu-support.md",
