@@ -77,15 +77,15 @@ nx, ny = size(domain(trainimg))
 r = 100; circle = []
 for i=1:nx, j=1:ny
     if (i-nx÷2)^2 + (j-ny÷2)^2 < r^2
-        push!(circle, CartesianIndex(i,j)=>NaN)
+        push!(circle, CartesianIndex(i,j))
     end
 end
 
-problem = SimulationProblem(domain(trainimg), :facies => Int, 3)
+problem = SimulationProblem(domain(trainimg), :facies => Float64, 3)
 
 solver = ImgQuilt(
     :facies => (
-        trainimg = geostatsimage("Strebelle"),
+        trainimg = trainimg,
         tilesize = (62,62),
         inactive = circle
     )
