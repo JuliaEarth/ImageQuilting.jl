@@ -30,6 +30,20 @@ Get the latest stable release with Julia's package manager:
 
 For even faster computation with GPUs, please follow the instructions in [GPU support](gpu-support.md).
 
+## Talks
+
+Below is a list of talks related to this project. For more material, please subscribe to the
+[YouTube channel](https://www.youtube.com/channel/UCiOnsyYAZM-voi5diu8lN9w).
+
+```@raw html
+<p align="center">
+<iframe width="560" height="315" src="https://www.youtube.com/embed/YJs7jl_Y9yM" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+<p align="center">
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Y5KhQCapuPw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+```
+
 ## Usage
 
 This package is part of the [GeoStats.jl](https://github.com/JuliaEarth/GeoStats.jl) framework. Solver
