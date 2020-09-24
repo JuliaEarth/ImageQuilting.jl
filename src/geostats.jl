@@ -18,7 +18,7 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
 
 * `overlap`  - Overlap size (default to (1/6, 1/6, ..., 1/6))
 * `path`     - Simulation path (:raster (default), :dilation, or :random)
-* `inactive` - Vector of inactive voxels (i.e. tuples (i,j,k)) in the grid
+* `inactive` - Vector of inactive voxels (i.e. `CartesianIndex`) in the grid
 * `soft`     - A vector of `(data,dataTI)` pairs
 * `tol`      - Initial relaxation tolerance in (0,1] (default to 0.1)
 
@@ -67,20 +67,20 @@ function preprocess(problem::SimulationProblem, solver::ImgQuilt)
                                               ntuple(i->1/6, dims)
 
       # create hard data object
-      hdata = []
+      hdata = Dict{CartesianIndex{dims},Real}()
       for (loc, datloc) in datamap(problem, var)
         push!(hdata, lin2cart(simsize, loc) => pdata[var][datloc])
       end
 
       # disable inactive voxels
-      shape = []
+      shape = Dict{CartesianIndex{dims},Real}()
       if varparams.inactive ≠ nothing
         for icoords in varparams.inactive
           push!(shape, icoords => NaN)
         end
       end
 
-      hard = merge(Dict(hdata), Dict(shape))
+      hard = merge(hdata, shape)
 
       preproc[var] = (varparams, trainimg, simsize, overlap, hard)
     end
