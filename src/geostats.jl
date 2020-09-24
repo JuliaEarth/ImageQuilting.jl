@@ -11,7 +11,7 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
 
 ### Required
 
-* `TI`       - Training image from which to extract tiles
+* `trainimg` - Training image from which to extract tiles
 * `tilesize` - Tuple with tile size for each dimension
 
 ### Optional
@@ -31,7 +31,7 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
 * `showprogress` - Whether to show or not the estimated time duration (default to false)
 """
 @simsolver ImgQuilt begin
-  @param TI
+  @param trainimg
   @param tilesize
   @param overlap       = nothing
   @param path          = :raster
@@ -58,6 +58,10 @@ function preprocess(problem::SimulationProblem, solver::ImgQuilt)
       # get user parameters
       varparams = covars.params[(var,)]
 
+      # training image as simple array
+      TI = varparams.trainimg
+      trainimg = reshape(TI[var], size(domain(TI)))
+
       # default overlap
       overlap = varparams.overlap ≠ nothing ? varparams.overlap :
                                               ntuple(i->1/6, dims)
@@ -78,7 +82,7 @@ function preprocess(problem::SimulationProblem, solver::ImgQuilt)
 
       hard = merge(Dict(hdata), Dict(shape))
 
-      preproc[var] = (varparams, simsize, overlap, hard)
+      preproc[var] = (varparams, trainimg, simsize, overlap, hard)
     end
   end
 
@@ -89,10 +93,10 @@ function solvesingle(problem::SimulationProblem, covars::NamedTuple,
                      solver::ImgQuilt, preproc)
   varreal = map(covars.names) do var
     # unpack preprocessed parameters
-    par, simsize, overlap, hard = preproc[var]
+    par, trainimg, simsize, overlap, hard = preproc[var]
 
     # run image quilting core function
-    reals = iqsim(par.TI, par.tilesize, simsize;
+    reals = iqsim(trainimg, par.tilesize, simsize;
                   overlap=overlap, path=par.path,
                   soft=par.soft, hard=hard, tol=par.tol,
                   threads=solver.threads, gpu=solver.gpu,

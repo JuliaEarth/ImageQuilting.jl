@@ -154,19 +154,17 @@ end
   end
 
   @testset "GeoStats.jl API" begin
-    sdata   = georef((variable=[1.,0.,1.],), [25. 50. 75.; 25. 75. 50.])
+    sdata   = georef((facies=[1.,0.,1.],), [25. 50. 75.; 25. 75. 50.])
     sdomain = RegularGrid(100,100)
-    problem = SimulationProblem(sdata, sdomain, :variable, 3)
+    problem = SimulationProblem(sdata, sdomain, :facies, 3)
 
-    sdata = geostatsimage("Strebelle")
-    dims  = size(domain(sdata))
-    TI = reshape(sdata[:facies], dims)
+    trainimg = geostatsimage("Strebelle")
     inactive = [CartesianIndex(i,j) for i in 1:30 for j in 1:30]
-    solver = ImgQuilt(:variable => (TI=TI, tilesize=(30,30), inactive=inactive))
+    solver = ImgQuilt(:facies => (trainimg=trainimg, tilesize=(30,30), inactive=inactive))
 
     Random.seed!(2017)
     solution = solve(problem, solver)
-    @test keys(solution.realizations) ⊆ [:variable]
+    @test keys(solution.realizations) ⊆ [:facies]
 
     incomplete_solver = ImgQuilt()
     @test_throws ErrorException solve(problem, incomplete_solver)
