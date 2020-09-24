@@ -29,6 +29,11 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
 * `threads`      - Number of threads in FFT (default to number of physical CPU cores)
 * `gpu`          - Whether to use the GPU or the CPU (default to false)
 * `showprogress` - Whether to show or not the estimated time duration (default to false)
+
+## References
+
+* Hoffimann et al 2017. *Stochastic simulation by image quilting of process-based geological models.*
+* Hoffimann et al 2015. *Geostatistical modeling of evolving landscapes by means of image quilting.*
 """
 @simsolver ImgQuilt begin
   @param trainimg
