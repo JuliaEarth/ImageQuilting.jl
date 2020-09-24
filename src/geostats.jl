@@ -45,13 +45,10 @@ end
 
 function preprocess(problem::SimulationProblem, solver::ImgQuilt)
   # retrieve problem info
-  pdata = data(problem)
+  pdata   = data(problem)
   pdomain = domain(problem)
-  dims = ncoords(pdomain)
   simsize = size(pdomain)
-
-  # sanity checks
-  @assert pdomain isa RegularGrid "ImgQuilt requires RegularGrid domain"
+  dims    = ncoords(pdomain)
 
   # result of preprocessing
   preproc = Dict{Symbol,Tuple}()
@@ -66,20 +63,22 @@ function preprocess(problem::SimulationProblem, solver::ImgQuilt)
                                               ntuple(i->1/6, dims)
 
       # create hard data object
-      hdata = Dict{CartesianIndex{dims},Real}()
+      hdata = []
       for (loc, datloc) in datamap(problem, var)
         push!(hdata, lin2cart(simsize, loc) => pdata[var][datloc])
       end
 
       # disable inactive voxels
-      shape = Dict{CartesianIndex{dims},Real}()
+      shape = []
       if varparams.inactive ≠ nothing
         for icoords in varparams.inactive
           push!(shape, icoords => NaN)
         end
       end
 
-      preproc[var] = (varparams, simsize, overlap, merge(hdata, shape))
+      hard = merge(Dict(hdata), Dict(shape))
+
+      preproc[var] = (varparams, simsize, overlap, hard)
     end
   end
 
