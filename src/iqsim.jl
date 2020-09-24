@@ -130,12 +130,12 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   voxelreuse   = Vector{Float64}()
 
   # preallocate memory
-  ovlmask   = Array{Bool}(undef, tilesize)
-  cutmask   = Array{Bool}(undef, tilesize)
+  ovlmask   = BitArray(undef, tilesize)
+  cutmask   = BitArray(undef, tilesize)
   ovldist   = Array{Float64}(undef, distsize)
   softdists = [Array{Float64}(undef, distsize) for i in 1:length(soft)]
   if !isempty(hard)
-    hardmask = Array{Bool}(undef, tilesize)
+    hardmask = BitArray(undef, tilesize)
     harddev  = Array{Float64}(undef, tilesize)
     harddist = Array{Float64}(undef, distsize)
   end
