@@ -4,6 +4,7 @@
 
 module ImageQuilting
 
+using GeoStatsBase
 using ImageFiltering
 using ImageMorphology
 using LightGraphs
@@ -19,6 +20,8 @@ using SparseArrays: spzeros
 using Random: shuffle!, randperm
 using Statistics: mean, std
 
+import GeoStatsBase: preprocess, solvesingle
+
 include("utils.jl")
 include("plot_recipes.jl")
 include("imfilter_cpu.jl")
@@ -27,12 +30,7 @@ include("tau_model.jl")
 include("graphcuts.jl")
 include("voxel_reuse.jl")
 include("iqsim.jl")
-
-# optionally load GeoStats.jl API
-using Requires
-function __init__()
-    @require GeoStatsBase="323cb8eb-fbf6-51c0-afd0-f8fba70507b2" include("geostats.jl")
-end
+include("geostats.jl")
 
 export
   # functions

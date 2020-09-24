@@ -2,9 +2,6 @@
 # Licensed under the ISC License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-using .GeoStatsBase
-import .GeoStatsBase: preprocess, solvesingle
-
 """
     ImgQuilt(var₁=>param₁, var₂=>param₂, ...)
 
