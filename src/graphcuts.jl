@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------
-# Licensed under the ISC License. See LICENCE in the project root.
+# Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
 function boykov_kolmogorov_cut(A::AbstractArray{T,N}, B::AbstractArray{T,N}, dim::Integer) where {N,T}
