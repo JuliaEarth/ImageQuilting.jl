@@ -38,6 +38,6 @@ export
   voxelreuse,
 
   # geostats solver
-  ImgQuilt
+  IQ
 
 end

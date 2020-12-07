@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------
 
 """
-    ImgQuilt(var₁=>param₁, var₂=>param₂, ...)
+    IQ(var₁=>param₁, var₂=>param₂, ...)
 
 Image quilting simulation solver as described in Hoffimann et al. 2017.
 
@@ -18,6 +18,7 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
 
 * `overlap`  - Overlap size (default to (1/6, 1/6, ..., 1/6))
 * `path`     - Simulation path (:raster (default), :dilation, or :random)
+* `mapping`  - Data mapping method (default to `NearestMapping()`)
 * `inactive` - Vector of inactive voxels (i.e. `CartesianIndex`) in the grid
 * `soft`     - A vector of `(data,dataTI)` pairs
 * `tol`      - Initial relaxation tolerance in (0,1] (default to 0.1)
@@ -35,11 +36,12 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
 * Hoffimann et al 2017. *Stochastic simulation by image quilting of process-based geological models.*
 * Hoffimann et al 2015. *Geostatistical modeling of evolving landscapes by means of image quilting.*
 """
-@simsolver ImgQuilt begin
+@simsolver IQ begin
   @param trainimg
   @param tilesize
   @param overlap       = nothing
   @param path          = :raster
+  @param mapping       = NearestMapping()
   @param inactive      = nothing
   @param soft          = []
   @param tol           = .1
@@ -48,7 +50,7 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
   @global showprogress = false
 end
 
-function preprocess(problem::SimulationProblem, solver::ImgQuilt)
+function preprocess(problem::SimulationProblem, solver::IQ)
   # retrieve problem info
   pdata   = data(problem)
   pdomain = domain(problem)
@@ -71,9 +73,16 @@ function preprocess(problem::SimulationProblem, solver::ImgQuilt)
       overlap = varparams.overlap ≠ nothing ? varparams.overlap :
                                               ntuple(i->1/6, dims)
 
+      # determine data mappings
+      vmapping = if hasdata(problem)
+        map(pdata, pdomain, (var,), varparams.mapping)[var]
+      else
+        Dict()
+      end
+
       # create hard data object
       hdata = Dict{CartesianIndex{dims},Real}()
-      for (loc, datloc) in datamap(problem, var)
+      for (loc, datloc) in vmapping
         push!(hdata, lin2cart(simsize, loc) => pdata[var][datloc])
       end
 
@@ -94,8 +103,7 @@ function preprocess(problem::SimulationProblem, solver::ImgQuilt)
   preproc
 end
 
-function solvesingle(problem::SimulationProblem, covars::NamedTuple,
-                     solver::ImgQuilt, preproc)
+function solvesingle(::SimulationProblem, covars::NamedTuple, solver::IQ, preproc)
   varreal = map(covars.names) do var
     # unpack preprocessed parameters
     par, trainimg, simsize, overlap, hard = preproc[var]

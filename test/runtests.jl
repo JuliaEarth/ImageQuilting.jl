@@ -160,13 +160,13 @@ end
 
     trainimg = geostatsimage("Strebelle")
     inactive = [CartesianIndex(i,j) for i in 1:30 for j in 1:30]
-    solver = ImgQuilt(:facies => (trainimg=trainimg, tilesize=(30,30), inactive=inactive))
+    solver = IQ(:facies => (trainimg=trainimg, tilesize=(30,30), inactive=inactive))
 
     Random.seed!(2017)
     solution = solve(problem, solver)
     @test keys(solution.realizations) ⊆ [:facies]
 
-    incomplete_solver = ImgQuilt()
+    incomplete_solver = IQ()
     @test_throws ErrorException solve(problem, incomplete_solver)
 
     if visualtests
