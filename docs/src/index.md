@@ -50,7 +50,7 @@ This package is part of the [GeoStats.jl](https://github.com/JuliaEarth/GeoStats
 options are displayed below:
 
 ```@docs
-ImgQuilt
+IQ
 ```
 
 ### Low-level API

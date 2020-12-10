@@ -13,7 +13,7 @@ gr(size=(850,300)) # hide
 
 problem = SimulationProblem(RegularGrid(200,200), :facies => Int, 3)
 
-solver = ImgQuilt(
+solver = IQ(
     :facies => (
         trainimg = geostatsimage("Strebelle"),
         tilesize = (62,62)
@@ -28,7 +28,7 @@ plot(solution)
 ```@example basics
 problem = SimulationProblem(RegularGrid(200,200), :Z => Int, 3)
 
-solver = ImgQuilt(
+solver = IQ(
     :Z => (
         trainimg = geostatsimage("StoneWall"),
         tilesize = (13,13)
@@ -50,7 +50,7 @@ observed = sample(trainimg, 20, replace=false)
 
 problem = SimulationProblem(observed, domain(trainimg), :facies, 3)
 
-solver = ImgQuilt(
+solver = IQ(
     :facies => (
         trainimg = trainimg,
         tilesize = (30,30)
@@ -83,7 +83,7 @@ end
 
 problem = SimulationProblem(domain(trainimg), :facies => Float64, 3)
 
-solver = ImgQuilt(
+solver = IQ(
     :facies => (
         trainimg = trainimg,
         tilesize = (62,62),
