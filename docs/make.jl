@@ -3,10 +3,10 @@ ENV["GKSwstype"] = "100"
 
 using Documenter, ImageQuilting
 
-istravis = "TRAVIS" ∈ keys(ENV)
+isCI = "CI" ∈ keys(ENV)
 
 makedocs(
-  format = Documenter.HTML(prettyurls=istravis),
+  format = Documenter.HTML(prettyurls=isCI),
   sitename = "ImageQuilting.jl",
   authors = "Júlio Hoffimann",
   pages = [
