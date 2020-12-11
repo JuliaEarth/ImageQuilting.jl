@@ -142,14 +142,14 @@ datadir = joinpath(@__DIR__,"data")
       TI = reshape(sdata[var], dims)[1:50,1:50,:]
       reals = iqsim(TI, (30,30,1), size(TI), nreal=4)
       ps = [heatmap(real[:,:,1]) for real in reals]
-      @plottest plot(ps...) joinpath(datadir,"Reals"*TIname*".png") !istravis
+      @plottest plot(ps...) joinpath(datadir,"Reals"*TIname*".png") !isCI
     end
     for TIname in ["StoneWall","WalkerLake"]
       Random.seed!(2017)
       sdata = geostatsimage(TIname)
       dims  = size(domain(sdata))
       TI = reshape(sdata[:Z], dims)[1:20,1:20,:]
-      @plottest voxelreuseplot(TI) joinpath(datadir,"Voxel"*TIname*".png") !istravis
+      @plottest voxelreuseplot(TI) joinpath(datadir,"Voxel"*TIname*".png") !isCI
     end
   end
 
@@ -170,7 +170,7 @@ datadir = joinpath(@__DIR__,"data")
     @test_throws ErrorException solve(problem, incomplete_solver)
 
     if visualtests
-      @plottest plot(solution,size=(900,300)) joinpath(datadir,"GeoStatsAPI.png") !istravis
+      @plottest plot(solution,size=(900,300)) joinpath(datadir,"GeoStatsAPI.png") !isCI
     end
   end
 end
