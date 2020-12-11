@@ -2,7 +2,7 @@
 
 *A Julia package for fast 3D image quilting simulation.*
 
-[![Build Status](https://travis-ci.org/JuliaEarth/ImageQuilting.jl.svg?branch=master)](https://travis-ci.org/JuliaEarth/ImageQuilting.jl)
+[![Build Status](https://img.shields.io/github/workflow/status/JuliaEarth/ImageQuilting.jl/CI)](https://github.com/JuliaEarth/ImageQuilting.jl/actions)
 [![Coverage Status](https://coveralls.io/repos/JuliaEarth/ImageQuilting.jl/badge.svg?branch=master)](https://coveralls.io/r/JuliaEarth/ImageQuilting.jl?branch=master)
 [![Stable Documentation](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaEarth.github.io/ImageQuilting.jl/stable)
 [![Latest Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaEarth.github.io/ImageQuilting.jl/latest)
