@@ -80,7 +80,7 @@ Please [open an issue](https://github.com/JuliaEarth/ImageQuilting.jl/issues) if
 [build-img]: https://img.shields.io/github/workflow/status/JuliaEarth/ImageQuilting.jl/CI
 [build-url]: https://github.com/JuliaEarth/ImageQuilting.jl/actions
 
-[codecov-img]: https://codecov.io/gh/JuliaEarth/ImageQuilting.jl/branch/master/graph/badge.svg
+[codecov-img]: https://img.shields.io/codecov/c/github/JuliaEarth/ImageQuilting.jl
 [codecov-url]: https://codecov.io/gh/JuliaEarth/ImageQuilting.jl
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
