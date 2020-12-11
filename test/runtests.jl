@@ -9,14 +9,14 @@ using Test, Pkg, Random
 ENV["GKSwstype"] = "100"
 
 # environment settings
+isCI = "CI" ∈ keys(ENV)
 islinux = Sys.islinux()
-istravis = "TRAVIS" ∈ keys(ENV)
-datadir = joinpath(@__DIR__,"data")
-visualtests = !istravis || (istravis && islinux)
-if !istravis
+visualtests = !isCI || (isCI && islinux)
+if !isCI
   Pkg.add("Gtk")
   using Gtk
 end
+datadir = joinpath(@__DIR__,"data")
 
 @testset "ImageQuilting.jl" begin
   @testset "Basic checks" begin
