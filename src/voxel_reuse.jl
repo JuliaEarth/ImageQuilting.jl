@@ -18,7 +18,7 @@ function voxelreuse(trainimg::AbstractArray{T,N}, tilesize::Dims{N};
                     overlap::NTuple{N,Float64}=ntuple(i->1/6,N),
                     nreal::Integer=10, kwargs...) where {T,N}
 
-  # calculate the overlap size from given percentage
+  # overlap size from given percentage
   ovlsize = @. ceil(Int, overlap*tilesize)
 
   # elementary raster path
@@ -28,7 +28,8 @@ function voxelreuse(trainimg::AbstractArray{T,N}, tilesize::Dims{N};
   simsize = @. ntiles*(tilesize - ovlsize) + ovlsize
 
   _, _, voxs = iqsim(trainimg, tilesize, simsize;
-                     overlap=overlap, nreal=nreal, debug=true, kwargs...)
+                     overlap=overlap, nreal=nreal,
+                     debug=true, kwargs...)
 
   μ = mean(voxs)
   σ = std(voxs, mean=μ)

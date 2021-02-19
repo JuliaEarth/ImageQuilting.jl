@@ -22,7 +22,7 @@ function convdist(img::AbstractArray, kern::AbstractArray;
   AB = imfilter_impl(img, wkern)
   B² = sum(wkern .* kern)
 
-  parent(abs.(A² .- 2AB .+ B²))
+  parent(@. abs(A² - 2AB + B²))
 end
 
 cart2lin(dims, ind) = LinearIndices(dims)[ind]
@@ -30,11 +30,8 @@ lin2cart(dims, ind) = CartesianIndices(dims)[ind]
 
 function event!(buff, hard::Dict, tile::CartesianIndices)
   @inbounds for (i, coord) in enumerate(tile)
-    if isnan(get(hard, coord, NaN))
-      buff[i] = 0.0
-    else
-      buff[i] = hard[coord]
-    end
+    h = get(hard, coord, NaN)
+    buff[i] = ifelse(isnan(h), 0.0, h)
   end
 end
 
@@ -46,11 +43,8 @@ end
 
 function indicator!(buff, hard::Dict, tile::CartesianIndices)
   @inbounds for (i, coord) in enumerate(tile)
-    if isnan(get(hard, coord, NaN))
-      buff[i] = false
-    else
-      buff[i] = true
-    end
+    nan = isnan(get(hard, coord, NaN))
+    buff[i] = ifelse(nan, false, true)
   end
 end
 
@@ -62,11 +56,8 @@ end
 
 function activation!(buff, hard::Dict, tile::CartesianIndices)
   @inbounds for (i, coord) in enumerate(tile)
-    if coord ∈ keys(hard) && isnan(hard[coord])
-      buff[i] = false
-    else
-      buff[i] = true
-    end
+    cond = coord ∈ keys(hard) && isnan(hard[coord])
+    buff[i] = ifelse(cond, false, true)
   end
 end
 

@@ -2,7 +2,8 @@ using ImageQuilting
 using GeoStatsBase
 using GeoStatsImages
 using Statistics
-using Plots, VisualRegressionTests
+using Plots; gr(size=(600,400))
+using ReferenceTests, ImageIO
 using Test, Random
 
 # workaround GR warnings
@@ -13,6 +14,19 @@ isCI = "CI" ∈ keys(ENV)
 islinux = Sys.islinux()
 visualtests = !isCI || (isCI && islinux)
 datadir = joinpath(@__DIR__,"data")
+
+# helper functions for visual regression tests
+function asimage(plt)
+  io = IOBuffer()
+  show(io, "image/png", plt)
+  seekstart(io)
+  ImageIO.load(io)
+end
+macro test_ref_plot(fname, plt)
+  esc(quote
+    @test_reference $fname asimage($plt)
+  end)
+end
 
 @testset "ImageQuilting.jl" begin
   @testset "Basic checks" begin
@@ -109,6 +123,21 @@ datadir = joinpath(@__DIR__,"data")
     TI = ones(20,20,20)
     _, _, voxs = iqsim(TI, (10,10,10), overlap=(1/3,1/3,1/3), debug=true)
     @test 0 ≤ voxs[1] ≤ 1
+
+    A = ones(20,20)
+    B = ones(20,20)
+    C = ImageQuilting.boykov_kolmogorov_cut(A, B, 1)
+    @test all(C[1,:] .== 1)
+    @test all(C[2:end,:] .== 0)
+    C = ImageQuilting.boykov_kolmogorov_cut(A, B, 2)
+    @test all(C[:,1] .== 1)
+    @test all(C[:,2:end] .== 0)
+
+    # TI = geostatsimage("StoneWall")
+    # img = reshape(TI[:Z], 200, 200)
+    # A = img[1:50,1:30]
+    # B = img[1:50,11:40]
+    # C = ImageQuilting.boykov_kolmogorov_cut(A, B, 1)
   end
 
   @testset "Simulation paths" begin
@@ -138,14 +167,14 @@ datadir = joinpath(@__DIR__,"data")
       TI = reshape(sdata[var], dims)[1:50,1:50,:]
       reals = iqsim(TI, (30,30,1), size(TI), nreal=4)
       ps = [heatmap(real[:,:,1]) for real in reals]
-      @plottest plot(ps...) joinpath(datadir,"Reals"*TIname*".png") !isCI
+      @test_ref_plot "data/Reals$(TIname).png" plot(ps...)
     end
     for TIname in ["StoneWall","WalkerLake"]
       Random.seed!(2017)
       sdata = geostatsimage(TIname)
       dims  = size(domain(sdata))
       TI = reshape(sdata[:Z], dims)[1:20,1:20,:]
-      @plottest voxelreuseplot(TI) joinpath(datadir,"Voxel"*TIname*".png") !isCI
+      @test_ref_plot "data/Voxel$(TIname).png" voxelreuseplot(TI)
     end
   end
 
@@ -160,13 +189,14 @@ datadir = joinpath(@__DIR__,"data")
 
     Random.seed!(2017)
     solution = solve(problem, solver)
-    @test keys(solution.realizations) ⊆ [:facies]
+    @test length(solution) == 3
+    @test size(domain(solution[1])) == (100,100)
 
     incomplete_solver = IQ()
     @test_throws ErrorException solve(problem, incomplete_solver)
 
     if visualtests
-      @plottest plot(solution,size=(900,300)) joinpath(datadir,"GeoStatsAPI.png") !isCI
+      @test_ref_plot "data/GeoStatsAPI.png" plot(solution,size=(900,300))
     end
   end
 end
