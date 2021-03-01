@@ -4,7 +4,9 @@
 
 module ImageQuilting
 
+using Meshes
 using GeoStatsBase
+
 using ImageFiltering
 using ImageMorphology
 using LightGraphs

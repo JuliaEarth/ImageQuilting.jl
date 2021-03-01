@@ -55,7 +55,7 @@ function preprocess(problem::SimulationProblem, solver::IQ)
   pdata   = data(problem)
   pdomain = domain(problem)
   simsize = size(pdomain)
-  dims    = ncoords(pdomain)
+  dims    = embeddim(pdomain)
 
   # result of preprocessing
   preproc = Dict{Symbol,Tuple}()
@@ -67,7 +67,7 @@ function preprocess(problem::SimulationProblem, solver::IQ)
 
       # training image as simple array
       TI = varparams.trainimg
-      trainimg = reshape(TI[var], size(domain(TI)))
+      trainimg = asarray(TI, var)
 
       # default overlap
       overlap = varparams.overlap ≠ nothing ? varparams.overlap :

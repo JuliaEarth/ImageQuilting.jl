@@ -1,4 +1,5 @@
 using ImageQuilting
+using Meshes
 using GeoStatsBase
 using GeoStatsImages
 using Statistics
@@ -14,19 +15,6 @@ isCI = "CI" ∈ keys(ENV)
 islinux = Sys.islinux()
 visualtests = !isCI || (isCI && islinux)
 datadir = joinpath(@__DIR__,"data")
-
-# helper functions for visual regression tests
-function asimage(plt)
-  io = IOBuffer()
-  show(io, "image/png", plt)
-  seekstart(io)
-  ImageIO.load(io)
-end
-macro test_ref_plot(fname, plt)
-  esc(quote
-    @test_reference $fname asimage($plt)
-  end)
-end
 
 @testset "ImageQuilting.jl" begin
   @testset "Basic checks" begin
@@ -167,20 +155,20 @@ end
       TI = reshape(sdata[var], dims)[1:50,1:50,:]
       reals = iqsim(TI, (30,30,1), size(TI), nreal=4)
       ps = [heatmap(real[:,:,1]) for real in reals]
-      @test_ref_plot "data/Reals$(TIname).png" plot(ps...)
+      @test_reference "data/Reals$(TIname).png" plot(ps...)
     end
     for TIname in ["StoneWall","WalkerLake"]
       Random.seed!(2017)
       sdata = geostatsimage(TIname)
       dims  = size(domain(sdata))
       TI = reshape(sdata[:Z], dims)[1:20,1:20,:]
-      @test_ref_plot "data/Voxel$(TIname).png" voxelreuseplot(TI)
+      @test_reference "data/Voxel$(TIname).png" voxelreuseplot(TI)
     end
   end
 
   @testset "GeoStats.jl API" begin
     sdata   = georef((facies=[1.,0.,1.],), [25. 50. 75.; 25. 75. 50.])
-    sdomain = RegularGrid(100,100)
+    sdomain = CartesianGrid(100,100)
     problem = SimulationProblem(sdata, sdomain, :facies, 3)
 
     trainimg = geostatsimage("Strebelle")
@@ -196,7 +184,7 @@ end
     @test_throws ErrorException solve(problem, incomplete_solver)
 
     if visualtests
-      @test_ref_plot "data/GeoStatsAPI.png" plot(solution,size=(900,300))
+      @test_reference "data/GeoStatsAPI.png" plot(solution,size=(900,300))
     end
   end
 end
