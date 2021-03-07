@@ -23,7 +23,7 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 [compat]
 CpuId = "0.2, 0.3"
 FFTW = "1.0"
-GeoStatsBase = "0.19"
+GeoStatsBase = "0.19, 0.20"
 ImageFiltering = "0.6"
 ImageMorphology = "0.2"
 LightGraphs = "1.2"
