@@ -1,4 +1,5 @@
 [deps]
+GR = "28b8d3ca-fb5f-59d9-8090-bfdbd6d07a71"
 GeoStatsBase = "323cb8eb-fbf6-51c0-afd0-f8fba70507b2"
 GeoStatsImages = "7cd16168-b42c-5e7d-a585-4f59d326662d"
 ImageIO = "82e4d734-157c-48bb-816b-45c225c6df19"
@@ -8,3 +9,7 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 ReferenceTests = "324d217c-45ce-50fc-942e-d289b448e8cf"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[compat]
+GR = "=0.59.0"
+Plots = "=1.22.4"
