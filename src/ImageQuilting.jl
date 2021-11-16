@@ -7,10 +7,10 @@ module ImageQuilting
 using Meshes
 using GeoStatsBase
 
+using Graphs
+using GraphsFlows
 using ImageFiltering
 using ImageMorphology
-using LightGraphs
-using LightGraphsFlows
 using Base: @nexprs, @nloops, @nref
 using Primes: factor
 using StatsBase: sample, weights
