@@ -131,12 +131,14 @@ datadir = joinpath(@__DIR__,"data")
   @testset "Simulation paths" begin
     # different simulation paths
     for kind in [:raster,:dilation,:random]
-      path = ImageQuilting.genpath((10,10,10), kind, Int[])
+      rng = MersenneTwister(123)
+      path = ImageQuilting.genpath(rng, (10,10,10), kind, Int[])
       @test length(path) == 1000
     end
 
     # data is visited first if present
-    path = ImageQuilting.genpath((10,10,10), :data, [1,1000])
+    rng = MersenneTwister(123)
+    path = ImageQuilting.genpath(rng, (10,10,10), :data, [1,1000])
     @test path[1:2] == [1,1000] || path[1:2] == [1000,1]
   end
 
@@ -149,20 +151,18 @@ datadir = joinpath(@__DIR__,"data")
 
   if visualtests
     for (TIname,var) in [("Strebelle",:facies),("StoneWall",:Z)]
-      Random.seed!(2017)
-      sdata = geostatsimage(TIname)
-      dims  = size(domain(sdata))
-      TI = reshape(sdata[var], dims)[1:50,1:50,:]
-      reals = iqsim(TI, (30,30,1), size(TI), nreal=4)
+      rng = MersenneTwister(2017)
+      img = geostatsimage(TIname)
+      TI = asarray(img, var)[1:50,1:50,:]
+      reals = iqsim(TI, (30,30,1), size(TI), nreal=4, rng=rng)
       ps = [heatmap(real[:,:,1]) for real in reals]
       @test_reference "data/Reals$(TIname).png" plot(ps...)
     end
     for TIname in ["StoneWall","WalkerLake"]
-      Random.seed!(2017)
-      sdata = geostatsimage(TIname)
-      dims  = size(domain(sdata))
-      TI = reshape(sdata[:Z], dims)[1:20,1:20,:]
-      @test_reference "data/Voxel$(TIname).png" voxelreuseplot(TI)
+      rng = MersenneTwister(2017)
+      img = geostatsimage(TIname)
+      TI = asarray(img, :Z)[1:20,1:20,:]
+      @test_reference "data/Voxel$(TIname).png" voxelreuseplot(TI, rng=rng)
     end
   end
 
@@ -171,11 +171,11 @@ datadir = joinpath(@__DIR__,"data")
     sdomain = CartesianGrid(100,100)
     problem = SimulationProblem(sdata, sdomain, :facies, 3)
 
+    rng = MersenneTwister(2017)
     trainimg = geostatsimage("Strebelle")
     inactive = [CartesianIndex(i,j) for i in 1:30 for j in 1:30]
-    solver = IQ(:facies => (trainimg=trainimg, tilesize=(30,30), inactive=inactive))
+    solver = IQ(:facies => (trainimg=trainimg, tilesize=(30,30), inactive=inactive), rng=rng)
 
-    Random.seed!(2017)
     solution = solve(problem, solver)
     @test length(solution) == 3
     @test size(domain(solution[1])) == (100,100)

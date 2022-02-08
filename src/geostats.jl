@@ -30,6 +30,7 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
 * `threads`      - Number of threads in FFT (default to number of physical CPU cores)
 * `gpu`          - Whether to use the GPU or the CPU (default to false)
 * `showprogress` - Whether to show or not the estimated time duration (default to false)
+* `rng`          - Random number generator (default to `Random.GLOBAL_RNG`)
 
 ## References
 
@@ -48,6 +49,7 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
   @global threads      = cpucores()
   @global gpu          = false
   @global showprogress = false
+  @global rng          = Random.GLOBAL_RNG
 end
 
 function preprocess(problem::SimulationProblem, solver::IQ)
@@ -104,6 +106,9 @@ function preprocess(problem::SimulationProblem, solver::IQ)
 end
 
 function solvesingle(::SimulationProblem, covars::NamedTuple, solver::IQ, preproc)
+  # random number generator
+  rng = solver.rng
+
   varreal = map(covars.names) do var
     # unpack preprocessed parameters
     par, trainimg, simsize, overlap, hard = preproc[var]
@@ -113,7 +118,7 @@ function solvesingle(::SimulationProblem, covars::NamedTuple, solver::IQ, prepro
                   overlap=overlap, path=par.path,
                   soft=par.soft, hard=hard, tol=par.tol,
                   threads=solver.threads, gpu=solver.gpu,
-                  showprogress=solver.showprogress)
+                  showprogress=solver.showprogress, rng=rng)
 
     # flatten result
     var => vec(reals[1])

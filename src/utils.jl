@@ -133,7 +133,7 @@ function find_skipped(hard::Dict, geoconfig::NamedTuple)
   skipped, datainds
 end
 
-function genpath(extent::Dims{N}, kind::Symbol, datainds::AbstractVector{Int}) where {N}
+function genpath(rng::AbstractRNG, extent::Dims{N}, kind::Symbol, datainds::AbstractVector{Int}) where {N}
   path = Vector{Int}()
 
   if isempty(datainds)
@@ -144,12 +144,12 @@ function genpath(extent::Dims{N}, kind::Symbol, datainds::AbstractVector{Int}) w
     end
 
     if kind == :random
-      path = randperm(prod(extent))
+      path = randperm(rng, prod(extent))
     end
 
     if kind == :dilation
       nelm = prod(extent)
-      pivot = rand(1:nelm)
+      pivot = rand(rng, 1:nelm)
 
       grid = falses(extent)
       grid[pivot] = true
@@ -163,7 +163,7 @@ function genpath(extent::Dims{N}, kind::Symbol, datainds::AbstractVector{Int}) w
     end
   else
     # data-first path
-    shuffle!(datainds)
+    shuffle!(rng, datainds)
 
     grid = falses(extent)
     for pivot in datainds

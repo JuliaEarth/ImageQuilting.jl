@@ -19,8 +19,8 @@ using FFTW: set_num_threads
 using CpuId: cpucores
 using RecipesBase
 using SparseArrays: spzeros
-using Random: shuffle!, randperm
 using Statistics: mean, std
+using Random
 
 import GeoStatsBase: preprocess, solvesingle
 

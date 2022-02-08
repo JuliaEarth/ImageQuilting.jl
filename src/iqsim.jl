@@ -9,7 +9,8 @@
           soft::AbstractVector=[], hard::Dict=Dict(), tol::Real=.1,
           path::Symbol=:raster, nreal::Integer=1,
           threads::Integer=cpucores(), gpu::Bool=false,
-          debug::Bool=false, showprogress::Bool=false)
+          debug::Bool=false, showprogress::Bool=false,
+          rng::AbstractRNG=Random.GLOBAL_RNG)
 
 Performs image quilting simulation as described in Hoffimann et al. 2017.
 
@@ -33,6 +34,7 @@ Performs image quilting simulation as described in Hoffimann et al. 2017.
 * `gpu` informs whether to use the GPU or the CPU (default to false)
 * `debug` informs whether to export or not the boundary cuts and voxel reuse
 * `showprogress` informs whether to show or not estimated time duration
+* `rng` is the random number generator (default to `Random.GLOBAL_RNG`)
 
 The main output `reals` consists of a list of realizations that can be indexed with
 `reals[1], reals[2], ..., reals[nreal]`. If `debug=true`, additional output is generated:
@@ -49,7 +51,8 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
                soft::AbstractVector=[], hard::Dict=Dict(), tol::Real=.1,
                path::Symbol=:raster, nreal::Integer=1,
                threads::Integer=cpucores(), gpu::Bool=false,
-               debug::Bool=false, showprogress::Bool=false) where {T,N}
+               debug::Bool=false, showprogress::Bool=false,
+               rng=Random.GLOBAL_RNG) where {T,N}
 
   # number of threads in FFTW
   set_num_threads(threads)
@@ -117,7 +120,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   skipped, datainds = find_skipped(hard, geoconfig)
 
   # construct simulation path
-  simpath = genpath(ntiles, path, datainds)
+  simpath = genpath(rng, ntiles, path, datainds)
 
   # show progress and estimated time duration
   showprogress && (progress = Progress(nreal))
@@ -220,7 +223,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       patternprobs = tau_model(patterndb, D, Ds)
 
       # pick a pattern at random from the database
-      rind   = sample(patterndb, weights(patternprobs))
+      rind   = sample(rng, patterndb, weights(patternprobs))
       start  = lin2cart(distsize, rind)
       finish = @. start.I + tilesize - 1
       rtile  = CartesianIndex(start):CartesianIndex(finish)
