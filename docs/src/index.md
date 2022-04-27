@@ -5,7 +5,7 @@
 [![Build Status](https://img.shields.io/github/workflow/status/JuliaEarth/ImageQuilting.jl/CI)](https://github.com/JuliaEarth/ImageQuilting.jl/actions)
 [![Coverage Status](https://img.shields.io/codecov/c/github/JuliaEarth/ImageQuilting.jl)](https://codecov.io/gh/JuliaEarth/ImageQuilting.jl)
 [![Stable Documentation](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaEarth.github.io/ImageQuilting.jl/stable)
-[![Latest Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaEarth.github.io/ImageQuilting.jl/latest)
+[![Latest Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaEarth.github.io/ImageQuilting.jl/dev)
 
 This package implements an extension to the famous Efros-Freeman algorithm for texture synthesis and transfer in computer vision.
 Unlike the original algorithm developed for 2D images, our method can also handle 3D masked grids and pre-existing point-data very

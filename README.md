@@ -87,4 +87,4 @@ Please [open an issue](https://github.com/JuliaEarth/ImageQuilting.jl/issues) if
 [docs-stable-url]: https://JuliaEarth.github.io/ImageQuilting.jl/stable
 
 [docs-latest-img]: https://img.shields.io/badge/docs-latest-blue.svg
-[docs-latest-url]: https://JuliaEarth.github.io/ImageQuilting.jl/latest
+[docs-latest-url]: https://JuliaEarth.github.io/ImageQuilting.jl/dev
