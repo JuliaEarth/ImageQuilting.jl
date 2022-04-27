@@ -11,7 +11,7 @@ using GeoStatsImages
 using Plots
 gr(size=(850,300)) # hide
 
-problem = SimulationProblem(RegularGrid(200,200), :facies => Int, 3)
+problem = SimulationProblem(CartesianGrid(200,200), :facies => Int, 3)
 
 solver = IQ(
     :facies => (
@@ -26,7 +26,7 @@ plot(solution)
 ```
 
 ```@example basics
-problem = SimulationProblem(RegularGrid(200,200), :Z => Int, 3)
+problem = SimulationProblem(CartesianGrid(200,200), :Z => Int, 3)
 
 solver = IQ(
     :Z => (
