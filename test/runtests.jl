@@ -115,17 +115,11 @@ datadir = joinpath(@__DIR__,"data")
     A = ones(20,20)
     B = ones(20,20)
     C = ImageQuilting.boykov_kolmogorov_cut(A, B, 1)
-    @test all(C[1,:] .== 1)
-    @test all(C[2:end,:] .== 0)
+    @test all(C[1:end-1,:] .== 1)
+    @test all(C[end,:] .== 0)
     C = ImageQuilting.boykov_kolmogorov_cut(A, B, 2)
-    @test all(C[:,1] .== 1)
-    @test all(C[:,2:end] .== 0)
-
-    # TI = geostatsimage("StoneWall")
-    # img = asarray(TI, :Z)
-    # A = img[1:50,1:30]
-    # B = img[1:50,11:40]
-    # C = ImageQuilting.boykov_kolmogorov_cut(A, B, 1)
+    @test all(C[:,1:end-1] .== 1)
+    @test all(C[:,end] .== 0)
   end
 
   @testset "Simulation paths" begin
