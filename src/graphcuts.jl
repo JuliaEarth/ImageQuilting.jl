@@ -47,7 +47,7 @@ function boykov_kolmogorov_cut(A::AbstractArray{T,N}, B::AbstractArray{T,N}, dim
       add_edge!(G, u, v)
       add_edge!(G, v, u)
 
-      C[u,v] = C[v,u] = (Du + Dv) / (∇Au + ∇Av + ∇Bu + ∇Bv)
+      C[u,v] = C[v,u] = (Du + Dv) / (∇Au + ∇Av + ∇Bu + ∇Bv + eps())
     end
   end
 
