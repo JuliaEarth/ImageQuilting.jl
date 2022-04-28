@@ -122,7 +122,7 @@ datadir = joinpath(@__DIR__,"data")
     @test all(C[:,2:end] .== 0)
 
     # TI = geostatsimage("StoneWall")
-    # img = reshape(TI[:Z], 200, 200)
+    # img = asarray(TI, :Z)
     # A = img[1:50,1:30]
     # B = img[1:50,11:40]
     # C = ImageQuilting.boykov_kolmogorov_cut(A, B, 1)

@@ -52,7 +52,7 @@ function boykov_kolmogorov_cut(A::AbstractArray{T,N}, B::AbstractArray{T,N}, dim
   end
 
   # fill edges from source terminal to left slice
-  linds = CartesianIndices(ntuple(i -> i == dim ? 1 : (1:sz[i]), N))
+  linds = CartesianIndices(ntuple(i -> i == dim ? (1:1) : (1:sz[i]), N))
   for ind in linds
     u = cart2lin(sz, ind)
     add_edge!(G, s, u)
@@ -60,7 +60,7 @@ function boykov_kolmogorov_cut(A::AbstractArray{T,N}, B::AbstractArray{T,N}, dim
   end
 
   # fill edges from right slice to sink terminal
-  rinds = CartesianIndices(ntuple(i -> i == dim ? sz[dim] : (1:sz[i]), N))
+  rinds = CartesianIndices(ntuple(i -> i == dim ? (sz[dim]:sz[dim]) : (1:sz[i]), N))
   for ind in rinds
     v = cart2lin(sz, ind)
     add_edge!(G, v, t)
