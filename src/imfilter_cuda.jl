@@ -6,7 +6,7 @@ using ImageFiltering
 #using DSP
 
 
-function imfilter_gpu(img::AbstractArray{T,N},
+function imfilter_cuda(img::AbstractArray{T,N},
                       kern::AbstractArray{K,N}) where {T<:Real,K<:Real,N}
 
     img_gpu_fft = nothing
