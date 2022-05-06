@@ -6,6 +6,7 @@ using Statistics
 using Plots; gr(size=(600,400))
 using ReferenceTests, ImageIO
 using Test, Random
+using ComputationalResources
 
 # workaround GR warnings
 ENV["GKSwstype"] = "100"
@@ -15,17 +16,18 @@ isCI = "CI" ∈ keys(ENV)
 islinux = Sys.islinux()
 visualtests = !isCI || (isCI && islinux)
 datadir = joinpath(@__DIR__,"data")
+test_device = CUDALibs()
 
 @testset "ImageQuilting.jl" begin
   @testset "Basic checks" begin
     # the output of a homogeneous image is also homogeneous
     TI = ones(20,20,20)
-    reals = iqsim(TI, (10,10,10), size(TI))
+    reals = iqsim(TI, (10,10,10), size(TI), device=test_device)
     @test reals[1] == TI
 
     # categories are obtained from training image only
     ncateg = 3; TI = rand(0:ncateg, 20, 20, 20)
-    reals = iqsim(TI, (10,10,10), size(TI))
+    reals = iqsim(TI, (10,10,10), size(TI), device=test_device)
     @test Set(reals[1]) ⊆ Set(TI)
   end
 
@@ -33,20 +35,20 @@ datadir = joinpath(@__DIR__,"data")
     # trends with soft data
     TI = [zeros(10,20,1); ones(10,20,1)]
     trend = [zeros(20,10,1) ones(20,10,1)]
-    reals = iqsim(TI, (10,10,1), size(TI), soft=[(trend,TI)], tol=1)
+    reals = iqsim(TI, (10,10,1), size(TI), soft=[(trend,TI)], tol=1, device=test_device)
     @test mean(reals[1][:,1:10,:]) ≤ mean(reals[1][:,11:20,:])
 
     # no side effects with soft data
     TI = ones(20,20,20)
     TI[:,5,:] .= NaN
     aux = fill(1.0, size(TI))
-    iqsim(TI, (10,10,10), size(TI), soft=[(aux,aux)])
+    iqsim(TI, (10,10,10), size(TI), soft=[(aux,aux)], device=test_device)
     @test aux == fill(1.0, size(TI))
 
     # auxiliary variable with integer type
     TI = ones(20,20,20)
     aux = [i for i in 1:20, j in 1:20, k in 1:20]
-    iqsim(TI, (10,10,10), size(TI), soft=[(aux,aux)])
+    iqsim(TI, (10,10,10), size(TI), soft=[(aux,aux)], device=test_device)
     @test aux == [i for i in 1:20, j in 1:20, k in 1:20]
   end
 
@@ -55,13 +57,13 @@ datadir = joinpath(@__DIR__,"data")
     TI = ones(20,20,20)
     obs = rand(size(TI)...)
     data = Dict(CartesianIndex(i,j,k)=>obs[i,j,k] for i=1:20, j=1:20, k=1:20)
-    reals = iqsim(TI, (10,10,10), size(TI), hard=data)
+    reals = iqsim(TI, (10,10,10), size(TI), hard=data, device=test_device)
     @test reals[1] == obs
 
     # multiple realizations with hard data
     TI = ones(20,20,20)
     data = Dict(CartesianIndex(20,20,20)=>10)
-    reals = iqsim(TI, (10,10,10), size(TI), hard=data, nreal=3)
+    reals = iqsim(TI, (10,10,10), size(TI), hard=data, nreal=3, device=test_device)
     for real in reals
       @test real[20,20,20] == 10
     end
@@ -78,17 +80,17 @@ datadir = joinpath(@__DIR__,"data")
         active[i,j,k] = false
       end
     end
-    reals = iqsim(TI, (10,10,10), size(TI), hard=shape)
+    reals = iqsim(TI, (10,10,10), size(TI), hard=shape, device=test_device)
     @test all(isnan.(reals[1][.!active]))
     @test all(.!isnan.(reals[1][active]))
 
     # masked training image
     TI = ones(20,20,20)
     TI[:,5,:] .= NaN
-    reals = iqsim(TI, (10,10,10), size(TI))
+    reals = iqsim(TI, (10,10,10), size(TI), device=test_device)
     @test reals[1] == fill(1.0, size(TI))
     TI[1,5,:] .= 0
-    reals = iqsim(TI, (10,10,10), size(TI))
+    reals = iqsim(TI, (10,10,10), size(TI), device=test_device)
     @test reals[1] == fill(1.0, size(TI))
 
     # masked domain and masked training image
@@ -96,11 +98,11 @@ datadir = joinpath(@__DIR__,"data")
     TI[:,5,:] .= NaN
     aux = fill(1.0, size(TI))
     shape = Dict(CartesianIndex(i,j,k)=>NaN for i=1:20, j=5, k=1:20)
-    reals = iqsim(TI, (10,10,10), size(TI), hard=shape)
+    reals = iqsim(TI, (10,10,10), size(TI), hard=shape, device=test_device)
     @test all(isnan.(reals[1][:,5,:]))
     @test all(reals[1][:,1:4,:] .== 1)
     @test all(reals[1][:,6:20,:] .== 1)
-    reals = iqsim(TI, (10,10,10), size(TI), hard=shape, soft=[(aux,aux)])
+    reals = iqsim(TI, (10,10,10), size(TI), hard=shape, soft=[(aux,aux)], device=test_device)
     @test all(isnan.(reals[1][:,5,:]))
     @test all(reals[1][:,1:4,:] .== 1)
     @test all(reals[1][:,6:20,:] .== 1)
@@ -109,7 +111,7 @@ datadir = joinpath(@__DIR__,"data")
   @testset "Minimum error cut" begin
     # 3D cut
     TI = ones(20,20,20)
-    _, _, voxs = iqsim(TI, (10,10,10), overlap=(1/3,1/3,1/3), debug=true)
+    _, _, voxs = iqsim(TI, (10,10,10), overlap=(1/3,1/3,1/3), debug=true, device=test_device)
     @test 0 ≤ voxs[1] ≤ 1
 
     A = ones(20,20)
@@ -148,7 +150,7 @@ datadir = joinpath(@__DIR__,"data")
       rng = MersenneTwister(2017)
       img = geostatsimage(TIname)
       TI = asarray(img, var)[1:50,1:50,:]
-      reals = iqsim(TI, (30,30,1), size(TI), nreal=4, rng=rng)
+      reals = iqsim(TI, (30,30,1), size(TI), nreal=4, rng=rng, device=test_device)
       ps = [heatmap(real[:,:,1]) for real in reals]
       @test_reference "data/Reals$(TIname).png" plot(ps...)
     end

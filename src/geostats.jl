@@ -46,6 +46,7 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
   @param inactive      = nothing
   @param soft          = []
   @param tol           = .1
+  @global device        = CPU1()
   @global threads      = cpucores()
   @global gpu          = false
   @global showprogress = false
@@ -118,7 +119,7 @@ function solvesingle(::SimulationProblem, covars::NamedTuple, solver::IQ, prepro
                   overlap=overlap, path=par.path,
                   soft=par.soft, hard=hard, tol=par.tol,
                   threads=solver.threads, gpu=solver.gpu,
-                  showprogress=solver.showprogress, rng=rng)
+                  showprogress=solver.showprogress, rng=rng, device=solver.device)
 
     # flatten result
     var => vec(reals[1])

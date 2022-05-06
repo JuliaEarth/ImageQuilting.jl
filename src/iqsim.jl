@@ -52,7 +52,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
                path::Symbol=:raster, nreal::Integer=1,
                threads::Integer=cpucores(), gpu::Bool=false,
                debug::Bool=false, showprogress::Bool=false,
-               rng=Random.GLOBAL_RNG) where {T,N}
+               rng=Random.GLOBAL_RNG, device::AbstractResource{R}=CPU1()) where {R,T,N}
 
   # number of threads in FFTW
   set_num_threads(threads)
@@ -143,7 +143,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
     harddist = Array{Float64}(undef, distsize)
   end
 
-  for real in 1:nreal
+   for real in 1:nreal
     # allocate memory for current simulation
     simgrid = zeros(padsize)
     debug && (cutgrid = zeros(padsize))
@@ -186,7 +186,8 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
           ovlmask[CartesianIndices(oslice)] .= true
         end
       end
-      ovldist .= convdist(TI, simdev, weights=ovlmask)
+      
+      ovldist .= convdist(device, TI, simdev, weights=ovlmask)
       ovldist[disabled] .= Inf
 
       # hard distance
@@ -195,7 +196,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
         indicator!(hardmask, hard, tile)
         if any(hardmask)
           event!(harddev, hard, tile)
-          harddist .= convdist(TI, harddev, weights=hardmask)
+          harddist .= convdist(device, TI, harddev, weights=hardmask)
           harddist[disabled] .= Inf
           hardtile = true
         end
@@ -205,7 +206,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       for s in eachindex(SOFT)
         AUX, AUXTI = SOFT[s]
         softdev = view(AUX, tile)
-        softdists[s] .= convdist(AUXTI, softdev)
+        softdists[s] .= convdist(device, AUXTI, softdev)
         softdists[s][disabled] .= Inf
       end
 

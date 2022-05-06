@@ -21,12 +21,15 @@ using RecipesBase
 using SparseArrays: spzeros
 using Statistics: mean, std
 using Random
+using CUDA
+using ComputationalResources
 
 import GeoStatsBase: preprocess, solvesingle
 
 include("utils.jl")
 include("plot_recipes.jl")
 include("imfilter_cpu.jl")
+include("imfilter_cuda.jl")
 include("relaxation.jl")
 include("tau_model.jl")
 include("graphcuts.jl")

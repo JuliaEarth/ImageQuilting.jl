@@ -1,4 +1,5 @@
 [deps]
+ComputationalResources = "ed09eef8-17a6-5b46-8889-db040fac31e3"
 GR = "28b8d3ca-fb5f-59d9-8090-bfdbd6d07a71"
 GeoStatsBase = "323cb8eb-fbf6-51c0-afd0-f8fba70507b2"
 GeoStatsImages = "7cd16168-b42c-5e7d-a585-4f59d326662d"

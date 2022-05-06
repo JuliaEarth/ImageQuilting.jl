@@ -2,24 +2,15 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-const GPU = nothing
-
-function get_imfilter_impl(GPU)
-  if GPU ≠ nothing
-    imfilter_gpu
-  else
-    imfilter_cpu
-  end
-end
-
-function convdist(img::AbstractArray, kern::AbstractArray;
-                  weights::AbstractArray=fill(1.0, size(kern)))
-  imfilter_impl = get_imfilter_impl(GPU)
+function convdist(device::AbstractResource{R},
+                  img::AbstractArray, kern::AbstractArray;
+                  weights::AbstractArray=fill(1.0, size(kern))) where {R}
+  #imfilter_impl = get_imfilter_impl(GPU)
 
   wkern = weights.*kern
 
-  A² = imfilter_impl(img.^2, weights)
-  AB = imfilter_impl(img, wkern)
+  A² = imfilter_device(device, img.^2, weights); 
+  AB = imfilter_device(device, img, wkern)
   B² = sum(wkern .* kern)
 
   parent(@. abs(A² - 2AB + B²))
@@ -67,7 +58,7 @@ function activation(hard::Dict, tile::CartesianIndices)
   buff
 end
 
-function preprocess_images(trainimg::AbstractArray{T,N}, soft::AbstractVector,
+function  preprocess_images(trainimg::AbstractArray{T,N}, soft::AbstractVector,
                            geoconfig::NamedTuple) where {T,N}
   padsize = geoconfig.padsize
 
