@@ -152,6 +152,7 @@ datadir = joinpath(@__DIR__,"data")
       ps = [heatmap(real[:,:,1]) for real in reals]
       @test_reference "data/Reals$(TIname).png" plot(ps...)
     end
+
     for TIname in ["StoneWall","WalkerLake"]
       rng = MersenneTwister(2017)
       img = geostatsimage(TIname)
