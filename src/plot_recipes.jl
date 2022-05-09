@@ -5,7 +5,7 @@
 @userplot VoxelReusePlot
 
 @recipe function f(vr::VoxelReusePlot; tmin=nothing, tmax=nothing,
-                   overlap=(1/6,1/6,1/6), nreal=10, gpu=false,
+                   overlap=(1/6,1/6,1/6), nreal=10,
                    rng=Random.GLOBAL_RNG)
   # get input image
   img = vr.args[1]
@@ -34,7 +34,7 @@
     tilesize = ntuple(i -> idx[i] ? t : 1, 3)
 
     μ, σ = voxelreuse(img, tilesize; overlap=overlap,
-                      nreal=nreal, gpu=gpu, rng=rng)
+                      nreal=nreal, rng=rng)
 
     push!(μs, μ)
     push!(σs, σ)

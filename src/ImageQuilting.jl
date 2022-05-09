@@ -17,12 +17,12 @@ using StatsBase: sample, weights
 using ProgressMeter: Progress, next!
 using FFTW: set_num_threads
 using CpuId: cpucores
+using ComputationalResources
+using CUDA
 using RecipesBase
 using SparseArrays: spzeros
 using Statistics: mean, std
 using Random
-using CUDA
-using ComputationalResources
 
 import GeoStatsBase: preprocess, solvesingle
 

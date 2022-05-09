@@ -8,7 +8,7 @@
           overlap::NTuple{N,<:Real}=ntuple(i->1/6,N),
           soft::AbstractVector=[], hard::Dict=Dict(), tol::Real=.1,
           path::Symbol=:raster, nreal::Integer=1,
-          threads::Integer=cpucores(), gpu::Bool=false,
+          threads::Integer=cpucores(),
           debug::Bool=false, showprogress::Bool=false,
           rng::AbstractRNG=Random.GLOBAL_RNG)
 
@@ -31,10 +31,10 @@ Performs image quilting simulation as described in Hoffimann et al. 2017.
 * `path` is the simulation path (`:raster`, `:dilation` or `:random`)
 * `nreal` is the number of realizations (default to 1)
 * `threads` is the number of threads for the FFT (default to all CPU cores)
-* `gpu` informs whether to use the GPU or the CPU (default to false)
 * `debug` informs whether to export or not the boundary cuts and voxel reuse
 * `showprogress` informs whether to show or not estimated time duration
 * `rng` is the random number generator (default to `Random.GLOBAL_RNG`)
+* `resource` informs the ComputationalResources.jl resource for acceleration
 
 The main output `reals` consists of a list of realizations that can be indexed with
 `reals[1], reals[2], ..., reals[nreal]`. If `debug=true`, additional output is generated:
@@ -50,9 +50,9 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
                overlap::NTuple{N,<:Real}=ntuple(i->1/6,N),
                soft::AbstractVector=[], hard::Dict=Dict(), tol::Real=.1,
                path::Symbol=:raster, nreal::Integer=1,
-               threads::Integer=cpucores(), gpu::Bool=false,
+               threads::Integer=cpucores(),
                debug::Bool=false, showprogress::Bool=false,
-               rng=Random.GLOBAL_RNG, device::AbstractResource{R}=CPU1()) where {R,T,N}
+               rng=Random.GLOBAL_RNG, resource::AbstractResource=CPU1()) where {T,N}
 
   # number of threads in FFTW
   set_num_threads(threads)
@@ -187,7 +187,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
         end
       end
       
-      ovldist .= convdist(device, TI, simdev, weights=ovlmask)
+      ovldist .= convdist(resource, TI, simdev, weights=ovlmask)
       ovldist[disabled] .= Inf
 
       # hard distance
@@ -196,7 +196,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
         indicator!(hardmask, hard, tile)
         if any(hardmask)
           event!(harddev, hard, tile)
-          harddist .= convdist(device, TI, harddev, weights=hardmask)
+          harddist .= convdist(resource, TI, harddev, weights=hardmask)
           harddist[disabled] .= Inf
           hardtile = true
         end
@@ -206,7 +206,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       for s in eachindex(SOFT)
         AUX, AUXTI = SOFT[s]
         softdev = view(AUX, tile)
-        softdists[s] .= convdist(device, AUXTI, softdev)
+        softdists[s] .= convdist(resource, AUXTI, softdev)
         softdists[s][disabled] .= Inf
       end
 

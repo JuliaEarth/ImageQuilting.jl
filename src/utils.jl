@@ -2,15 +2,14 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-function convdist(device::AbstractResource{R},
+function convdist(resource::AbstractResource{R},
                   img::AbstractArray, kern::AbstractArray;
                   weights::AbstractArray=fill(1.0, size(kern))) where {R}
-  #imfilter_impl = get_imfilter_impl(GPU)
 
   wkern = weights.*kern
 
-  A² = imfilter_device(device, img.^2, weights); 
-  AB = imfilter_device(device, img, wkern)
+  A² = imfilter_resource(resource, img.^2, weights); 
+  AB = imfilter_resource(resource, img, wkern)
   B² = sum(wkern .* kern)
 
   parent(@. abs(A² - 2AB + B²))
