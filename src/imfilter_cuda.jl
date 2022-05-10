@@ -6,38 +6,30 @@ function imfilter_resource(resource::CUDALibs, img, kern)
 
   sizeall = size(img) .+ size(kern) .- 1
 
-  imggpu = nothing
-  kerngpu = nothing
-
   N = ndims(img)
   T = eltype(img)
 
-  @sync begin
-    Threads.@spawn begin
-      imggpu = CUDA.zeros(T,sizeall)
-      imgindexes = ntuple(d->let padsize = div(size(kern,d)-1,2); (padsize+1):size(img,d)+padsize end, N)
-      imggpu[imgindexes...] = img
-    end
-
-    kerngpu = CUDA.zeros(T,sizeall)
-    kernindexes = axes(kern)
-    kerngpu[kernindexes...] = kern
-    kerngpu = CUFFT.fft(kerngpu)
-    kerngpu = conj.(kerngpu)
+  imggpu = Threads.@spawn begin
+    padimg = CUDA.zeros(T,sizeall)
+    indices = ntuple(d->let padsize = div(size(kern,d)-1,2); (padsize+1):size(img,d)+padsize end, N)
+    padimg[indices...] = img
+    padimg
   end
 
-  imggpu = CUFFT.fft(imggpu)
+  padkern = CUDA.zeros(T,sizeall)
+  kernindices = axes(kern)
+  padkern[kernindices...] = kern
 
-  out = imggpu .* kerngpu
+  fftkern = conj.(CUFFT.fft(padkern))
+  fftimg = CUFFT.fft(fetch(imggpu))
 
-  out = CUFFT.ifft(out)
- 
+  out = CUFFT.ifft(fftimg .* fftkern)
+
   # remove padding
   ix = map(x -> Base.OneTo(x), size(img) .- size(kern) .+ 1)
   out = out[ix...]
 
-  out = real.(out)
-  out = Array(out)
+  out = Array(real.(out))
 
   out
 end
