@@ -2,9 +2,7 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-function convdist(resource::AbstractResource{R},
-                  img::AbstractArray, kern::AbstractArray;
-                  weights::AbstractArray=fill(1.0, size(kern))) where {R}
+function convdist(resource, img, kern; weight=fill(1.0, size(kern)))
 
   wkern = weights.*kern
 
