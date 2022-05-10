@@ -2,7 +2,7 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-function convdist(resource, img, kern; weight=fill(1.0, size(kern)))
+function convdist(img, kern; weights=fill(1.0, size(kern)), resource = CPU1()) 
 
   wkern = weights.*kern
 
@@ -55,7 +55,7 @@ function activation(hard::Dict, tile::CartesianIndices)
   buff
 end
 
-function  preprocess_images(trainimg::AbstractArray{T,N}, soft::AbstractVector,
+function preprocess_images(trainimg::AbstractArray{T,N}, soft::AbstractVector,
                            geoconfig::NamedTuple) where {T,N}
   padsize = geoconfig.padsize
 

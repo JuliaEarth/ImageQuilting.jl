@@ -3,7 +3,7 @@ using Meshes
 using GeoStatsBase
 using GeoStatsImages
 using ComputationalResources
-  using Statistics
+using Statistics
 using Plots; gr(size=(600,400))
 using ReferenceTests, ImageIO
 using Test, Random
@@ -16,18 +16,17 @@ isCI = "CI" ∈ keys(ENV)
 islinux = Sys.islinux()
 visualtests = !isCI || (isCI && islinux)
 datadir = joinpath(@__DIR__,"data")
-testresource = CPU1()
 
 @testset "ImageQuilting.jl" begin
   @testset "Basic checks" begin
     # the output of a homogeneous image is also homogeneous
     TI = ones(20,20,20)
-    reals = iqsim(TI, (10,10,10), size(TI), resource=testresource)
+    reals = iqsim(TI, (10,10,10), size(TI))
     @test reals[1] == TI
 
     # categories are obtained from training image only
     ncateg = 3; TI = rand(0:ncateg, 20, 20, 20)
-    reals = iqsim(TI, (10,10,10), size(TI), resource=testresource)
+    reals = iqsim(TI, (10,10,10), size(TI))
     @test Set(reals[1]) ⊆ Set(TI)
   end
 
@@ -35,20 +34,20 @@ testresource = CPU1()
     # trends with soft data
     TI = [zeros(10,20,1); ones(10,20,1)]
     trend = [zeros(20,10,1) ones(20,10,1)]
-    reals = iqsim(TI, (10,10,1), size(TI), soft=[(trend,TI)], tol=1, resource=testresource)
+    reals = iqsim(TI, (10,10,1), size(TI), soft=[(trend,TI)], tol=1)
     @test mean(reals[1][:,1:10,:]) ≤ mean(reals[1][:,11:20,:])
 
     # no side effects with soft data
     TI = ones(20,20,20)
     TI[:,5,:] .= NaN
     aux = fill(1.0, size(TI))
-    iqsim(TI, (10,10,10), size(TI), soft=[(aux,aux)], resource=testresource)
+    iqsim(TI, (10,10,10), size(TI), soft=[(aux,aux)])
     @test aux == fill(1.0, size(TI))
 
     # auxiliary variable with integer type
     TI = ones(20,20,20)
     aux = [i for i in 1:20, j in 1:20, k in 1:20]
-    iqsim(TI, (10,10,10), size(TI), soft=[(aux,aux)], resource=testresource)
+    iqsim(TI, (10,10,10), size(TI), soft=[(aux,aux)])
     @test aux == [i for i in 1:20, j in 1:20, k in 1:20]
   end
 
@@ -57,13 +56,13 @@ testresource = CPU1()
     TI = ones(20,20,20)
     obs = rand(size(TI)...)
     data = Dict(CartesianIndex(i,j,k)=>obs[i,j,k] for i=1:20, j=1:20, k=1:20)
-    reals = iqsim(TI, (10,10,10), size(TI), hard=data, resource=testresource)
+    reals = iqsim(TI, (10,10,10), size(TI), hard=data)
     @test reals[1] == obs
 
     # multiple realizations with hard data
     TI = ones(20,20,20)
     data = Dict(CartesianIndex(20,20,20)=>10)
-    reals = iqsim(TI, (10,10,10), size(TI), hard=data, nreal=3, resource=testresource)
+    reals = iqsim(TI, (10,10,10), size(TI), hard=data, nreal=3)
     for real in reals
       @test real[20,20,20] == 10
     end
@@ -80,17 +79,17 @@ testresource = CPU1()
         active[i,j,k] = false
       end
     end
-    reals = iqsim(TI, (10,10,10), size(TI), hard=shape, resource=testresource)
+    reals = iqsim(TI, (10,10,10), size(TI), hard=shape)
     @test all(isnan.(reals[1][.!active]))
     @test all(.!isnan.(reals[1][active]))
 
     # masked training image
     TI = ones(20,20,20)
     TI[:,5,:] .= NaN
-    reals = iqsim(TI, (10,10,10), size(TI), resource=testresource)
+    reals = iqsim(TI, (10,10,10), size(TI))
     @test reals[1] == fill(1.0, size(TI))
     TI[1,5,:] .= 0
-    reals = iqsim(TI, (10,10,10), size(TI), resource=testresource)
+    reals = iqsim(TI, (10,10,10), size(TI))
     @test reals[1] == fill(1.0, size(TI))
 
     # masked domain and masked training image
@@ -98,11 +97,11 @@ testresource = CPU1()
     TI[:,5,:] .= NaN
     aux = fill(1.0, size(TI))
     shape = Dict(CartesianIndex(i,j,k)=>NaN for i=1:20, j=5, k=1:20)
-    reals = iqsim(TI, (10,10,10), size(TI), hard=shape, resource=testresource)
+    reals = iqsim(TI, (10,10,10), size(TI), hard=shape)
     @test all(isnan.(reals[1][:,5,:]))
     @test all(reals[1][:,1:4,:] .== 1)
     @test all(reals[1][:,6:20,:] .== 1)
-    reals = iqsim(TI, (10,10,10), size(TI), hard=shape, soft=[(aux,aux)], resource=testresource)
+    reals = iqsim(TI, (10,10,10), size(TI), hard=shape, soft=[(aux,aux)])
     @test all(isnan.(reals[1][:,5,:]))
     @test all(reals[1][:,1:4,:] .== 1)
     @test all(reals[1][:,6:20,:] .== 1)
@@ -111,7 +110,7 @@ testresource = CPU1()
   @testset "Minimum error cut" begin
     # 3D cut
     TI = ones(20,20,20)
-    _, _, voxs = iqsim(TI, (10,10,10), overlap=(1/3,1/3,1/3), debug=true, resource=testresource)
+    _, _, voxs = iqsim(TI, (10,10,10), overlap=(1/3,1/3,1/3), debug=true)
     @test 0 ≤ voxs[1] ≤ 1
 
     A = ones(20,20)
@@ -150,7 +149,7 @@ testresource = CPU1()
       rng = MersenneTwister(2017)
       img = geostatsimage(TIname)
       TI = asarray(img, var)[1:50,1:50,:]
-      reals = iqsim(TI, (30,30,1), size(TI), nreal=4, rng=rng, resource=testresource)
+      reals = iqsim(TI, (30,30,1), size(TI), nreal=4, rng=rng)
       ps = [heatmap(real[:,:,1]) for real in reals]
       @test_reference "data/Reals$(TIname).png" plot(ps...)
     end
@@ -170,7 +169,7 @@ testresource = CPU1()
     rng = MersenneTwister(2017)
     trainimg = geostatsimage("Strebelle")
     inactive = [CartesianIndex(i,j) for i in 1:30 for j in 1:30]
-    solver = IQ(:facies => (trainimg=trainimg, tilesize=(30,30), inactive=inactive), rng=rng, resource = testresource)
+    solver = IQ(:facies => (trainimg=trainimg, tilesize=(30,30), inactive=inactive), rng=rng)
 
     solution = solve(problem, solver)
     @test length(solution) == 3

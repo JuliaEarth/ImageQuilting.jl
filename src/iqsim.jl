@@ -8,9 +8,9 @@
           overlap::NTuple{N,<:Real}=ntuple(i->1/6,N),
           soft::AbstractVector=[], hard::Dict=Dict(), tol::Real=.1,
           path::Symbol=:raster, nreal::Integer=1,
-          threads::Integer=cpucores(),
+          resource::AbstractResource=CPU1(), threads::Integer=cpucores(),
           debug::Bool=false, showprogress::Bool=false,
-          rng::AbstractRNG=Random.GLOBAL_RNG, resource::AbstractResource=CPU1())
+          rng::AbstractRNG=Random.GLOBAL_RNG)
 
 Performs image quilting simulation as described in Hoffimann et al. 2017.
 
@@ -50,9 +50,9 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
                overlap::NTuple{N,<:Real}=ntuple(i->1/6,N),
                soft::AbstractVector=[], hard::Dict=Dict(), tol::Real=.1,
                path::Symbol=:raster, nreal::Integer=1,
-               resource::AbstractResource=CPU1(), threads::Integer=cpucores(), 
+               resource::AbstractResource{R}=CPU1(), threads::Integer=cpucores(), 
                debug::Bool=false, showprogress::Bool=false,
-               rng=Random.GLOBAL_RNG) where {T,N}
+               rng=Random.GLOBAL_RNG) where {R,T,N}
 
   # number of threads in FFTW
   set_num_threads(threads)
@@ -186,7 +186,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
           ovlmask[CartesianIndices(oslice)] .= true
         end
       end
-      ovldist .= convdist(resource, TI, simdev, weights=ovlmask)
+      ovldist .= convdist(TI, simdev, weights=ovlmask, resource = resource)
       ovldist[disabled] .= Inf
 
       # hard distance
@@ -195,7 +195,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
         indicator!(hardmask, hard, tile)
         if any(hardmask)
           event!(harddev, hard, tile)
-          harddist .= convdist(resource, TI, harddev, weights=hardmask)
+          harddist .= convdist(TI, harddev, weights=hardmask, resource = resource)
           harddist[disabled] .= Inf
           hardtile = true
         end
@@ -205,7 +205,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       for s in eachindex(SOFT)
         AUX, AUXTI = SOFT[s]
         softdev = view(AUX, tile)
-        softdists[s] .= convdist(resource, AUXTI, softdev)
+        softdists[s] .= convdist(AUXTI, softdev, resource = resource)
         softdists[s][disabled] .= Inf
       end
 

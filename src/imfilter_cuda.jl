@@ -9,17 +9,17 @@ function imfilter_resource(resource::CUDALibs, img, kern)
   imggpu = nothing
   kerngpu = nothing
 
-  n = ndims(img)
-  t = eltype(img)
+  N = ndims(img)
+  T = eltype(img)
 
   @sync begin
     Threads.@spawn begin
-      imggpu = CUDA.zeros(t,sizeall)
-      imgindexes = ntuple(d->let padsize = div(size(kern,d)-1,2); (padsize+1):size(img,d)+padsize end, n)
+      imggpu = CUDA.zeros(T,sizeall)
+      imgindexes = ntuple(d->let padsize = div(size(kern,d)-1,2); (padsize+1):size(img,d)+padsize end, N)
       imggpu[imgindexes...] = img
     end
 
-    kerngpu = CUDA.zeros(t,sizeall)
+    kerngpu = CUDA.zeros(T,sizeall)
     kernindexes = axes(kern)
     kerngpu[kernindexes...] = kern
     kerngpu = CUFFT.fft(kerngpu)
