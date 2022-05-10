@@ -10,7 +10,7 @@
           path::Symbol=:raster, nreal::Integer=1,
           threads::Integer=cpucores(),
           debug::Bool=false, showprogress::Bool=false,
-          rng::AbstractRNG=Random.GLOBAL_RNG)
+          rng::AbstractRNG=Random.GLOBAL_RNG, resource::AbstractResource=CPU1())
 
 Performs image quilting simulation as described in Hoffimann et al. 2017.
 
@@ -30,11 +30,11 @@ Performs image quilting simulation as described in Hoffimann et al. 2017.
 * `tol` is the initial relaxation tolerance in (0,1] (default to .1)
 * `path` is the simulation path (`:raster`, `:dilation` or `:random`)
 * `nreal` is the number of realizations (default to 1)
+* `resource` informs the ComputationalResources.jl resource for acceleration
 * `threads` is the number of threads for the FFT (default to all CPU cores)
 * `debug` informs whether to export or not the boundary cuts and voxel reuse
 * `showprogress` informs whether to show or not estimated time duration
 * `rng` is the random number generator (default to `Random.GLOBAL_RNG`)
-* `resource` informs the ComputationalResources.jl resource for acceleration
 
 The main output `reals` consists of a list of realizations that can be indexed with
 `reals[1], reals[2], ..., reals[nreal]`. If `debug=true`, additional output is generated:
@@ -50,9 +50,9 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
                overlap::NTuple{N,<:Real}=ntuple(i->1/6,N),
                soft::AbstractVector=[], hard::Dict=Dict(), tol::Real=.1,
                path::Symbol=:raster, nreal::Integer=1,
-               threads::Integer=cpucores(),
+               resource::AbstractResource=CPU1(), threads::Integer=cpucores(), 
                debug::Bool=false, showprogress::Bool=false,
-               rng=Random.GLOBAL_RNG, resource::AbstractResource=CPU1()) where {T,N}
+               rng=Random.GLOBAL_RNG) where {T,N}
 
   # number of threads in FFTW
   set_num_threads(threads)
@@ -143,7 +143,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
     harddist = Array{Float64}(undef, distsize)
   end
 
-   for real in 1:nreal
+  for real in 1:nreal
     # allocate memory for current simulation
     simgrid = zeros(padsize)
     debug && (cutgrid = zeros(padsize))
@@ -186,7 +186,6 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
           ovlmask[CartesianIndices(oslice)] .= true
         end
       end
-      
       ovldist .= convdist(resource, TI, simdev, weights=ovlmask)
       ovldist[disabled] .= Inf
 

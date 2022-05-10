@@ -2,23 +2,24 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-function imfilter_resource(resource::CUDALibs{R},
-                         img::AbstractArray{T,N},
-                         kern::AbstractArray{K,N}) where {R, T<:Real,K<:Real,N}
+function imfilter_resource(resource::CUDALibs, img, kern)
 
-  sizeall = Tuple(map(t->t[1]+t[2]-1,zip(size(img),size(kern))))
+  sizeall = size(img) .+ size(kern) .- 1
 
   imggpu = nothing
   kerngpu = nothing
 
+  n = ndims(img)
+  t = eltype(img)
+
   @sync begin
     Threads.@spawn begin
-      imggpu = CUDA.zeros(T,sizeall)
-      imgindexes = ntuple(d->let padsize = div(size(kern,d)-1,2); (padsize+1):size(img,d)+padsize end, N)
+      imggpu = CUDA.zeros(t,sizeall)
+      imgindexes = ntuple(d->let padsize = div(size(kern,d)-1,2); (padsize+1):size(img,d)+padsize end, n)
       imggpu[imgindexes...] = img
     end
 
-    kerngpu = CUDA.zeros(T,sizeall)
+    kerngpu = CUDA.zeros(t,sizeall)
     kernindexes = axes(kern)
     kerngpu[kernindexes...] = kern
     kerngpu = CUFFT.fft(kerngpu)
@@ -32,7 +33,8 @@ function imfilter_resource(resource::CUDALibs{R},
   out = CUFFT.ifft(out)
  
   # remove padding
-  out = let ix = map(x -> Base.OneTo(x), size(img) .- size(kern) .+ 1); out[ix...] end
+  ix = map(x -> Base.OneTo(x), size(img) .- size(kern) .+ 1)
+  out = out[ix...]
 
   out = real.(out)
   out = Array(out)

@@ -27,8 +27,8 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
 
 ### Optional
 
+* `resource`     - The ComputationalResources.jl resource for acceleration (default to CPU1)
 * `threads`      - Number of threads in FFT (default to number of physical CPU cores)
-* `resource`       - The ComputationalResources.jl resource for acceleration (default to CPU1)
 * `showprogress` - Whether to show or not the estimated time duration (default to false)
 * `rng`          - Random number generator (default to `Random.GLOBAL_RNG`)
 
@@ -117,8 +117,8 @@ function solvesingle(::SimulationProblem, covars::NamedTuple, solver::IQ, prepro
     reals = iqsim(trainimg, par.tilesize, simsize;
                   overlap=overlap, path=par.path,
                   soft=par.soft, hard=hard, tol=par.tol,
-                  threads=solver.threads,
-                  showprogress=solver.showprogress, rng=rng, resource=solver.resource)
+                  resource=solver.resource, threads=solver.threads, 
+                  showprogress=solver.showprogress, rng=rng)
 
     # flatten result
     var => vec(reals[1])
