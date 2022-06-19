@@ -36,12 +36,12 @@ function gpu_setup()
 
   ctx = cl.Context(dev)
   queue = cl.CmdQueue(ctx)
-  mult_kernel = basic_kernels(ctx)
+  mult_kernel = clkernels(ctx)
 
   GPUmeta(dev, ctx, queue, mult_kernel)
 end
 
-function basic_kernels(ctx)
+function clkernels(ctx)
   mult_kernel = "
     __kernel void mult(__global const float2 *a,
                        __global const float2 *b,
