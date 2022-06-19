@@ -29,9 +29,9 @@ include("plotrecipes.jl")
 include("imfilter.jl")
 include("relaxation.jl")
 include("taumodel.jl")
-include("graphcuts.jl")
-include("voxelreuse.jl")
+include("graphcut.jl")
 include("iqsim.jl")
+include("voxelreuse.jl")
 include("geostats.jl")
 
 export
