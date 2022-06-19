@@ -54,7 +54,7 @@ function activation(hard, tile)
   buff
 end
 
-function preprocess_images(trainimg, soft, geoconfig)
+function imagepreproc(trainimg, soft, geoconfig)
   padsize = geoconfig.padsize
 
   TI = Float64.(trainimg)
@@ -76,7 +76,7 @@ function preprocess_images(trainimg, soft, geoconfig)
   TI, SOFT
 end
 
-function find_disabled(trainimg, geoconfig)
+function finddisabled(trainimg, geoconfig)
   TIsize   = geoconfig.TIsize
   tilesize = geoconfig.tilesize
   distsize = geoconfig.distsize
@@ -92,7 +92,7 @@ function find_disabled(trainimg, geoconfig)
   disabled
 end
 
-function find_skipped(hard, geoconfig)
+function findskipped(hard, geoconfig)
   ntiles   = geoconfig.ntiles
   tilesize = geoconfig.tilesize
   spacing  = geoconfig.spacing

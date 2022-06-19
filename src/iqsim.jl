@@ -111,13 +111,13 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
                TIsize=TIsize, simsize=simsize, padsize=padsize, distsize=distsize)
 
   # pad input images and knockout inactive voxels
-  TI, SOFT = preprocess_images(trainimg, soft, geoconfig)
+  TI, SOFT = imagepreproc(trainimg, soft, geoconfig)
 
   # disable tiles in the training image if they contain inactive voxels
-  disabled = find_disabled(trainimg, geoconfig)
+  disabled = finddisabled(trainimg, geoconfig)
 
   # determine tiles that should be skipped and tiles with data
-  skipped, datainds = find_skipped(hard, geoconfig)
+  skipped, datainds = findskipped(hard, geoconfig)
 
   # construct simulation path
   simpath = genpath(rng, ntiles, path, datainds)
