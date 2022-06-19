@@ -2,23 +2,11 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-const GPU = nothing
-
-function get_imfilter_impl(GPU)
-  if GPU ≠ nothing
-    imfilter_gpu
-  else
-    imfilter_cpu
-  end
-end
-
 function fastdistance(img, kern; weights=fill(1.0, size(kern)))
-  imfilter_impl = get_imfilter_impl(GPU)
-
   wkern = weights.*kern
 
-  A² = imfilter_impl(img.^2, weights)
-  AB = imfilter_impl(img, wkern)
+  A² = imfilter_kernel(img.^2, weights)
+  AB = imfilter_kernel(img, wkern)
   B² = sum(wkern .* kern)
 
   parent(@. abs(A² - 2AB + B²))
