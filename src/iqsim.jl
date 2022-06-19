@@ -186,7 +186,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
           ovlmask[CartesianIndices(oslice)] .= true
         end
       end
-      ovldist .= convdist(TI, simdev, weights=ovlmask)
+      ovldist .= fastdistance(TI, simdev, weights=ovlmask)
       ovldist[disabled] .= Inf
 
       # hard distance
@@ -195,7 +195,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
         indicator!(hardmask, hard, tile)
         if any(hardmask)
           event!(harddev, hard, tile)
-          harddist .= convdist(TI, harddev, weights=hardmask)
+          harddist .= fastdistance(TI, harddev, weights=hardmask)
           harddist[disabled] .= Inf
           hardtile = true
         end
@@ -205,7 +205,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       for s in eachindex(SOFT)
         AUX, AUXTI = SOFT[s]
         softdev = view(AUX, tile)
-        softdists[s] .= convdist(AUXTI, softdev)
+        softdists[s] .= fastdistance(AUXTI, softdev)
         softdists[s][disabled] .= Inf
       end
 

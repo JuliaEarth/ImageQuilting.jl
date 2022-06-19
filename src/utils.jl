@@ -12,7 +12,7 @@ function get_imfilter_impl(GPU)
   end
 end
 
-function convdist(img, kern; weights=fill(1.0, size(kern)))
+function fastdistance(img, kern; weights=fill(1.0, size(kern)))
   imfilter_impl = get_imfilter_impl(GPU)
 
   wkern = weights.*kern
