@@ -43,7 +43,7 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
   @param path          = :raster
   @param mapping       = NearestMapping()
   @param inactive      = nothing
-  @param soft          = []
+  @param soft          = nothing
   @param tol           = 0.1
   @global threads      = cpucores()
   @global showprogress = false
@@ -70,14 +70,29 @@ function preprocess(problem::SimulationProblem, solver::IQ)
       trainimg = asarray(TI, var)
 
       # default overlap
-      overlap = varparams.overlap ≠ nothing ? varparams.overlap :
-                                              ntuple(i->1/6, dims)
+      overlap = isnothing(varparams.overlap) ? ntuple(i->1/6, dims) :
+                                               varparams.overlap
 
       # determine data mappings
       vmapping = if hasdata(problem)
         map(pdata, pdomain, (var,), varparams.mapping)[var]
       else
         Dict()
+      end
+
+      # create soft data object
+      soft = if !isnothing(varparams.soft)
+        data, dataTI = varparams.soft
+        @assert domain(data) == pdomain "incompatible soft data for target domain"
+        @assert domain(dataTI) == domain(TI) "incompatible soft data for training image"
+        schema   = Tables.schema(values(data))
+        schemaTI = Tables.schema(values(dataTI))
+        vars     = schema.names |> collect |> sort
+        varsTI   = schemaTI.names |> collect |> sort
+        @assert vars == varsTI "variables for target domain and training image differ"
+        [(asarray(data, var), asarray(dataTI, var)) for var in vars]
+      else
+        []
       end
 
       # create hard data object
@@ -88,7 +103,7 @@ function preprocess(problem::SimulationProblem, solver::IQ)
 
       # disable inactive voxels
       shape = Dict{CartesianIndex{dims},Real}()
-      if varparams.inactive ≠ nothing
+      if !isnothing(varparams.inactive)
         for icoords in varparams.inactive
           push!(shape, icoords => NaN)
         end
@@ -96,7 +111,7 @@ function preprocess(problem::SimulationProblem, solver::IQ)
 
       hard = merge(hdata, shape)
 
-      preproc[var] = (varparams, trainimg, simsize, overlap, hard)
+      preproc[var] = (varparams, trainimg, simsize, overlap, soft, hard)
     end
   end
 
@@ -109,12 +124,12 @@ function solvesingle(::SimulationProblem, covars::NamedTuple, solver::IQ, prepro
 
   varreal = map(covars.names) do var
     # unpack preprocessed parameters
-    par, trainimg, simsize, overlap, hard = preproc[var]
+    par, trainimg, simsize, overlap, soft, hard = preproc[var]
 
     # run image quilting core function
     reals = iqsim(trainimg, par.tilesize, simsize;
                   overlap=overlap, path=par.path,
-                  soft=par.soft, hard=hard,
+                  soft=soft, hard=hard,
                   tol=par.tol, threads=solver.threads,
                   showprogress=solver.showprogress, rng=rng)
 

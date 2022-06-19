@@ -98,22 +98,50 @@ plot(solution)
 
 ## Soft data
 
-Sometimes it is also useful to incorporate auxiliary variables to
-guide the selection of patterns in the training image.
+It is possible to incorporate auxiliary variables to
+guide the selection of patterns from the training image.
 
-```julia
-using ImageQuilting
-using GeoStatsImages
+```@example basics
 using ImageFiltering
 
-TI    = geostatsimage("WalkerLake")
-truth = geostatsimage("WalkerLakeTruth")
+# image assumed as ground truth (unknown)
+truthimg = geostatsimage("WalkerLakeTruth")
 
-G(m) = imfilter(m, KernelFactors.IIRGaussian([10,10]))
+# training image with similar patterns
+trainimg = geostatsimage("WalkerLake")
 
-data   = G(truth)
-dataTI = G(TI)
-
-reals = iqsim(TI, (27, 27), size(truth), soft=[(data,dataTI)], nreal=3)
+plot(plot(trainimg), plot(truthimg))
 ```
-![Soft data conditioning](images/soft.png)
+
+```@example basics
+# forward model (blur filter)
+function forward(data)
+    img = asarray(data, :Z)
+    krn = KernelFactors.IIRGaussian([10,10])
+    fwd = imfilter(img, krn)
+    georef((fwd=fwd,), domain(data))
+end
+
+# apply forward model to both images
+data   = forward(truthimg)
+dataTI = forward(trainimg)
+
+plot(plot(dataTI), plot(data))
+```
+
+```@example basics
+# simulate patterns over the domain of interest
+problem = SimulationProblem(domain(truthimg), :Z => Float64, 3)
+
+solver = IQ(
+    :Z => (
+        trainimg = trainimg,
+        tilesize = (27,27),
+        soft = (data,dataTI)
+    )
+)
+
+solution = solve(problem, solver)
+
+plot(solution)
+```

@@ -7,6 +7,7 @@ module ImageQuilting
 using Meshes
 using GeoStatsBase
 
+using Tables
 using Graphs
 using GraphsFlows
 using ImageFiltering
