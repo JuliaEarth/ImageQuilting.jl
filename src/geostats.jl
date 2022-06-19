@@ -17,18 +17,17 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
 ### Optional
 
 * `overlap`  - Overlap size (default to (1/6, 1/6, ..., 1/6))
-* `path`     - Simulation path (:raster (default), :dilation, or :random)
+* `path`     - Simulation path (`:raster` (default), `:dilation`, or `:random`)
 * `mapping`  - Data mapping method (default to `NearestMapping()`)
 * `inactive` - Vector of inactive voxels (i.e. `CartesianIndex`) in the grid
-* `soft`     - A vector of `(data,dataTI)` pairs
-* `tol`      - Initial relaxation tolerance in (0,1] (default to 0.1)
+* `soft`     - A pair `(data,dataTI)` of geospatial data objects (default to `nothing`)
+* `tol`      - Initial relaxation tolerance in (0,1] (default to `0.1`)
 
 ## Global parameters
 
 ### Optional
 
 * `threads`      - Number of threads in FFT (default to number of physical CPU cores)
-* `gpu`          - Whether to use the GPU or the CPU (default to false)
 * `showprogress` - Whether to show or not the estimated time duration (default to false)
 * `rng`          - Random number generator (default to `Random.GLOBAL_RNG`)
 
@@ -45,9 +44,8 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
   @param mapping       = NearestMapping()
   @param inactive      = nothing
   @param soft          = []
-  @param tol           = .1
+  @param tol           = 0.1
   @global threads      = cpucores()
-  @global gpu          = false
   @global showprogress = false
   @global rng          = Random.GLOBAL_RNG
 end
@@ -116,8 +114,8 @@ function solvesingle(::SimulationProblem, covars::NamedTuple, solver::IQ, prepro
     # run image quilting core function
     reals = iqsim(trainimg, par.tilesize, simsize;
                   overlap=overlap, path=par.path,
-                  soft=par.soft, hard=hard, tol=par.tol,
-                  threads=solver.threads, gpu=solver.gpu,
+                  soft=par.soft, hard=hard,
+                  tol=par.tol, threads=solver.threads,
                   showprogress=solver.showprogress, rng=rng)
 
     # flatten result
