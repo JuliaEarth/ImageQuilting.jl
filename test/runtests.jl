@@ -175,8 +175,9 @@ datadir = joinpath(@__DIR__,"data")
     @test length(solution) == 3
     @test size(domain(solution[1])) == (100,100)
 
-    incomplete_solver = IQ()
-    @test_throws ErrorException solve(problem, incomplete_solver)
+    # incomplete solver
+    solver = IQ()
+    @test_throws ErrorException solve(problem, solver)
 
     if visualtests
       @test_reference "data/GeoStatsAPI.png" plot(solution,size=(900,300))
