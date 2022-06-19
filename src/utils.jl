@@ -15,54 +15,53 @@ end
 cart2lin(dims, ind) = LinearIndices(dims)[ind]
 lin2cart(dims, ind) = CartesianIndices(dims)[ind]
 
-function event!(buff, hard::Dict, tile::CartesianIndices)
+function event!(buff, hard, tile)
   @inbounds for (i, coord) in enumerate(tile)
     h = get(hard, coord, NaN)
     buff[i] = ifelse(isnan(h), 0.0, h)
   end
 end
 
-function event(hard::Dict, tile::CartesianIndices)
+function event(hard, tile)
   buff = Array{Float64}(undef, size(tile))
   event!(buff, hard, tile, def)
   buff
 end
 
-function indicator!(buff, hard::Dict, tile::CartesianIndices)
+function indicator!(buff, hard, tile)
   @inbounds for (i, coord) in enumerate(tile)
     nan = isnan(get(hard, coord, NaN))
     buff[i] = ifelse(nan, false, true)
   end
 end
 
-function indicator(hard::Dict, tile::CartesianIndices)
+function indicator(hard, tile)
   buff = Array{Bool}(undef, size(tile))
   indicator!(buff, hard, tile)
   buff
 end
 
-function activation!(buff, hard::Dict, tile::CartesianIndices)
+function activation!(buff, hard, tile)
   @inbounds for (i, coord) in enumerate(tile)
     cond = coord ∈ keys(hard) && isnan(hard[coord])
     buff[i] = ifelse(cond, false, true)
   end
 end
 
-function activation(hard::Dict, tile::CartesianIndices)
+function activation(hard, tile)
   buff = Array{Bool}(undef, size(tile))
   activation!(buff, hard, tile)
   buff
 end
 
-function preprocess_images(trainimg::AbstractArray{T,N}, soft::AbstractVector,
-                           geoconfig::NamedTuple) where {T,N}
+function preprocess_images(trainimg, soft, geoconfig)
   padsize = geoconfig.padsize
 
   TI = Float64.(trainimg)
   replace!(TI, NaN => 0.)
 
   SOFT = map(soft) do (aux, auxTI)
-    prepend = ntuple(i->0, N)
+    prepend = ntuple(i->0, ndims(TI))
     append  = padsize .- min.(padsize, size(aux))
     padding = Pad(:symmetric, prepend, append)
 
@@ -77,7 +76,7 @@ function preprocess_images(trainimg::AbstractArray{T,N}, soft::AbstractVector,
   TI, SOFT
 end
 
-function find_disabled(trainimg::AbstractArray{T,N}, geoconfig::NamedTuple) where {T,N}
+function find_disabled(trainimg, geoconfig)
   TIsize   = geoconfig.TIsize
   tilesize = geoconfig.tilesize
   distsize = geoconfig.distsize
@@ -93,7 +92,7 @@ function find_disabled(trainimg::AbstractArray{T,N}, geoconfig::NamedTuple) wher
   disabled
 end
 
-function find_skipped(hard::Dict, geoconfig::NamedTuple)
+function find_skipped(hard, geoconfig)
   ntiles   = geoconfig.ntiles
   tilesize = geoconfig.tilesize
   spacing  = geoconfig.spacing
@@ -120,7 +119,7 @@ function find_skipped(hard::Dict, geoconfig::NamedTuple)
   skipped, datainds
 end
 
-function genpath(rng::AbstractRNG, extent::Dims{N}, kind::Symbol, datainds::AbstractVector{Int}) where {N}
+function genpath(rng, extent, kind, datainds)
   path = Vector{Int}()
 
   if isempty(datainds)
