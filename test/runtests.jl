@@ -114,10 +114,10 @@ datadir = joinpath(@__DIR__,"data")
 
     A = ones(20,20)
     B = ones(20,20)
-    C = ImageQuilting.boykov_kolmogorov_cut(A, B, 1)
+    C = ImageQuilting.graphcut(A, B, 1)
     @test all(C[1:end-1,:] .== 1)
     @test all(C[end,:] .== 0)
-    C = ImageQuilting.boykov_kolmogorov_cut(A, B, 2)
+    C = ImageQuilting.graphcut(A, B, 2)
     @test all(C[:,1:end-1] .== 1)
     @test all(C[:,end] .== 0)
   end

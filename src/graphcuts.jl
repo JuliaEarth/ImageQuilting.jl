@@ -2,10 +2,11 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-function boykov_kolmogorov_cut(A::AbstractArray{T,N}, B::AbstractArray{T,N}, dim::Integer) where {N,T}
+function graphcut(A, B, dim)
   @assert size(A) == size(B) "arrays must have the same size for cut"
 
   # size and number of voxels
+  N    = ndims(A)
   sz   = size(A)
   nvox = prod(sz)
 

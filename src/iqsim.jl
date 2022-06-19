@@ -243,7 +243,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
           oslice = ntuple(i -> i == d ? (1:ovlsize[d]) : (1:tilesize[i]), N)
           inds = CartesianIndices(oslice)
           A = view(simdev, inds); B = view(TIdev, inds)
-          cutmask[inds] .|= boykov_kolmogorov_cut(A, B, d)
+          cutmask[inds] .|= graphcut(A, B, d)
         end
 
         # compute mask with next tile
@@ -251,7 +251,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
           oslice = ntuple(i -> i == d ? (spacing[d]+1:tilesize[d]) : (1:tilesize[i]), N)
           inds = CartesianIndices(oslice)
           A = view(simdev, inds); B = view(TIdev, inds)
-          cutmask[inds] .|= .!boykov_kolmogorov_cut(A, B, d)
+          cutmask[inds] .|= .!graphcut(A, B, d)
         end
       end
 
