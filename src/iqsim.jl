@@ -220,7 +220,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       patterndb = isempty(Ds) ? findall(vec(D .≤ (1+tol)minimum(D))) : relaxation(D, Ds, tol)
 
       # pattern probability
-      patternprobs = tau_model(patterndb, D, Ds)
+      patternprobs = taumodel(patterndb, D, Ds)
 
       # pick a pattern at random from the database
       rind   = sample(rng, patterndb, weights(patternprobs))

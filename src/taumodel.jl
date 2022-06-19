@@ -2,7 +2,7 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-function tau_model(events::AbstractVector, D₁::AbstractArray, Dₙ::AbstractArray)
+function taumodel(events, D₁, Dₙ)
   nevents = length(events)
 
   # trivial mass function

@@ -2,7 +2,7 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-function relaxation(distance::AbstractArray, auxdistances::AbstractArray, cutoff::Real)
+function relaxation(distance, auxdistances, cutoff)
   # patterns enabled in the training image
   enabled = .!isinf.(distance)
   npatterns = sum(enabled)
@@ -26,7 +26,7 @@ function relaxation(distance::AbstractArray, auxdistances::AbstractArray, cutoff
       softdistance[n][softdb[n]] .= Inf
       softdb[n] = [softdb[n]; partialsortperm(vec(softdistance[n]), 1:softdbsize-length(softdb[n]))]
 
-      patterndb = fast_intersect(patterndb, softdb[n], length(distance))
+      patterndb = fastintersect(patterndb, softdb[n], length(distance))
 
       isempty(patterndb) && break
     end
@@ -38,8 +38,7 @@ function relaxation(distance::AbstractArray, auxdistances::AbstractArray, cutoff
   patterndb
 end
 
-function fast_intersect(A::AbstractVector{Int}, B::AbstractVector{Int},
-                         nbits::Integer)
+function fastintersect(A, B, nbits)
   bitsA = falses(nbits)
   bitsB = falses(nbits)
   bitsA[A] .= true
