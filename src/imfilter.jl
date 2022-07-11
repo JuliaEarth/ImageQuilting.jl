@@ -12,10 +12,8 @@ function imfilter_gpu(img, krn)
   T = eltype(img)
 
   # pad images to common size
-  imgsize = size(img)
-  krnsize = size(krn)
-  padimg  = padarray(img, Fill(zero(T), ntuple(i->0, N), krnsize .- 1))
-  padkrn  = padarray(krn, Fill(zero(T), ntuple(i->0, N), imgsize .- 1))
+  padimg  = padarray(img, Fill(zero(T), ntuple(i->0, N), size(krn) .- 1))
+  padkrn  = padarray(krn, Fill(zero(T), ntuple(i->0, N), size(img) .- 1))
 
   # perform ifft(fft(img) .* conj.(fft(krn)))
   fftimg = padimg |> CuArray |> CUFFT.fft
@@ -24,7 +22,7 @@ function imfilter_gpu(img, krn)
 
   # unpad result
   start  = CartesianIndex(ntuple(i->1, N))
-  finish = CartesianIndex(imgsize .- (krnsize .- 1))
+  finish = CartesianIndex(size(img) .- (size(krn) .- 1))
   real.(result[start:finish]) |> Array
 end
 
