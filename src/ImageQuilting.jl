@@ -12,7 +12,6 @@ using Graphs
 using GraphsFlows
 using ImageFiltering
 using ImageMorphology
-using Primes: factor
 using StatsBase: sample, weights
 using ProgressMeter: Progress, next!
 using FFTW: set_num_threads
