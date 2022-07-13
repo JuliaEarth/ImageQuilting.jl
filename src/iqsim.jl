@@ -109,6 +109,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
   # pad input images and knockout inactive voxels
   TI, SOFT = imagepreproc(trainimg, soft, geoconfig)
+  TI² = TI.^2
 
   # disable tiles in the training image if they contain inactive voxels
   disabled = finddisabled(trainimg, geoconfig)
@@ -183,7 +184,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
           ovlmask[CartesianIndices(oslice)] .= true
         end
       end
-      ovldist .= fastdistance(TI, simdev, weights=ovlmask)
+      ovldist .= fastdistance(TI, simdev, img²=TI², weights=ovlmask)
       ovldist[disabled] .= Inf
 
       # hard distance
