@@ -2,10 +2,10 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-function fastdistance(img, kern; img²=img.^2, weights=fill(1.0, size(kern)))
+function fastdistance(img, kern; weights=fill(1.0, size(kern)))
   wkern = weights.*kern
 
-  A² = imfilter_kernel(img², weights)
+  A² = imfilter_kernel(img.^2, weights)
   AB = imfilter_kernel(img, wkern)
   B² = sum(wkern .* kern)
 
