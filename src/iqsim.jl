@@ -109,6 +109,10 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
   # pad input images and knockout inactive voxels
   TI, SOFT = imagepreproc(trainimg, soft, geoconfig)
+  
+  # load TI and TI² to CPU or GPU memory 
+  TI_kernel = load_imfilter_img_to_kernel(TI, tilesize)
+  TI²_kernel = load_imfilter_img_to_kernel(TI.^2, tilesize)
 
   # disable tiles in the training image if they contain inactive voxels
   disabled = finddisabled(trainimg, geoconfig)
@@ -183,7 +187,9 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
           ovlmask[CartesianIndices(oslice)] .= true
         end
       end
-      ovldist .= fastdistance(TI, simdev, weights=ovlmask)
+
+      # calculate overlap distances
+      ovldist .= fastdistance(TI_kernel, TI²_kernel, TIsize, simdev, weights=ovlmask)
       ovldist[disabled] .= Inf
 
       # hard distance
@@ -192,7 +198,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
         indicator!(hardmask, hard, tile)
         if any(hardmask)
           event!(harddev, hard, tile)
-          harddist .= fastdistance(TI, harddev, weights=hardmask)
+          harddist .= fastdistance(TI_kernel, TI²_kernel, TIsize, harddev, weights=hardmask)
           harddist[disabled] .= Inf
           hardtile = true
         end
@@ -202,7 +208,9 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       for s in eachindex(SOFT)
         AUX, AUXTI = SOFT[s]
         softdev = view(AUX, tile)
-        softdists[s] .= fastdistance(AUXTI, softdev)
+        AUXTI_kernel = load_imfilter_img_to_kernel(AUXTI, tilesize)
+        AUXTI²_kernel = load_imfilter_img_to_kernel(AUXTI.^2, tilesize)
+        softdists[s] .= fastdistance(AUXTI_kernel, AUXTI²_kernel, size(AUXTI), softdev)
         softdists[s][disabled] .= Inf
       end
 
