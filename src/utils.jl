@@ -4,10 +4,6 @@
 
 function fastdistance(img_kernel, img²_kernel, imgsize, kern; weights=fill(1.0, size(kern)))
   wkern = weights.*kern
-  
-  println("---fastdistance---")
-  println("size(img) ", size(img_kernel))
-  println("size(kern) ", size(kern))
 
   A² = imfilter_kernel(img²_kernel, weights, imgsize)
   AB = imfilter_kernel(img_kernel, wkern, imgsize)
