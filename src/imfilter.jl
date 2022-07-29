@@ -1,14 +1,29 @@
 # ------------------------------------------------------------------
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
+@platform parameter clear
+@platform parameter accelerator_count
+@platform parameter accelerator_api
 
-function imfilter_cpu(img, krn)
+@platform default function which_platform()
+  println("Running on DEFAULT PLATFORM")
+end
+
+@platform aware function which_platform({accelerator_count::(@atleast 1), accelerator_api::CUDA_API})
+  println("Running on CUDA GPU")
+end
+
+which_platform()
+
+@platform default function imfilter_kernel(img, krn)
   imfilter(img, centered(krn), Inner(), Algorithm.FFT())
 end
 
-function imfilter_gpu(img, krn)
+
+@platform aware function imfilter_kernel({accelerator_count::(@atleast 1), accelerator_api::CUDA_API}, img, krn)
+  
   # retrieve basic info
-  N = ndims(img)
+  N = ndims(img) 
   T = eltype(img)
 
   # pad images to common size
@@ -25,5 +40,3 @@ function imfilter_gpu(img, krn)
   finish = CartesianIndex(size(img) .- (size(krn) .- 1))
   real.(result[start:finish]) |> Array
 end
-
-const imfilter_kernel = CUDA.functional() ? imfilter_gpu : imfilter_cpu

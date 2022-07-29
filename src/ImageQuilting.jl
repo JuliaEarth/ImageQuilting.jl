@@ -23,18 +23,25 @@ using Base: @nexprs, @nloops, @nref
 using SparseArrays: spzeros
 using Statistics: mean, std
 using Random
+ 
+using PlatformAware
 
 import GeoStatsBase: preprocess, solvesingle
 
 include("utils.jl")
 include("plotrecipes.jl")
-include("imfilter.jl")
 include("relaxation.jl")
 include("taumodel.jl")
 include("graphcut.jl")
 include("iqsim.jl")
 include("voxelreuse.jl")
 include("geostats.jl")
+
+#include("imfilter.jl")
+
+function __init__()
+  include(pkgdir(@__MODULE__) * "/src/imfilter.jl")
+end
 
 export
   # functions
