@@ -50,8 +50,6 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
                path::Symbol=:raster, nreal::Integer=1,
                threads::Integer=cpucores(), debug::Bool=false,
                showprogress::Bool=false, rng=Random.GLOBAL_RNG) where {T,N}
-
-  which_platform()
   
   # number of threads in FFTW
   set_num_threads(threads)
