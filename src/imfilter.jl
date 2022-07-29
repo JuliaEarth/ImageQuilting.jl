@@ -13,17 +13,14 @@ end
   println("Running on CUDA GPU")
 end
 
-which_platform()
-
 @platform default function imfilter_kernel(img, krn)
   imfilter(img, centered(krn), Inner(), Algorithm.FFT())
 end
 
-
 @platform aware function imfilter_kernel({accelerator_count::(@atleast 1), accelerator_api::CUDA_API}, img, krn)
   
   # retrieve basic info
-  N = ndims(img) 
+  N = ndims(img)
   T = eltype(img)
 
   # pad images to common size

@@ -41,6 +41,7 @@ include("geostats.jl")
 
 function __init__()
   include(pkgdir(@__MODULE__) * "/src/imfilter.jl")
+  which_platform()
 end
 
 export
