@@ -143,7 +143,7 @@ if visualtests
 end
 
 if CUDA.functional()
-  @testset "CPU and GPU imfilters are equivalent" begin
+  @testset "CPU vs GPU" begin
     tolerance = 1e-5
 
     # 2D imfilter
