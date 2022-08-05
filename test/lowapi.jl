@@ -147,7 +147,7 @@ if CUDA.functional()
     tolerance = 1e-5
 
     # 2D imfilter
-    img = rand(120, 60)
+    img = rand(200, 100)
     krn = rand(30, 10)
 
     result_cpu = ImageQuilting.imfilter_cpu(img, krn)
