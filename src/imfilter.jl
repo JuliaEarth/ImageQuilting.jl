@@ -22,7 +22,7 @@ function imfilter_gpu(img, krn)
 
   # recover result
   finalsize = size(img) .- (size(krn) .- 1)
-  real.(fftresult[CartesianIndices(finalsize)]) |> Array
+  real.(result[CartesianIndices(finalsize)]) |> Array
 end
 
 const imfilter_kernel = CUDA.functional() ? imfilter_gpu : imfilter_cpu
