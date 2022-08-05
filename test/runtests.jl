@@ -4,6 +4,7 @@ using GeoStatsBase
 using GeoStatsImages
 using ImageFiltering
 using Statistics
+using CUDA
 using Plots; gr(size=(600,400))
 using ReferenceTests, ImageIO
 using Test, Random
