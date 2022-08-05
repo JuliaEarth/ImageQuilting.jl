@@ -11,7 +11,7 @@ function imfilter_gpu(img, krn)
   N = ndims(img)
   T = eltype(img)
 
-  # pad kernel to common size with img
+  # pad kernel to common size with image
   padsize = size(img) .- size(krn)
   padkrn = padarray(krn, Fill(zero(T), ntuple(i->0, N), padsize))
 
