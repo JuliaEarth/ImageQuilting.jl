@@ -18,7 +18,7 @@ function imfilter_gpu(img, krn)
   # perform ifft(fft(img) .* conj.(fft(krn)))
   fftimg = img |> CuArray |> CUFFT.fft
   fftkrn = padkrn |> CuArray |> CUFFT.fft
-  fftresult = (fftimg .* conj.(fftkrn)) |> CUFFT.ifft
+  result = (fftimg .* conj.(fftkrn)) |> CUFFT.ifft
 
   # recover result
   finalsize = size(img) .- (size(krn) .- 1)
