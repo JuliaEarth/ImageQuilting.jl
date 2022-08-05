@@ -141,3 +141,27 @@ if visualtests
     @test_reference "data/Voxel$(TIname).png" voxelreuseplot(TI, rng=rng)
   end
 end
+
+if CUDA.functional()
+  @testset "CPU vs GPU" begin
+    tolerance = 1e-5
+
+    # 2D imfilter
+    img = rand(200, 100)
+    krn = rand(30, 10)
+
+    result_cpu = ImageQuilting.imfilter_cpu(img, krn)
+    result_gpu = ImageQuilting.imfilter_gpu(img, krn)
+    @test size(result_cpu) == size(result_gpu)
+    @test isapprox(result_cpu[:], result_gpu[:], atol=tolerance)
+    
+    # 3D imfilter
+    img = rand(50, 100, 150)
+    krn = rand(10, 20, 30)
+    
+    result_cpu = ImageQuilting.imfilter_cpu(img, krn)
+    result_gpu = ImageQuilting.imfilter_gpu(img, krn)
+    @test size(result_cpu) == size(result_gpu)
+    @test isapprox(result_cpu[:], result_gpu[:], atol=tolerance)
+  end
+end

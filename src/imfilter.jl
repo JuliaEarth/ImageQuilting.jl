@@ -11,19 +11,18 @@ function imfilter_gpu(img, krn)
   N = ndims(img)
   T = eltype(img)
 
-  # pad images to common size
-  padimg  = padarray(img, Fill(zero(T), ntuple(i->0, N), size(krn) .- 1))
-  padkrn  = padarray(krn, Fill(zero(T), ntuple(i->0, N), size(img) .- 1))
+  # pad kernel to common size with image
+  padsize = size(img) .- size(krn)
+  padkrn  = padarray(krn, Fill(zero(T), ntuple(i->0, N), padsize))
 
   # perform ifft(fft(img) .* conj.(fft(krn)))
-  fftimg = padimg |> CuArray |> CUFFT.fft
+  fftimg = img |> CuArray |> CUFFT.fft
   fftkrn = padkrn |> CuArray |> CUFFT.fft
   result = (fftimg .* conj.(fftkrn)) |> CUFFT.ifft
 
-  # unpad result
-  start  = CartesianIndex(ntuple(i->1, N))
-  finish = CartesianIndex(size(img) .- (size(krn) .- 1))
-  real.(result[start:finish]) |> Array
+  # recover result
+  finalsize = size(img) .- (size(krn) .- 1)
+  real.(result[CartesianIndices(finalsize)]) |> Array
 end
 
 const imfilter_kernel = CUDA.functional() ? imfilter_gpu : imfilter_cpu
