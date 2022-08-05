@@ -156,8 +156,8 @@ if CUDA.functional()
     @test isapprox(result_cpu[:], result_gpu[:], atol=tolerance)
     
     # 3D imfilter
-    img = rand(60, 40, 50)
-    krn = rand(9, 6, 15)
+    img = rand(50, 100, 150)
+    krn = rand(10, 20, 30)
     
     result_cpu = ImageQuilting.imfilter_cpu(img, krn)
     result_gpu = ImageQuilting.imfilter_gpu(img, krn)
