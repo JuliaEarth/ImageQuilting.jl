@@ -143,7 +143,7 @@ if visualtests
 end
 
 if CUDA.functional()
-  @testset "GPU imfilter is equivalent to CPU imfilter" begin
+  @testset "CPU and GPU imfilters are equivalent" begin
     tolerance = 1e-5
 
     # 2D imfilter
@@ -152,7 +152,8 @@ if CUDA.functional()
 
     result_cpu = ImageQuilting.imfilter_cpu(img, krn)
     result_gpu = ImageQuilting.imfilter_gpu(img, krn)
-    @test isapprox(result_cpu, result_gpu, atol=tolerance)
+    @test size(result_cpu) == size(result_gpu)
+    @test isapprox(result_cpu[:], result_gpu[:], atol=tolerance)
     
     # 3D imfilter
     img = rand(60, 40, 50)
@@ -160,6 +161,7 @@ if CUDA.functional()
     
     result_cpu = ImageQuilting.imfilter_cpu(img, krn)
     result_gpu = ImageQuilting.imfilter_gpu(img, krn)
-    @test isapprox(result_cpu, result_gpu, atol=tolerance)
+    @test size(result_cpu) == size(result_gpu)
+    @test isapprox(result_cpu[:], result_gpu[:], atol=tolerance)
   end
 end
