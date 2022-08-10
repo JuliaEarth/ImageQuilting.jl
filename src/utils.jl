@@ -54,11 +54,20 @@ function activation(hard, tile)
   buff
 end
 
+function array_cpu(array)
+  array
+end
+
+function array_gpu(array)
+  array |> Cuarray{Float32}
+end
+
+const array_kernel = CUDA.functional() ? array_gpu : array_cpu
+
 function imagepreproc(trainimg, soft, geoconfig)
   padsize = geoconfig.padsize
 
-  TI = Float64.(trainimg)
-  replace!(TI, NaN => 0.)
+  TI = replace(Float64.(trainimg), NaN => 0.) |> array_kernel
 
   SOFT = map(soft) do (aux, auxTI)
     prepend = ntuple(i->0, ndims(TI))
