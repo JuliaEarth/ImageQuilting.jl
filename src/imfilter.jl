@@ -6,7 +6,7 @@ function imfilter_cpu(img, krn)
   imfilter(img, centered(krn), Inner(), Algorithm.FFT())
 end
 
-function imfilter_gpu(img, krn)
+function imfilter_gpu(img::CuArray, krn)
   # retrieve basic info
   N = ndims(img)
   T = eltype(img)
@@ -16,7 +16,7 @@ function imfilter_gpu(img, krn)
   padkrn  = padarray(krn, Fill(zero(T), ntuple(i->0, N), padsize))
 
   # perform ifft(fft(img) .* conj.(fft(krn)))
-  fftimg = img |> CuArray |> CUFFT.fft
+  fftimg = img |> CUFFT.fft
   fftkrn = padkrn |> CuArray |> CUFFT.fft
   result = (fftimg .* conj.(fftkrn)) |> CUFFT.ifft
 
