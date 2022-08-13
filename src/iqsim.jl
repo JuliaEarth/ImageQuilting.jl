@@ -226,7 +226,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       rtile  = CartesianIndex(start):CartesianIndex(finish)
 
       # selected training image dataevent
-      TIdev = view(TI, rtile)
+      TIdev = view_kernel(TI, rtile)
 
       # boundary cut mask
       cutmask .= false
