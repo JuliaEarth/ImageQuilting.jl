@@ -7,7 +7,7 @@ function imfilter_cpu(img, krn)
 end
 
 function imfilter_gpu(img, krn)
-  imfilter_gpu(img |> CuArray{Float32}, krn)
+  imfilter_gpu(img |> CuArray, krn)
 end
 
 function imfilter_gpu(img::CuArray, krn)
