@@ -83,9 +83,7 @@ function imagepreproc(trainimg, soft, geoconfig)
     replace!(AUX, NaN => 0.)
     replace!(AUXTI, NaN => 0.)
 
-    AUXTI_kernel = AUXTI |> array_kernel
-
-    AUX, AUXTI_kernel
+    AUX, array_kernel(AUXTI)
   end
 
   TI_kernel, SOFT
