@@ -79,7 +79,7 @@ function imagepreproc(trainimg, soft, geoconfig)
 
   TI = Float64.(trainimg)
   replace!(TI, NaN => 0.)
-  TI_kernel = TI |> array_kernel
+  TI_kernel = array_kernel(TI)
 
   SOFT = map(soft) do (aux, auxTI)
     prepend = ntuple(i->0, ndims(TI))
