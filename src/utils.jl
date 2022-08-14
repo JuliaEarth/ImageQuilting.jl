@@ -54,23 +54,15 @@ function activation(hard, tile)
   buff
 end
 
-function array_cpu(array)
-  array
-end
+array_cpu(array) = array
 
-function array_gpu(array)
-  array |> CuArray
-end
+array_gpu(array) = CuArray(array)
 
 const array_kernel = CUDA.functional() ? array_gpu : array_cpu
 
-function view_cpu(array, I)
-  view(array, I)
-end
+view_cpu(array, I) = view(array, I)
 
-function view_gpu(array, I)
-  array[I] |> Array
-end
+view_gpu(array, I) = Array(array[I])
 
 const view_kernel = CUDA.functional() ? view_gpu : view_cpu
 
