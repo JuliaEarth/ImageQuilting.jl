@@ -71,7 +71,6 @@ function imagepreproc(trainimg, soft, geoconfig)
 
   TI = Float64.(trainimg)
   replace!(TI, NaN => 0.)
-  TI_kernel = array_kernel(TI)
 
   SOFT = map(soft) do (aux, auxTI)
     prepend = ntuple(i->0, ndims(TI))
@@ -83,10 +82,16 @@ function imagepreproc(trainimg, soft, geoconfig)
     replace!(AUX, NaN => 0.)
     replace!(AUXTI, NaN => 0.)
 
+    AUX, AUXTI
+  end
+
+  # load array to GPU, when available
+  TI_kernel = array_kernel(TI)
+  SOFT_kernel = map(SOFT) do (AUX, AUXTI)
     AUX, array_kernel(AUXTI)
   end
 
-  TI_kernel, SOFT
+  TI_kernel, SOFT_kernel
 end
 
 function finddisabled(trainimg, geoconfig)
