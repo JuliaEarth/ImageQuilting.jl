@@ -54,6 +54,18 @@ function activation(hard, tile)
   buff
 end
 
+array_cpu(array) = array
+
+array_gpu(array) = CuArray(array)
+
+const array_kernel = CUDA.functional() ? array_gpu : array_cpu
+
+view_cpu(array, I) = view(array, I)
+
+view_gpu(array, I) = Array(array[I])
+
+const view_kernel = CUDA.functional() ? view_gpu : view_cpu
+
 function imagepreproc(trainimg, soft, geoconfig)
   padsize = geoconfig.padsize
 
@@ -73,7 +85,13 @@ function imagepreproc(trainimg, soft, geoconfig)
     AUX, AUXTI
   end
 
-  TI, SOFT
+  # load array to GPU, when available
+  TI_kernel = array_kernel(TI)
+  SOFT_kernel = map(SOFT) do (AUX, AUXTI)
+    AUX, array_kernel(AUXTI)
+  end
+
+  TI_kernel, SOFT_kernel
 end
 
 function finddisabled(trainimg, geoconfig)
