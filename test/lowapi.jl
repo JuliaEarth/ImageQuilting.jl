@@ -149,20 +149,18 @@ if CUDA.functional()
     # 2D imfilter
     img = rand(200, 100)
     krn = rand(30, 10)
-    krn_alloc = ImageQuilting.array_kernel(zeros(size(img)))
 
-    result_cpu = ImageQuilting.imfilter_cpu(img, krn, krn_alloc)
-    result_gpu = ImageQuilting.imfilter_gpu(CuArray(img), krn, krn_alloc)
+    result_cpu = ImageQuilting.imfilter_cpu(img, krn)
+    result_gpu = ImageQuilting.imfilter_gpu(CuArray(img), krn)
     @test size(result_cpu) == size(result_gpu)
     @test isapprox(result_cpu[:], result_gpu[:], atol=tolerance)
     
     # 3D imfilter
     img = rand(50, 100, 150)
     krn = rand(10, 20, 30)
-    krn_alloc = ImageQuilting.array_kernel(zeros(size(img)))
     
-    result_cpu = ImageQuilting.imfilter_cpu(img, krn, krn_alloc)
-    result_gpu = ImageQuilting.imfilter_gpu(CuArray(img), krn, krn_alloc)
+    result_cpu = ImageQuilting.imfilter_cpu(img, krn)
+    result_gpu = ImageQuilting.imfilter_gpu(CuArray(img), krn)
     @test size(result_cpu) == size(result_gpu)
     @test isapprox(result_cpu[:], result_gpu[:], atol=tolerance)
   end
