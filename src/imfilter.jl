@@ -16,7 +16,7 @@ function imfilter_gpu(img, krn)
   padkrn  = padarray(krn, Fill(zero(T), ntuple(i->0, N), padsize))
 
   # perform ifft(fft(img) .* conj.(fft(krn)))
-  fftimg = img |> CuArray |> CUFFT.fft
+  fftimg = img |> CUFFT.fft
   fftkrn = padkrn |> CuArray |> CUFFT.fft
   result = (fftimg .* conj.(fftkrn)) |> CUFFT.ifft
 

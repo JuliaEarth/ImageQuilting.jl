@@ -151,7 +151,7 @@ if CUDA.functional()
     krn = rand(30, 10)
 
     result_cpu = ImageQuilting.imfilter_cpu(img, krn)
-    result_gpu = ImageQuilting.imfilter_gpu(img, krn)
+    result_gpu = ImageQuilting.imfilter_gpu(CuArray(img), krn)
     @test size(result_cpu) == size(result_gpu)
     @test isapprox(result_cpu[:], result_gpu[:], atol=tolerance)
     
@@ -160,7 +160,7 @@ if CUDA.functional()
     krn = rand(10, 20, 30)
     
     result_cpu = ImageQuilting.imfilter_cpu(img, krn)
-    result_gpu = ImageQuilting.imfilter_gpu(img, krn)
+    result_gpu = ImageQuilting.imfilter_gpu(CuArray(img), krn)
     @test size(result_cpu) == size(result_gpu)
     @test isapprox(result_cpu[:], result_gpu[:], atol=tolerance)
   end
