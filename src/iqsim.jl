@@ -140,6 +140,9 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
     harddist = Array{Float64}(undef, distsize)
   end
 
+  # preallocate kernel memory for optimization on GPU
+  krn_alloc = array_kernel(zeros(TIsize))
+
   for real in 1:nreal
     # allocate memory for current simulation
     simgrid = zeros(padsize)
@@ -183,7 +186,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
           ovlmask[CartesianIndices(oslice)] .= true
         end
       end
-      ovldist .= fastdistance(TI, simdev, weights=ovlmask)
+      ovldist .= fastdistance(TI, simdev, weights=ovlmask, krn_alloc=krn_alloc)
       ovldist[disabled] .= Inf
 
       # hard distance
@@ -192,7 +195,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
         indicator!(hardmask, hard, tile)
         if any(hardmask)
           event!(harddev, hard, tile)
-          harddist .= fastdistance(TI, harddev, weights=hardmask)
+          harddist .= fastdistance(TI, harddev, weights=hardmask, krn_alloc=krn_alloc)
           harddist[disabled] .= Inf
           hardtile = true
         end
@@ -202,7 +205,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       for s in eachindex(SOFT)
         AUX, AUXTI = SOFT[s]
         softdev = view(AUX, tile)
-        softdists[s] .= fastdistance(AUXTI, softdev)
+        softdists[s] .= fastdistance(AUXTI, softdev, krn_alloc=krn_alloc)
         softdists[s][disabled] .= Inf
       end
 
