@@ -12,8 +12,8 @@ function imfilter_gpu(img, krn)
   T = eltype(img)
 
   # pad kernel to common size with image
-  padsize = size(img) .- size(krn)
-  padkrn  = padarray(krn, Fill(zero(T), ntuple(i->0, N), padsize))
+  padkrn = CUDA.zeros(size(img))
+  copyto!(padkrn, CartesianIndices(krn), CuArray(krn), CartesianIndices(krn))
 
   # perform ifft(fft(img) .* conj.(fft(krn)))
   fftimg = img |> CUFFT.fft
