@@ -3,10 +3,6 @@
   sdomain = CartesianGrid(100,100)
   problem = SimulationProblem(sdata, sdomain, :facies, 3)
 
-  # incomplete solver
-  solver = IQ()
-  @test_throws ErrorException solve(problem, solver)
-
   rng = MersenneTwister(2017)
   trainimg = geostatsimage("Strebelle")
   inactive = [CartesianIndex(i,j) for i in 1:30 for j in 1:30]
