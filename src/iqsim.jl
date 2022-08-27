@@ -111,6 +111,8 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
   # pad input images and knockout inactive voxels
   TI, SOFT = imagepreproc(trainimg, soft, geoconfig)
+  
+  #TI_,SOFT_ = placeimg(TI,SOFT)
 
   # disable tiles in the training image if they contain inactive voxels
   disabled = finddisabled(trainimg, geoconfig)
@@ -203,6 +205,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       # soft distance
       for s in eachindex(SOFT)
         AUX, AUXTI = SOFT[s]
+        #AUXTI_ = SOFT_[s]
         softdev = view(AUX, tile)
         softdists[s] .= fastdistance(AUXTI, softdev)
         softdists[s][disabled] .= Inf

@@ -17,7 +17,11 @@ using ProgressMeter: Progress, next!
 using FFTW: set_num_threads
 using CpuId: cpucores
 using RecipesBase
+using Primes
 using CUDA
+using OpenCL
+using CLFFT
+const clfft = CLFFT
 
 using Base: @nexprs, @nloops, @nref
 using SparseArrays: spzeros
@@ -29,6 +33,7 @@ using PlatformAware
 import GeoStatsBase: preprocess, solvesingle
 
 include("utils.jl")
+include("utils_gpu.jl")
 include("plotrecipes.jl")
 include("relaxation.jl")
 include("taumodel.jl")
