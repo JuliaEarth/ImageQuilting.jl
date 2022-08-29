@@ -54,17 +54,6 @@ function activation(hard, tile)
   buff
 end
 
-array_cpu(array) = array
-
-array_gpu(array) = CuArray(array)
-
-const array_kernel = CUDA.functional() ? array_gpu : array_cpu
-
-view_cpu(array, I) = view(array, I)
-
-view_gpu(array, I) = Array(array[I])
-
-const view_kernel = CUDA.functional() ? view_gpu : view_cpu
 
 function imagepreproc(trainimg, soft, geoconfig)
   padsize = geoconfig.padsize

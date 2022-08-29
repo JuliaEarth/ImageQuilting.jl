@@ -21,6 +21,14 @@ end
   imfilter(img, centered(krn), Inner(), Algorithm.FFT())
 end
 
+@platform default function array_kernel(array) array end
+
+@platform aware function array_kernel({accelerator_count::(@atleast 1), accelerator_api::CUDA_API}, array) CuArray(array) end
+
+@platform default function view_kernel(array, I) view(array, I) end
+
+@platform aware function view_kernel({accelerator_count::(@atleast 1), accelerator_api::CUDA_API}, array, I) Array(array[I]) end
+
 
 @platform aware function imfilter_kernel({accelerator_count::(@atleast 1), accelerator_api::CUDA_API}, img, krn)
 
@@ -40,7 +48,7 @@ end
    # recover result
    finalsize = size(img) .- (size(krn) .- 1)
    real.(result[CartesianIndices(finalsize)]) |> Array
-   
+
  end
 
 
