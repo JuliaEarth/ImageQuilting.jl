@@ -1,5 +1,3 @@
-using FFTW
-
 # ------------------------------------------------------------------
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
@@ -131,6 +129,8 @@ const GPU = gpu_setup()
    indexesA = ntuple(d->postpad[d]+1:size(img,d)-prepad[d], N)
    copyreal!(out, AF, indexesA)
    
+   GC.gc()
+
    out
   end
 
