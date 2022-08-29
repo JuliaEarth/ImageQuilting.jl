@@ -51,8 +51,6 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
                threads::Integer=cpucores(), debug::Bool=false,
                showprogress::Bool=false, rng=Random.GLOBAL_RNG) where {T,N}
 
-  which_platform()
-            
   # number of threads in FFTW
   set_num_threads(threads)
 
@@ -111,8 +109,6 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
   # pad input images and knockout inactive voxels
   TI, SOFT = imagepreproc(trainimg, soft, geoconfig)
-  
-  #TI_,SOFT_ = placeimg(TI,SOFT)
 
   # disable tiles in the training image if they contain inactive voxels
   disabled = finddisabled(trainimg, geoconfig)
@@ -205,7 +201,6 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       # soft distance
       for s in eachindex(SOFT)
         AUX, AUXTI = SOFT[s]
-        #AUXTI_ = SOFT_[s]
         softdev = view(AUX, tile)
         softdists[s] .= fastdistance(AUXTI, softdev)
         softdists[s][disabled] .= Inf
@@ -231,7 +226,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       rtile  = CartesianIndex(start):CartesianIndex(finish)
 
       # selected training image dataevent
-      TIdev = view(TI, rtile)
+      TIdev = view_kernel(TI, rtile)
 
       # boundary cut mask
       cutmask .= false

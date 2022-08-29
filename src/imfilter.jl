@@ -21,54 +21,27 @@ end
   imfilter(img, centered(krn), Inner(), Algorithm.FFT())
 end
 
-#=
-@platform aware function imfilter_kernel({accelerator_count::(@atleast 1), accelerator_api::CUDA_API}, img, kern)
-
-  sizeall = size(img) .+ size(kern) .- 1
-
-  N = ndims(img)
-  T = eltype(img) 
-
-  imggpu = CUDA.zeros(T,sizeall)
-  indices = ntuple(d->let padsize = div(size(kern,d)-1,2); (padsize+1):size(img,d)+padsize end, N)
-  imggpu[indices...] = img
-
-  padkern = CUDA.zeros(T,sizeall)
-  kernindices = axes(kern)
-  padkern[kernindices...] = kern
-
-  fftkern = conj.(CUFFT.fft(padkern))
-  fftimg = CUFFT.fft(fetch(imggpu))
-
-  out = CUFFT.ifft(fftimg .* fftkern)
-
-  # remove padding
-  ix = map(x -> Base.OneTo(x), size(img) .- size(kern) .+ 1)
-
-  Array(real.(out[ix...]))
-
-end
-=#
 
 @platform aware function imfilter_kernel({accelerator_count::(@atleast 1), accelerator_api::CUDA_API}, img, krn)
-  
+
    # retrieve basic info
    N = ndims(img)
    T = eltype(img)
-
+ 
    # pad kernel to common size with image
-   padsize = size(img) .- size(krn)
-   padkrn  = padarray(krn, Fill(zero(T), ntuple(i->0, N), padsize))
-
+   padkrn = CUDA.zeros(size(img))
+   copyto!(padkrn, CartesianIndices(krn), CuArray(krn), CartesianIndices(krn))
+ 
    # perform ifft(fft(img) .* conj.(fft(krn)))
-   fftimg = img .|> Float32 |> CuArray |> CUFFT.fft
-   fftkrn = padkrn .|> Float32 |> CuArray |> CUFFT.fft
+   fftimg = img |> CUFFT.fft
+   fftkrn = padkrn |> CuArray |> CUFFT.fft
    result = (fftimg .* conj.(fftkrn)) |> CUFFT.ifft
-
+ 
    # recover result
    finalsize = size(img) .- (size(krn) .- 1)
    real.(result[CartesianIndices(finalsize)]) |> Array
-end
+   
+ end
 
 
 const GPU = gpu_setup()
