@@ -45,7 +45,10 @@ include("geostats.jl")
 #include("imfilter.jl")
 
 function __init__()
-  include(pkgdir(@__MODULE__) * "/src/imfilter.jl")
+  include(pkgdir(@__MODULE__) * "/src/kernels.jl")
+  include(pkgdir(@__MODULE__) * "/src/imfilter.default.jl")
+  include(pkgdir(@__MODULE__) * "/src/imfilter.cuda.jl")
+  include(pkgdir(@__MODULE__) * "/src/imfilter.opencl.jl")
 end
 
 export

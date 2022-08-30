@@ -1,62 +1,18 @@
 # ------------------------------------------------------------------
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
-@platform parameter clear
-@platform parameter accelerator_count
-@platform parameter accelerator_api
 
-@platform default function which_platform()
-  println("Running on DEFAULT PLATFORM")
-end
-
-@platform aware function which_platform({accelerator_count::(@atleast 1), accelerator_api::CUDA_API})
-  println("Running on CUDA GPU")
-end
-
-@platform aware function which_platform({accelerator_count::(@atleast 1), accelerator_api::OpenCL_API})
+@platform aware function init_imfilter_kernel({accelerator_count::(@atleast 1), accelerator_api::OpenCL_API})
   println("Running on OpenCL GPU")
+  global GPU = gpu_setup()
 end
 
-@platform default function imfilter_kernel(img, krn)
-  imfilter(img, centered(krn), Inner(), Algorithm.FFT())
-end
+@platform aware function array_kernel({accelerator_count::(@atleast 1), accelerator_api::CUDA_API}, array) array end
 
-@platform default function array_kernel(array) array end
-
-@platform aware function array_kernel({accelerator_count::(@atleast 1), accelerator_api::CUDA_API}, array) CuArray(array) end
-
-@platform default function view_kernel(array, I) view(array, I) end
-
-@platform aware function view_kernel({accelerator_count::(@atleast 1), accelerator_api::CUDA_API}, array, I) Array(array[I]) end
-
-
-@platform aware function imfilter_kernel({accelerator_count::(@atleast 1), accelerator_api::CUDA_API}, img, krn)
-
-   # retrieve basic info
-   N = ndims(img)
-   T = eltype(img)
- 
-   # pad kernel to common size with image
-   padkrn = CUDA.zeros(size(img))
-   copyto!(padkrn, CartesianIndices(krn), CuArray(krn), CartesianIndices(krn))
- 
-   # perform ifft(fft(img) .* conj.(fft(krn)))
-   fftimg = img |> CUFFT.fft
-   fftkrn = padkrn |> CuArray |> CUFFT.fft
-   result = (fftimg .* conj.(fftkrn)) |> CUFFT.ifft
- 
-   # recover result
-   finalsize = size(img) .- (size(krn) .- 1)
-   real.(result[CartesianIndices(finalsize)]) |> Array
-
- end
-
-
-const GPU = gpu_setup()
+@platform aware function view_kernel({accelerator_count::(@atleast 1), accelerator_api::CUDA_API}, array, I) view(array, I) end
 
 @platform aware function imfilter_kernel({accelerator_count::(@atleast 1), accelerator_api::OpenCL_API}, img, kern)
   
-
    # retrieve basic info
    N = ndims(img)
    T = ComplexF64
@@ -149,20 +105,4 @@ end
 realtype(::Type{R}) where {R<:Real} = R
 realtype(::Type{Complex{R}}) where {R<:Real} = R
 
-
-@platform default function placeimg(img, soft)
-   img, map(soft) do (aux, auxTI)
-    auxTI 
-   end 
-end
-
-@platform aware function placeimg({accelerator_count::(@atleast 1), accelerator_api::CUDA_API}, img, soft)
-   img_gpu = img .|> Float32 |> CuArray
-
-   soft_gpu = map(soft) do (aux, auxTI)
-    auxTI .|> Float32 |> CuArray
-   end
-
-   img_gpu, soft_gpu
-end
 
