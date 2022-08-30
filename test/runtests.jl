@@ -3,6 +3,7 @@ using Meshes
 using GeoStatsBase
 using GeoStatsImages
 using ImageFiltering
+using LinearAlgebra
 using Statistics
 using CUDA
 using Plots; gr(size=(600,400))
