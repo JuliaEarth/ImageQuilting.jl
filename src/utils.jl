@@ -56,7 +56,7 @@ end
 
 array_cpu(array) = array
 
-array_gpu(array) = CuArray(array)
+array_gpu(array) = CuArray{Float32}(array)
 
 const array_kernel = CUDA.functional() ? array_gpu : array_cpu
 
