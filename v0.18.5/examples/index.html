@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Examples · ImageQuilting.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">ImageQuilting.jl</span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li class="is-active"><a class="tocitem" href>Examples</a><ul class="internal"><li><a class="tocitem" href="#Basic"><span>Basic</span></a></li><li><a class="tocitem" href="#Hard-data"><span>Hard data</span></a></li><li><a class="tocitem" href="#Masked-grids"><span>Masked grids</span></a></li><li><a class="tocitem" href="#Soft-data"><span>Soft data</span></a></li></ul></li><li><a class="tocitem" href="../voxel-reuse/">Voxel reuse</a></li><li><a class="tocitem" href="../gpu-support/">GPU support</a></li><li><span class="tocitem">About</span><ul><li><a class="tocitem" href="../about/author/">Author</a></li><li><a class="tocitem" href="../about/license/">License</a></li><li><a class="tocitem" href="../about/citation/">Citation</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Examples</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Examples</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/JuliaEarth/ImageQuilting.jl/blob/master/docs/src/examples.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h2 id="Basic"><a class="docs-heading-anchor" href="#Basic">Basic</a><a id="Basic-1"></a><a class="docs-heading-anchor-permalink" href="#Basic" title="Permalink"></a></h2><p>An example of unconditional simulation (i.e. simulation without data). This is the original Efros-Freeman algorithm for texture synthesis with a few additional options.</p><pre><code class="language-">using GeoStats
+using ImageQuilting
+using GeoStatsImages
+using Plots
+gr(size=(850,300)) # hide
+
+problem = SimulationProblem(CartesianGrid(200,200), :facies =&gt; Int, 3)
+
+solver = IQ(
+    :facies =&gt; (
+        trainimg = geostatsimage(&quot;Strebelle&quot;),
+        tilesize = (62,62)
+    )
+)
+
+solution = solve(problem, solver)
+
+plot(solution)</code></pre><pre><code class="language-">problem = SimulationProblem(CartesianGrid(200,200), :Z =&gt; Int, 3)
+
+solver = IQ(
+    :Z =&gt; (
+        trainimg = geostatsimage(&quot;StoneWall&quot;),
+        tilesize = (13,13)
+    )
+)
+
+solution = solve(problem, solver)
+
+plot(solution)</code></pre><h2 id="Hard-data"><a class="docs-heading-anchor" href="#Hard-data">Hard data</a><a id="Hard-data-1"></a><a class="docs-heading-anchor-permalink" href="#Hard-data" title="Permalink"></a></h2><p>Hard data (i.e. point data) can be honored during simulation.</p><pre><code class="language-">trainimg = geostatsimage(&quot;Strebelle&quot;)
+observed = sample(trainimg, 20, replace=false)
+
+problem = SimulationProblem(observed, domain(trainimg), :facies, 3)
+
+solver = IQ(
+    :facies =&gt; (
+        trainimg = trainimg,
+        tilesize = (30,30)
+    )
+)
+
+solution = solve(problem, solver)
+
+plot(solution)</code></pre><h2 id="Masked-grids"><a class="docs-heading-anchor" href="#Masked-grids">Masked grids</a><a id="Masked-grids-1"></a><a class="docs-heading-anchor-permalink" href="#Masked-grids" title="Permalink"></a></h2><p>Voxels marked with the special symbol <code>NaN</code> are treated as inactive. The algorithm will skip tiles that only contain inactive voxels to save computation and will generate realizations that are consistent with the mask. This is particularly useful with complex 3D models that have large inactive portions.</p><pre><code class="language-">trainimg = geostatsimage(&quot;Strebelle&quot;)
+
+# skip circle at the center
+nx, ny = size(domain(trainimg))
+r = 100; circle = []
+for i=1:nx, j=1:ny
+    if (i-nx÷2)^2 + (j-ny÷2)^2 &lt; r^2
+        push!(circle, CartesianIndex(i,j))
+    end
+end
+
+problem = SimulationProblem(domain(trainimg), :facies =&gt; Float64, 3)
+
+solver = IQ(
+    :facies =&gt; (
+        trainimg = trainimg,
+        tilesize = (62,62),
+        inactive = circle
+    )
+)
+
+solution = solve(problem, solver)
+
+plot(solution)</code></pre><h2 id="Soft-data"><a class="docs-heading-anchor" href="#Soft-data">Soft data</a><a id="Soft-data-1"></a><a class="docs-heading-anchor-permalink" href="#Soft-data" title="Permalink"></a></h2><p>It is possible to incorporate auxiliary variables to guide the selection of patterns from the training image.</p><pre><code class="language-">using ImageFiltering
+
+# image assumed as ground truth (unknown)
+truthimg = geostatsimage(&quot;WalkerLakeTruth&quot;)
+
+# training image with similar patterns
+trainimg = geostatsimage(&quot;WalkerLake&quot;)
+
+plot(plot(trainimg), plot(truthimg))</code></pre><pre><code class="language-"># forward model (blur filter)
+function forward(data)
+    img = asarray(data, :Z)
+    krn = KernelFactors.IIRGaussian([10,10])
+    fwd = imfilter(img, krn)
+    georef((fwd=fwd,), domain(data))
+end
+
+# apply forward model to both images
+data   = forward(truthimg)
+dataTI = forward(trainimg)
+
+plot(plot(dataTI), plot(data))</code></pre><pre><code class="language-"># simulate patterns over the domain of interest
+problem = SimulationProblem(domain(truthimg), :Z =&gt; Float64, 3)
+
+solver = IQ(
+    :Z =&gt; (
+        trainimg = trainimg,
+        tilesize = (27,27),
+        soft = (data,dataTI)
+    )
+)
+
+solution = solve(problem, solver)
+
+plot(solution)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../voxel-reuse/">Voxel reuse »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Tuesday 30 August 2022 01:15">Tuesday 30 August 2022</span>. Using Julia version 1.8.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
