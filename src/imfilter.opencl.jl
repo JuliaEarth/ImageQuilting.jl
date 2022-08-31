@@ -66,7 +66,10 @@ end
    indexesA = ntuple(d->postpad[d]+1:size(img,d)-prepad[d], N)
    copyreal!(out, AF, indexesA)
    
-   GC.gc()
+  # if (Sys.free_memory() / 2^20 < 1000) 
+  #  @info "GC !"
+  #  GC.gc() 
+  # end
 
    out
   end
