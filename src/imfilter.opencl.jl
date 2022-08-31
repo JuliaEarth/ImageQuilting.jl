@@ -7,9 +7,9 @@
   global GPU = gpu_setup()
 end
 
-@platform aware function array_kernel({accelerator_count::(@atleast 1), accelerator_api::CUDA_API}, array) array end
+@platform aware function array_kernel({accelerator_count::(@atleast 1), accelerator_api::OpenCL_API}, array) array end
 
-@platform aware function view_kernel({accelerator_count::(@atleast 1), accelerator_api::CUDA_API}, array, I) view(array, I) end
+@platform aware function view_kernel({accelerator_count::(@atleast 1), accelerator_api::OpenCL_API}, array, I) view(array, I) end
 
 @platform aware function imfilter_kernel({accelerator_count::(@atleast 1), accelerator_api::OpenCL_API}, img, kern)
   
