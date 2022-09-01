@@ -12,7 +12,11 @@ end
 @platform aware function view_kernel({accelerator_count::(@atleast 1), accelerator_api::OpenCL_API}, array, I) view(array, I) end
 
 @platform aware function imfilter_kernel({accelerator_count::(@atleast 1), accelerator_api::OpenCL_API}, img, kern)
-  
+    imfilter_opencl(img,kern)
+end
+
+
+  function imfilter_opencl(img, kern)
    # retrieve basic info
    N = ndims(img)
    T = ComplexF64
@@ -66,12 +70,8 @@ end
    indexesA = ntuple(d->postpad[d]+1:size(img,d)-prepad[d], N)
    copyreal!(out, AF, indexesA)
    
-  # if (Sys.free_memory() / 2^20 < 1000) 
-  #  @info "GC !"
-  #  GC.gc() 
-  # end
-
    out
+
   end
 
  @generated function reflect(A::AbstractArray{T,N}) where {T,N}

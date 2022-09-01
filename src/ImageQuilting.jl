@@ -42,7 +42,7 @@ include("iqsim.jl")
 include("voxelreuse.jl")
 include("geostats.jl")
 
-#include("imfilter.jl")
+include("test_imfilter.jl")
 
 function __init__()
   include(pkgdir(@__MODULE__) * "/src/kernels.jl")

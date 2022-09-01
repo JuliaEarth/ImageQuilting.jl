@@ -11,10 +11,11 @@ end
 @platform aware function view_kernel({accelerator_count::(@atleast 1), accelerator_api::CUDA_API}, array, I) Array(array[I]) end
 
 @platform aware function imfilter_kernel({accelerator_count::(@atleast 1), accelerator_api::CUDA_API}, img, krn)
+    imfilter_cuda(img,krn)
+ end
 
-   # retrieve basic info
-#   N = ndims(img)
-#   T = eltype(img)
+
+function imfilter_cuda(img, krn)
  
    # pad kernel to common size with image
    padkrn = CUDA.zeros(size(img))
@@ -29,6 +30,5 @@ end
    finalsize = size(img) .- (size(krn) .- 1)
    real.(result[CartesianIndices(finalsize)]) |> Array
 
- end
-
+end
 
