@@ -19,8 +19,8 @@ function test_imfilter(N)
 
     @info "start"
 
-    img = rand(Float64,(N,N,N))
-    krn = rand(Float64,(10,10,10))
+    img = rand(Float32,(N,N,N))
+    krn = rand(Float32,(10,10,10))
 
     X = Int(round(N/2))
 
