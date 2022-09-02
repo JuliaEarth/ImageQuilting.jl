@@ -16,7 +16,7 @@ end
 end
 
 
-  function imfilter_opencl(img, kern)
+function imfilter_opencl(img, kern)
    # retrieve basic info
    N = ndims(img)
    T = ComplexF64
