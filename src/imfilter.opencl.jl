@@ -19,7 +19,7 @@ end
 function imfilter_opencl(img, kern)
    # retrieve basic info
    N = ndims(img)
-   T = ComplexF32
+   T = ComplexF64
 
    # GPU metadata
    ctx = GPU.ctx; queue = GPU.queue
