@@ -1,7 +1,6 @@
 # ------------------------------------------------------------------
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
-
 function fastdistance(img, kern; weights=fill(1.0, size(kern)))
   wkern = weights.*kern
 
@@ -54,17 +53,36 @@ function activation(hard, tile)
   buff
 end
 
+function select_imfilter_algorithm()
+  if CUDA.functional()
+    return :CUDA
+  elseif !isempty(OpenCL.cl.devices())
+    return :OpenCL
+  else
+    return :CPU
+  end
+end
+
+const selected_imfilter_algorithm = select_imfilter_algorithm()
+
+array_cuda(array) = CuArray{Float32}(array)
+array_opencl(array) = array
 array_cpu(array) = array
 
-array_gpu(array) = CuArray{Float32}(array)
-
-const array_kernel = CUDA.functional() ? array_gpu : array_cpu
-
+view_cuda(array, I) = Array(array[I])
+view_opencl(array, I) = view(array, I)
 view_cpu(array, I) = view(array, I)
 
-view_gpu(array, I) = Array(array[I])
-
-const view_kernel = CUDA.functional() ? view_gpu : view_cpu
+if selected_imfilter_algorithm == :CUDA
+  const array_kernel = array_cuda
+  const view_kernel = view_cuda
+elseif selected_imfilter_algorithm == :OpenCL
+  const array_kernel = array_opencl
+  const view_kernel = view_opencl
+elseif selected_imfilter_algorithm == :CPU
+  const array_kernel = array_cpu
+  const view_kernel = view_cpu
+end
 
 function imagepreproc(trainimg, soft, geoconfig)
   padsize = geoconfig.padsize

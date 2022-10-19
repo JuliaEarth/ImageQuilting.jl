@@ -18,6 +18,7 @@ using FFTW: set_num_threads
 using CpuId: cpucores
 using RecipesBase
 using CUDA
+using OpenCL
 
 using Base: @nexprs, @nloops, @nref
 using SparseArrays: spzeros
@@ -27,6 +28,7 @@ using Random
 import GeoStatsBase: preprocess, solvesingle
 
 include("utils.jl")
+include("opencl_utils.jl")
 include("plotrecipes.jl")
 include("imfilter.jl")
 include("relaxation.jl")
