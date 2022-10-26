@@ -19,6 +19,7 @@ using CpuId: cpucores
 using RecipesBase
 using CUDA
 using OpenCL
+using CLFFT
 
 using Base: @nexprs, @nloops, @nref
 using SparseArrays: spzeros
