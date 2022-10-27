@@ -31,7 +31,7 @@ function imfilter_opencl(img, krn)
   T = ComplexF64
 
   # retrieve OpenCL info
-  device, ctx, queue = OpenCL.cl.create_compute_context()
+  device, ctx, queue = cl.create_compute_context()
 
   # build OpenCL program kernels
   conj_kernel = build_conj_kernel(ctx)
@@ -52,9 +52,9 @@ function imfilter_opencl(img, krn)
   CLFFT.bake!(plan, queue)
 
   # populate device memory
-  bufimg = OpenCL.cl.Buffer(T, ctx, :copy, hostbuf=fftimg)
-  bufkrn = OpenCL.cl.Buffer(T, ctx, :copy, hostbuf=fftkrn)
-  bufresult = OpenCL.cl.Buffer(T, ctx, :w, length(img))
+  bufimg = cl.Buffer(T, ctx, :copy, hostbuf=fftimg)
+  bufkrn = cl.Buffer(T, ctx, :copy, hostbuf=fftkrn)
+  bufresult = cl.Buffer(T, ctx, :w, length(img))
 
   # transform img and krn to FFT representation 
   CLFFT.enqueue_transform(plan, :forward, [queue], bufimg, nothing)
@@ -66,7 +66,7 @@ function imfilter_opencl(img, krn)
   CLFFT.enqueue_transform(plan, :backward, [queue], bufresult, nothing)
 
   # recover result
-  result = reshape(OpenCL.cl.read(queue, bufresult), size(img))
+  result = reshape(cl.read(queue, bufresult), size(img))
   real_result = real.(result)
 
   finalsize = size(img) .- (size(krn) .- 1)
