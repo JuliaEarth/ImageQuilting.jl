@@ -37,16 +37,19 @@ function imfilter_opencl(img, krn)
   conj_kernel = build_conj_kernel(ctx)
   mult_kernel = build_mult_kernel(ctx)
 
-  # pad krn to common size with img
-  padkrn = zeros(eltype(img), size(img))
+  # pad img to support CLFFT operations
+  padimg = pad_opencl_img(img)
+
+  # pad krn to common size with padimg
+  padkrn = zeros(eltype(img), size(padimg))
   padkrn[CartesianIndices(krn)] = krn
 
   # convert to Complex
-  fftimg = T.(img)
+  fftimg = T.(padimg)
   fftkrn = T.(padkrn)
 
   # OpenCl setup
-  plan = CLFFT.Plan(T, ctx, size(img))
+  plan = CLFFT.Plan(T, ctx, size(fftimg))
   CLFFT.set_layout!(plan, :interleaved, :interleaved)
   CLFFT.set_result!(plan, :inplace)
   CLFFT.bake!(plan, queue)
@@ -54,29 +57,27 @@ function imfilter_opencl(img, krn)
   # populate device memory
   bufimg = cl.Buffer(T, ctx, :copy, hostbuf=fftimg)
   bufkrn = cl.Buffer(T, ctx, :copy, hostbuf=fftkrn)
-  bufresult = cl.Buffer(T, ctx, :w, length(img))
+  bufresult = cl.Buffer(T, ctx, :w, length(fftimg))
 
   # transform img and krn to FFT representation 
   CLFFT.enqueue_transform(plan, :forward, [queue], bufimg, nothing)
   CLFFT.enqueue_transform(plan, :forward, [queue], bufkrn, nothing)
 
   # compute ifft(fft(A).*conj.(fft(krn)))
-  queue(conj_kernel, length(img), nothing, bufkrn)
-  queue(mult_kernel, length(img), nothing, bufimg, bufkrn, bufresult)
+  queue(conj_kernel, length(fftimg), nothing, bufkrn)
+  queue(mult_kernel, length(fftimg), nothing, bufimg, bufkrn, bufresult)
   CLFFT.enqueue_transform(plan, :backward, [queue], bufresult, nothing)
 
   # recover result
-  result = reshape(cl.read(queue, bufresult), size(img))
+  result = reshape(cl.read(queue, bufresult), size(fftimg))
   real_result = real.(result)
 
   finalsize = size(img) .- (size(krn) .- 1)
   real_result[CartesianIndices(finalsize)]
 end
 
-if selected_imfilter_algorithm == :CUDA
-  const imfilter_kernel = imfilter_cuda
-elseif selected_imfilter_algorithm == :OpenCL
-  const imfilter_kernel = imfilter_opencl
-elseif selected_imfilter_algorithm == :CPU
-  const imfilter_kernel = imfilter_cpu
-end
+const imfilter_kernel(img, krn, ::CUDAKernel) = imfilter_cuda(img, krn)
+const imfilter_kernel(img, krn, ::OpenCLKernel) = imfilter_opencl(img, krn)
+const imfilter_kernel(img, krn, ::CPUKernel) = imfilter_cpu(img, krn)
+
+const imfilter_kernel(img, krn) = imfilter_kernel(img, krn, default_kernel)

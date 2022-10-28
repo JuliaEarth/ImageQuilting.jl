@@ -53,36 +53,39 @@ function activation(hard, tile)
   buff
 end
 
-function select_imfilter_algorithm()
+abstract type Kernel end
+struct CUDAKernel <: Kernel end
+struct OpenCLKernel <: Kernel end
+struct CPUKernel <: Kernel end
+
+function select_default_kernel()
   if CUDA.functional()
-    return :CUDA
+    return CUDAKernel()
   elseif !isempty(OpenCL.cl.devices())
-    return :OpenCL
+    return CPUKernel()
+    return OpenCLKernel()
   else
-    return :CPU
+    return CPUKernel()
   end
 end
 
-const selected_imfilter_algorithm = select_imfilter_algorithm()
+const default_kernel = select_default_kernel()
 
-array_cuda(array) = CuArray{Float32}(array)
-array_opencl(array) = array
-array_cpu(array) = array
+# using the CUDA kernel
+array_kernel(array, ::CUDAKernel) = CuArray{Float32}(array)
+view_kernel(array, I, ::CUDAKernel) = Array(array[I])
 
-view_cuda(array, I) = Array(array[I])
-view_opencl(array, I) = view(array, I)
-view_cpu(array, I) = view(array, I)
+# using the OpenCL kernel
+array_kernel(array, ::OpenCLKernel) = array
+view_kernel(array, I, ::OpenCLKernel) = Array(array[I])
 
-if selected_imfilter_algorithm == :CUDA
-  const array_kernel = array_cuda
-  const view_kernel = view_cuda
-elseif selected_imfilter_algorithm == :OpenCL
-  const array_kernel = array_opencl
-  const view_kernel = view_opencl
-elseif selected_imfilter_algorithm == :CPU
-  const array_kernel = array_cpu
-  const view_kernel = view_cpu
-end
+# using the CPU kernel
+array_kernel(array, ::CPUKernel) = array
+view_kernel(array, I, ::CPUKernel) = Array(array[I])
+
+# set default kernel
+array_kernel(array) = array_kernel(array, default_kernel)
+view_kernel(array, I) = view_kernel(array, I, default_kernel)
 
 function imagepreproc(trainimg, soft, geoconfig)
   padsize = geoconfig.padsize
