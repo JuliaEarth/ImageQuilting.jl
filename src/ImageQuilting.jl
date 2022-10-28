@@ -29,7 +29,6 @@ using Random
 import GeoStatsBase: preprocess, solvesingle
 
 include("utils.jl")
-include("opencl_utils.jl")
 include("plotrecipes.jl")
 include("imfilter.jl")
 include("relaxation.jl")

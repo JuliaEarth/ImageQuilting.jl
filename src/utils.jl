@@ -58,35 +58,6 @@ struct CUDAKernel <: Kernel end
 struct OpenCLKernel <: Kernel end
 struct CPUKernel <: Kernel end
 
-function select_default_kernel()
-  if CUDA.functional()
-    return CUDAKernel()
-  elseif !isempty(OpenCL.cl.devices())
-    return CPUKernel()
-    return OpenCLKernel()
-  else
-    return CPUKernel()
-  end
-end
-
-const default_kernel = select_default_kernel()
-
-# using the CUDA kernel
-array_kernel(array, ::CUDAKernel) = CuArray{Float32}(array)
-view_kernel(array, I, ::CUDAKernel) = Array(array[I])
-
-# using the OpenCL kernel
-array_kernel(array, ::OpenCLKernel) = array
-view_kernel(array, I, ::OpenCLKernel) = Array(array[I])
-
-# using the CPU kernel
-array_kernel(array, ::CPUKernel) = array
-view_kernel(array, I, ::CPUKernel) = Array(array[I])
-
-# set default kernel
-array_kernel(array) = array_kernel(array, default_kernel)
-view_kernel(array, I) = view_kernel(array, I, default_kernel)
-
 function imagepreproc(trainimg, soft, geoconfig)
   padsize = geoconfig.padsize
 
