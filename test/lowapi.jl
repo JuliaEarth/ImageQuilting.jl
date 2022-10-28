@@ -143,13 +143,13 @@ if visualtests
 end
 
 if CUDA.functional()
-  @testset "CPU vs GPU" begin
+  @testset "CPU vs CUDA" begin
     # 2D imfilter
     img = rand(200, 100)
     krn = rand(30, 10)
 
     result_cpu = ImageQuilting.imfilter_cpu(img, krn)
-    result_gpu = ImageQuilting.imfilter_gpu(CuArray{Float32}(img), krn)
+    result_gpu = ImageQuilting.imfilter_cuda(CuArray{Float32}(img), krn)
     @test size(result_cpu) == size(result_gpu)
     @test norm(result_cpu[:] - result_gpu[:], Inf) < 1e-2
     
@@ -158,8 +158,30 @@ if CUDA.functional()
     krn = rand(10, 20, 30)
     
     result_cpu = ImageQuilting.imfilter_cpu(img, krn)
-    result_gpu = ImageQuilting.imfilter_gpu(CuArray{Float32}(img), krn)
+    result_gpu = ImageQuilting.imfilter_cuda(CuArray{Float32}(img), krn)
     @test size(result_cpu) == size(result_gpu)
     @test norm(result_cpu[:] - result_gpu[:], Inf) < 1e-2
+  end
+end
+
+if !isempty(OpenCL.cl.devices())
+  @testset "CPU vs OpenCL" begin
+    # 2D imfilter
+    img = rand(120, 50)
+    krn = rand(30, 10)
+
+    result_cpu = ImageQuilting.imfilter_cpu(img, krn)
+    result_opencl = ImageQuilting.imfilter_opencl(img, krn)
+    @test size(result_cpu) == size(result_opencl)
+    @test norm(result_cpu[:] - result_opencl[:], Inf) < 1e-2
+    
+    # 3D imfilter
+    img = rand(37, 59, 71)
+    krn = rand(10, 20, 30)
+    
+    result_cpu = ImageQuilting.imfilter_cpu(img, krn)
+    result_opencl = ImageQuilting.imfilter_opencl(img, krn)
+    @test size(result_cpu) == size(result_opencl)
+    @test norm(result_cpu[:] - result_opencl[:], Inf) < 1e-2
   end
 end

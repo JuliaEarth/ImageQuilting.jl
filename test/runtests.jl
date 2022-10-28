@@ -6,6 +6,7 @@ using ImageFiltering
 using LinearAlgebra
 using Statistics
 using CUDA
+using OpenCL
 using Plots; gr(size=(600,400))
 using GeoStatsPlots # TODO: replace by GeoStatsViz
 using ReferenceTests, ImageIO
