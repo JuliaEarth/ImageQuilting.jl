@@ -2,14 +2,27 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-include("imfilter.cpu.jl")
-include("imfilter.cuda.jl")
-include("imfilter.opencl.jl")
+include("kernel/imfilter_cpu.jl")
+include("kernel/imfilter_cuda.jl")
+include("kernel/imfilter_opencl.jl")
+
+function has_opencl_available()
+  try
+    hasdevices = !isempty(OpenCL.cl.devices())
+    return hasdevices
+  catch err
+    if err isa cl.CLError
+      return false
+    else
+      rethrow(err)
+    end
+  end
+end
 
 function select_default_kernel()
   if CUDA.functional()
     CUDAKernel()
-  elseif !isempty(cl.platforms()) && !isempty(cl.devices())
+  elseif has_opencl_available()
     OpenCLKernel()
   else
     CPUKernel()

@@ -2,8 +2,6 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-include("utils.opencl.jl")
-
 # using the OpenCL kernel
 const array_kernel(array, ::OpenCLKernel) = array
 const view_kernel(array, I, ::OpenCLKernel) = view(array, I)
@@ -59,3 +57,39 @@ function imfilter_kernel(img, krn, ::OpenCLKernel)
   real_result[CartesianIndices(finalsize)]
 end
 
+function pad_opencl_img(img)
+  # OpenCL FFT expects products of powers of 2, 3, 5, 7, 11 or 13
+  randices = CLFFT.supported_radices()
+  newsize = map(dim -> nextprod(randices, dim), size(img))
+  
+  padimg = zeros(eltype(img), newsize)
+  padimg[CartesianIndices(img)] = img
+  padimg
+end
+
+function build_mult_kernel(ctx)
+  mult_kernel = "
+  __kernel void mult(__global const double2 *a,
+                      __global const double2 *b,
+                      __global double2 *c)
+  {
+    int gid = get_global_id(0);
+    c[gid].x = a[gid].x*b[gid].x - a[gid].y*b[gid].y;
+    c[gid].y = a[gid].x*b[gid].y + a[gid].y*b[gid].x;
+  }
+  "
+  prog = cl.Program(ctx, source=mult_kernel) |> cl.build!
+  cl.Kernel(prog, "mult")
+end
+
+function build_conj_kernel(ctx)
+  conj_kernel = "
+  __kernel void conj(__global double2 *a)
+  {
+    int gid = get_global_id(0);
+    a[gid].y = -a[gid].y;
+  }
+  "
+  prog = cl.Program(ctx, source=conj_kernel) |> cl.build!
+  conj_kernel = cl.Kernel(prog, "conj")
+end
