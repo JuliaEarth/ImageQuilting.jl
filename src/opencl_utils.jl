@@ -4,6 +4,16 @@
 
 # OpenCL program kernels
 
+function pad_opencl_img(img)
+  # OpenCL FFT expects products of powers of 2, 3, 5, 7, 11 or 13
+  randices = CLFFT.supported_radices()
+  newsize = map(dim -> nextprod(randices, dim), size(img))
+  
+  padimg = zeros(eltype(img), newsize)
+  padimg[CartesianIndices(img)] = img
+  padimg
+end
+
 function build_mult_kernel(ctx)
   mult_kernel = "
   __kernel void mult(__global const double2 *a,
