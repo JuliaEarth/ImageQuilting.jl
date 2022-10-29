@@ -2,8 +2,8 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-# using the CUDA kernel
 const array_kernel(array, ::CUDAKernel) = CuArray{Float32}(array)
+
 const view_kernel(array, I, ::CUDAKernel) = Array(array[I])
 
 function imfilter_kernel(img, krn, ::CUDAKernel)

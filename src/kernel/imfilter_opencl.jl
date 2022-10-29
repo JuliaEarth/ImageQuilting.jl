@@ -2,8 +2,8 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-# using the OpenCL kernel
 const array_kernel(array, ::OpenCLKernel) = array
+
 const view_kernel(array, I, ::OpenCLKernel) = view(array, I)
 
 function imfilter_kernel(img, krn, ::OpenCLKernel)

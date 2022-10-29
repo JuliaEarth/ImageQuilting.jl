@@ -1,6 +1,7 @@
 # ------------------------------------------------------------------
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
+
 function fastdistance(img, kern; weights=fill(1.0, size(kern)))
   wkern = weights.*kern
 
