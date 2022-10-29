@@ -30,6 +30,6 @@ end
 
 const kernel_method = select_kernel_method()
 
-const array_kernel(array) = array_kernel(array, kernel_method)
-const view_kernel(array, I) = view_kernel(array, I, kernel_method)
-const imfilter_kernel(img, krn) = imfilter_kernel(img, krn, kernel_method)
+const array_kernel(array) = array_kernel(kernel_method, array)
+const view_kernel(array, I) = view_kernel(kernel_method, array, I)
+const imfilter_kernel(img, krn) = imfilter_kernel(kernel_method, img, krn)
