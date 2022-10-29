@@ -8,11 +8,10 @@ include("kernel/imfilter_opencl.jl")
 
 function has_opencl_available()
   try
-    hasdevices = !isempty(OpenCL.cl.devices())
-    return hasdevices
+    !isempty(OpenCL.cl.devices())
   catch err
     if err isa cl.CLError
-      return false
+      false
     else
       rethrow(err)
     end
