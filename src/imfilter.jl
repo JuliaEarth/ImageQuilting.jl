@@ -8,7 +8,7 @@ include("kernel/imfilter_opencl.jl")
 
 function has_opencl_available()
   try
-    !isempty(OpenCL.cl.devices())
+    !isempty(cl.devices())
   catch err
     if err isa cl.CLError
       false
@@ -18,7 +18,7 @@ function has_opencl_available()
   end
 end
 
-function select_default_kernel()
+function select_kernel_method()
   if CUDA.functional()
     CUDAMethod()
   elseif has_opencl_available()
@@ -28,9 +28,8 @@ function select_default_kernel()
   end
 end
 
-const default_kernel = select_default_kernel()
+const kernel_method = select_kernel_method()
 
-# define functions with default kernel
-const array_kernel(array) = array_kernel(array, default_kernel)
-const view_kernel(array, I) = view_kernel(array, I, default_kernel)
-const imfilter_kernel(img, krn) = imfilter_kernel(img, krn, default_kernel)
+const array_kernel(array) = array_kernel(array, kernel_method)
+const view_kernel(array, I) = view_kernel(array, I, kernel_method)
+const imfilter_kernel(img, krn) = imfilter_kernel(img, krn, kernel_method)

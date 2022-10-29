@@ -91,5 +91,5 @@ function build_conj_kernel(ctx)
   }
   "
   prog = cl.Program(ctx, source=conj_kernel) |> cl.build!
-  conj_kernel = cl.Kernel(prog, "conj")
+  cl.Kernel(prog, "conj")
 end
