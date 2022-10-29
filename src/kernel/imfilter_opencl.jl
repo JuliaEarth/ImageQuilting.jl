@@ -2,11 +2,11 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-const array_kernel(array, ::OpenCLKernel) = array
+const array_kernel(array, ::OpenCLMethod) = array
 
-const view_kernel(array, I, ::OpenCLKernel) = view(array, I)
+const view_kernel(array, I, ::OpenCLMethod) = view(array, I)
 
-function imfilter_kernel(img, krn, ::OpenCLKernel)
+function imfilter_kernel(img, krn, ::OpenCLMethod)
   # retrieve basic info
   N = ndims(img)
   T = ComplexF64

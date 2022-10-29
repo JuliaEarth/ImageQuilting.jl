@@ -20,11 +20,11 @@ end
 
 function select_default_kernel()
   if CUDA.functional()
-    CUDAKernel()
+    CUDAMethod()
   elseif has_opencl_available()
-    OpenCLKernel()
+    OpenCLMethod()
   else
-    CPUKernel()
+    CPUMethod()
   end
 end
 

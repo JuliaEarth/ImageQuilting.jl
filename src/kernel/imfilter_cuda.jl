@@ -2,11 +2,11 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-const array_kernel(array, ::CUDAKernel) = CuArray{Float32}(array)
+const array_kernel(array, ::CUDAMethod) = CuArray{Float32}(array)
 
-const view_kernel(array, I, ::CUDAKernel) = Array(array[I])
+const view_kernel(array, I, ::CUDAMethod) = Array(array[I])
 
-function imfilter_kernel(img, krn, ::CUDAKernel)
+function imfilter_kernel(img, krn, ::CUDAMethod)
   # retrieve basic info
   N = ndims(img)
   T = eltype(img)
