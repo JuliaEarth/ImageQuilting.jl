@@ -8,7 +8,6 @@ const view_kernel(::OpenCLMethod, array, I) = view(array, I)
 
 function imfilter_kernel(::OpenCLMethod, img, krn)
   # retrieve basic info
-  N = ndims(img)
   T = ComplexF64
 
   # retrieve OpenCL info
@@ -38,7 +37,7 @@ function imfilter_kernel(::OpenCLMethod, img, krn)
   # populate device memory
   bufimg = cl.Buffer(T, ctx, :copy, hostbuf=fftimg)
   bufkrn = cl.Buffer(T, ctx, :copy, hostbuf=fftkrn)
-  bufresult = cl.Buffer(T, ctx, :w, length(fftimg))
+  bufres = cl.Buffer(T, ctx, :w, length(fftimg))
 
   # transform img and krn to FFT representation 
   CLFFT.enqueue_transform(plan, :forward, [queue], bufimg, nothing)
@@ -46,11 +45,11 @@ function imfilter_kernel(::OpenCLMethod, img, krn)
 
   # compute ifft(fft(A).*conj.(fft(krn)))
   queue(conj_kernel, length(fftimg), nothing, bufkrn)
-  queue(mult_kernel, length(fftimg), nothing, bufimg, bufkrn, bufresult)
-  CLFFT.enqueue_transform(plan, :backward, [queue], bufresult, nothing)
+  queue(mult_kernel, length(fftimg), nothing, bufimg, bufkrn, bufres)
+  CLFFT.enqueue_transform(plan, :backward, [queue], bufres, nothing)
 
   # recover result
-  result = reshape(cl.read(queue, bufresult), size(fftimg))
+  result = reshape(cl.read(queue, bufres), size(fftimg))
   real_result = real.(result)
 
   finalsize = size(img) .- (size(krn) .- 1)
@@ -59,8 +58,8 @@ end
 
 function pad_opencl_img(img)
   # OpenCL FFT expects products of powers of 2, 3, 5, 7, 11 or 13
-  randices = CLFFT.supported_radices()
-  newsize = map(dim -> nextprod(randices, dim), size(img))
+  radices = CLFFT.supported_radices()
+  newsize = map(dim -> nextprod(radices, dim), size(img))
   
   padimg = zeros(eltype(img), newsize)
   padimg[CartesianIndices(img)] = img

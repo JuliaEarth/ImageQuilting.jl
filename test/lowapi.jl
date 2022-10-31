@@ -164,7 +164,7 @@ if CUDA.functional()
   end
 end
 
-if ImageQuilting.has_opencl_available()
+if ImageQuilting.opencl_functional()
   @testset "CPU vs OpenCL" begin
     # 2D imfilter
     img = rand(120, 50)
