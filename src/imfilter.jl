@@ -6,7 +6,7 @@ include("kernel/imfilter_cpu.jl")
 include("kernel/imfilter_cuda.jl")
 include("kernel/imfilter_opencl.jl")
 
-function has_opencl_available()
+function opencl_functional()
   try
     !isempty(cl.devices())
   catch err
@@ -21,7 +21,7 @@ end
 function select_kernel_method()
   if CUDA.functional()
     CUDAMethod()
-  elseif has_opencl_available()
+  elseif opencl_functional()
     OpenCLMethod()
   else
     CPUMethod()
