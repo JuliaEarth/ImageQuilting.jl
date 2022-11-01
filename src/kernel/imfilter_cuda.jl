@@ -7,6 +7,10 @@ const array_kernel(::CUDAMethod, array) = CuArray{Float32}(array)
 const view_kernel(::CUDAMethod, array, I) = Array(array[I])
 
 function imfilter_kernel(::CUDAMethod, img, krn)
+  imfilter_cuda(img, krn)
+end
+
+function imfilter_cuda(img, krn)
   # retrieve basic info
   N = ndims(img)
   T = eltype(img)

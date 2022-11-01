@@ -7,6 +7,10 @@ const array_kernel(::OpenCLMethod, array) = array
 const view_kernel(::OpenCLMethod, array, I) = view(array, I)
 
 function imfilter_kernel(::OpenCLMethod, img, krn)
+  imfilter_opencl(img, krn)
+end
+
+function imfilter_opencl(img, krn)
   # retrieve basic info
   T = ComplexF64
 
