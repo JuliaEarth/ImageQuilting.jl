@@ -13,7 +13,7 @@ function imfilter_kernel(::CUDAMethod, img, krn)
 
   # pad kernel to common size with image
   padkrn = CUDA.zeros(Float32, size(img))
-  copyto!(padkrn, CartesianIndices(krn), array_kernel(::CUDAMethod,krn), CartesianIndices(krn))
+  copyto!(padkrn, CartesianIndices(krn), CuArray{Float32}(krn), CartesianIndices(krn))
 
   # perform ifft(fft(img) .* conj.(fft(krn)))
   fftimg = img |> CUFFT.fft
