@@ -2,6 +2,13 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
+function init_imfilter_kernel(::OpenCLMethod)
+  global device, ctx, queue = cl.create_compute_context()
+  # build OpenCL program kernels
+  global conj_kernel = build_conj_kernel(ctx)
+  global mult_kernel = build_mult_kernel(ctx)
+end
+
 const array_kernel(::OpenCLMethod, array) = array
 
 const view_kernel(::OpenCLMethod, array, I) = view(array, I)
@@ -13,13 +20,6 @@ end
 function imfilter_opencl(img, krn)
   # retrieve basic info
   T = ComplexF32
-
-  # retrieve OpenCL info
-  device, ctx, queue = cl.create_compute_context()
-
-  # build OpenCL program kernels
-  conj_kernel = build_conj_kernel(ctx)
-  mult_kernel = build_mult_kernel(ctx)
 
   # pad img to support CLFFT operations
   padimg = pad_opencl_img(img)

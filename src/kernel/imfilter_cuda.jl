@@ -2,6 +2,8 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
+function init_imfilter_kernel(::CUDAMethod) end
+
 const array_kernel(::CUDAMethod, array) = CuArray{Float32}(array)
 
 const view_kernel(::CUDAMethod, array, I) = Array(array[I])

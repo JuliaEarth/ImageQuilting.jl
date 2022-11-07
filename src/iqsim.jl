@@ -140,6 +140,9 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
     harddist = Array{Float64}(undef, distsize)
   end
 
+  # preproc imfilter operations
+  init_imfilter_kernel()
+
   for real in 1:nreal
     # allocate memory for current simulation
     simgrid = zeros(padsize)
