@@ -12,7 +12,7 @@ end
 
 function imfilter_opencl(img, krn)
   # retrieve basic info
-  T = ComplexF64
+  T = ComplexF32
 
   # retrieve OpenCL info
   device, ctx, queue = cl.create_compute_context()
@@ -72,9 +72,9 @@ end
 
 function build_mult_kernel(ctx)
   mult_kernel = "
-  __kernel void mult(__global const double2 *a,
-                      __global const double2 *b,
-                      __global double2 *c)
+  __kernel void mult(__global const float2 *a,
+                      __global const float2 *b,
+                      __global float2 *c)
   {
     int gid = get_global_id(0);
     c[gid].x = a[gid].x*b[gid].x - a[gid].y*b[gid].y;
@@ -87,7 +87,7 @@ end
 
 function build_conj_kernel(ctx)
   conj_kernel = "
-  __kernel void conj(__global double2 *a)
+  __kernel void conj(__global float2 *a)
   {
     int gid = get_global_id(0);
     a[gid].y = -a[gid].y;
