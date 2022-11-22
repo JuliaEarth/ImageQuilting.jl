@@ -55,7 +55,7 @@ function preprocess(problem::SimulationProblem, solver::IQ)
   pdata   = data(problem)
   pdomain = domain(problem)
   simsize = size(pdomain)
-  dims    = embeddim(pdomain)
+  Dim     = embeddim(pdomain)
 
   # result of preprocessing
   preproc = Dict{Symbol,Tuple}()
@@ -70,7 +70,7 @@ function preprocess(problem::SimulationProblem, solver::IQ)
       trainimg = asarray(TI, var)
 
       # default overlap
-      overlap = isnothing(varparams.overlap) ? ntuple(i->1/6, dims) :
+      overlap = isnothing(varparams.overlap) ? ntuple(i->1/6, Dim) :
                                                varparams.overlap
 
       # determine data mappings
@@ -96,13 +96,13 @@ function preprocess(problem::SimulationProblem, solver::IQ)
       end
 
       # create hard data object
-      hdata = Dict{CartesianIndex{dims},Real}()
+      hdata = Dict{CartesianIndex{Dim},Real}()
       for (loc, datloc) in vmapping
         push!(hdata, lin2cart(simsize, loc) => pdata[var][datloc])
       end
 
       # disable inactive voxels
-      shape = Dict{CartesianIndex{dims},Real}()
+      shape = Dict{CartesianIndex{Dim},Real}()
       if !isnothing(varparams.inactive)
         for icoords in varparams.inactive
           push!(shape, icoords => NaN)
