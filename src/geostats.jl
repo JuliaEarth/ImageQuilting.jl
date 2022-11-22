@@ -98,7 +98,7 @@ function preprocess(problem::SimulationProblem, solver::IQ)
       # create hard data object
       hdata = Dict{CartesianIndex{Dim},Real}()
       for (loc, datloc) in vmapping
-        push!(hdata, lin2cart(simsize, loc) => pdata[var][datloc])
+        push!(hdata, lin2cart(simsize, loc) => pdata[datloc,var])
       end
 
       # disable inactive voxels
