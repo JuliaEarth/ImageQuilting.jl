@@ -77,7 +77,7 @@ Contributions are very welcome, as are feature requests and suggestions.
 
 Please [open an issue](https://github.com/JuliaEarth/ImageQuilting.jl/issues) if you encounter any problems.
 
-[build-img]: https://img.shields.io/github/workflow/status/JuliaEarth/ImageQuilting.jl/CI
+[build-img]: https://img.shields.io/github/actions/workflow/status/JuliaEarth/ImageQuilting.jl/CI.yml?branch=master&style=flat-square
 [build-url]: https://github.com/JuliaEarth/ImageQuilting.jl/actions
 
 [codecov-img]: https://img.shields.io/codecov/c/github/JuliaEarth/ImageQuilting.jl
