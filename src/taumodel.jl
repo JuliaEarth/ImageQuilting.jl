@@ -13,19 +13,20 @@ function taumodel(events, D₁, Dₙ)
 
   # distance matrix
   D = zeros(nevents, nsources)
-  D[:,1] = D₁[events]
-  for j=2:nsources
-    D[:,j] = Dₙ[j-1][events]
+  D[:, 1] = D₁[events]
+  for j in 2:nsources
+    D[:, j] = Dₙ[j - 1][events]
   end
 
   # convert distances to ranks
   idx = mapslices(sortperm, D, dims=1)
-  for j=1:nsources
-    r = 0; prevdist = -Inf
-    for i in view(idx,:,j)
-      D[i,j] > prevdist && (r += 1)
-      prevdist = D[i,j]
-      D[i,j] = r
+  for j in 1:nsources
+    r = 0
+    prevdist = -Inf
+    for i in view(idx, :, j)
+      D[i, j] > prevdist && (r += 1)
+      prevdist = D[i, j]
+      D[i, j] = r
     end
   end
 
@@ -34,11 +35,11 @@ function taumodel(events, D₁, Dₙ)
   P = broadcast(/, P, sum(P, dims=1))
 
   # prior to data all events are equally probable
-  x₀ = (1 - 1/nevents) / (1/nevents)
+  x₀ = (1 - 1 / nevents) / (1 / nevents)
 
   # assume no redundancy
   X = (1 .- P) ./ P
-  x = x₀ * prod(X/x₀, dims=2)
+  x = x₀ * prod(X / x₀, dims=2)
 
   p = 1 ./ (1 .+ x)
 end

@@ -8,7 +8,7 @@ function relaxation(distance, auxdistances, cutoff)
   npatterns = sum(enabled)
 
   # candidates with good overlap
-  dbsize = all(distance[enabled] .== 0) ? npatterns : ceil(Int, cutoff*npatterns)
+  dbsize = all(distance[enabled] .== 0) ? npatterns : ceil(Int, cutoff * npatterns)
   overlapdb = partialsortperm(vec(distance), 1:dbsize)
 
   # candidates in accordance with auxiliary data
@@ -17,14 +17,14 @@ function relaxation(distance, auxdistances, cutoff)
 
   patterndb = []
   softdistance = [copy(auxdistances[i]) for i in 1:naux]
-  frac = .1 * (dbsize / npatterns)
+  frac = 0.1 * (dbsize / npatterns)
   while true
-    softdbsize = ceil(Int, frac*npatterns)
+    softdbsize = ceil(Int, frac * npatterns)
 
     patterndb = overlapdb
     for n in 1:naux
       softdistance[n][softdb[n]] .= Inf
-      softdb[n] = [softdb[n]; partialsortperm(vec(softdistance[n]), 1:softdbsize-length(softdb[n]))]
+      softdb[n] = [softdb[n]; partialsortperm(vec(softdistance[n]), 1:(softdbsize - length(softdb[n])))]
 
       patterndb = fastintersect(patterndb, softdb[n], length(distance))
 
@@ -32,7 +32,7 @@ function relaxation(distance, auxdistances, cutoff)
     end
 
     !isempty(patterndb) && break
-    frac = min(frac + .1, 1)
+    frac = min(frac + 0.1, 1)
   end
 
   patterndb

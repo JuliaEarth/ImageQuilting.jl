@@ -39,23 +39,23 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
 @simsolver IQ begin
   @param trainimg
   @param tilesize
-  @param overlap       = nothing
-  @param path          = :raster
-  @param mapping       = NearestMapping()
-  @param inactive      = nothing
-  @param soft          = nothing
-  @param tol           = 0.1
-  @global threads      = cpucores()
+  @param overlap = nothing
+  @param path = :raster
+  @param mapping = NearestMapping()
+  @param inactive = nothing
+  @param soft = nothing
+  @param tol = 0.1
+  @global threads = cpucores()
   @global showprogress = false
-  @global rng          = Random.GLOBAL_RNG
+  @global rng = Random.GLOBAL_RNG
 end
 
 function preprocess(problem::SimulationProblem, solver::IQ)
   # retrieve problem info
-  pdata   = data(problem)
+  pdata = data(problem)
   pdomain = domain(problem)
   simsize = size(pdomain)
-  Dim     = embeddim(pdomain)
+  Dim = embeddim(pdomain)
 
   # result of preprocessing
   preproc = Dict{Symbol,Tuple}()
@@ -70,8 +70,7 @@ function preprocess(problem::SimulationProblem, solver::IQ)
       trainimg = asarray(TI, var)
 
       # default overlap
-      overlap = isnothing(varparams.overlap) ? ntuple(i->1/6, Dim) :
-                                               varparams.overlap
+      overlap = isnothing(varparams.overlap) ? ntuple(i -> 1 / 6, Dim) : varparams.overlap
 
       # determine data mappings
       vmapping = if hasdata(problem)
@@ -85,10 +84,10 @@ function preprocess(problem::SimulationProblem, solver::IQ)
         data, dataTI = varparams.soft
         @assert domain(data) == pdomain "incompatible soft data for target domain"
         @assert domain(dataTI) == domain(TI) "incompatible soft data for training image"
-        schema   = Tables.schema(values(data))
+        schema = Tables.schema(values(data))
         schemaTI = Tables.schema(values(dataTI))
-        vars     = schema.names |> collect |> sort
-        varsTI   = schemaTI.names |> collect |> sort
+        vars = schema.names |> collect |> sort
+        varsTI = schemaTI.names |> collect |> sort
         @assert vars == varsTI "variables for target domain and training image differ"
         [(asarray(data, var), asarray(dataTI, var)) for var in vars]
       else
@@ -98,7 +97,7 @@ function preprocess(problem::SimulationProblem, solver::IQ)
       # create hard data object
       hdata = Dict{CartesianIndex{Dim},Real}()
       for (loc, datloc) in vmapping
-        push!(hdata, lin2cart(simsize, loc) => pdata[datloc,var])
+        push!(hdata, lin2cart(simsize, loc) => pdata[datloc, var])
       end
 
       # disable inactive voxels
@@ -127,11 +126,19 @@ function solvesingle(::SimulationProblem, covars::NamedTuple, solver::IQ, prepro
     par, trainimg, simsize, overlap, soft, hard = preproc[var]
 
     # run image quilting core function
-    reals = iqsim(trainimg, par.tilesize, simsize;
-                  overlap=overlap, path=par.path,
-                  soft=soft, hard=hard,
-                  tol=par.tol, threads=solver.threads,
-                  showprogress=solver.showprogress, rng=rng)
+    reals = iqsim(
+      trainimg,
+      par.tilesize,
+      simsize;
+      overlap=overlap,
+      path=par.path,
+      soft=soft,
+      hard=hard,
+      tol=par.tol,
+      threads=solver.threads,
+      showprogress=solver.showprogress,
+      rng=rng
+    )
 
     # flatten result
     var => vec(reals[1])
