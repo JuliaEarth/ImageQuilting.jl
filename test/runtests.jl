@@ -6,7 +6,8 @@ using ImageFiltering
 using LinearAlgebra
 using Statistics
 using CUDA
-using Plots; gr(size=(600,400))
+using Plots;
+gr(size=(600, 400));
 using GeoStatsPlots # TODO: replace by GeoStatsViz
 using ReferenceTests, ImageIO
 using Test, Random
@@ -18,13 +19,10 @@ ENV["GKSwstype"] = "100"
 isCI = "CI" ∈ keys(ENV)
 islinux = Sys.islinux()
 visualtests = !isCI || (isCI && islinux)
-datadir = joinpath(@__DIR__,"data")
+datadir = joinpath(@__DIR__, "data")
 
 # list of tests
-testfiles = [
-  "lowapi.jl",
-  "highapi.jl"
-]
+testfiles = ["lowapi.jl", "highapi.jl"]
 
 @testset "ImageQuilting.jl" begin
   for testfile in testfiles

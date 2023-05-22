@@ -4,8 +4,14 @@
 
 @userplot VoxelReusePlot
 
-@recipe function f(vr::VoxelReusePlot; tmin=nothing, tmax=nothing,
-                   overlap=(1/6,1/6,1/6), nreal=10, rng=Random.GLOBAL_RNG)
+@recipe function f(
+  vr::VoxelReusePlot;
+  tmin=nothing,
+  tmax=nothing,
+  overlap=(1 / 6, 1 / 6, 1 / 6),
+  nreal=10,
+  rng=Random.GLOBAL_RNG
+)
   # get input image
   img = vr.args[1]
 
@@ -32,8 +38,7 @@
   for t in ts
     tilesize = ntuple(i -> idx[i] ? t : 1, 3)
 
-    μ, σ = voxelreuse(img, tilesize; overlap=overlap,
-                      nreal=nreal, rng=rng)
+    μ, σ = voxelreuse(img, tilesize; overlap=overlap, nreal=nreal, rng=rng)
 
     push!(μs, μ)
     push!(σs, σ)
@@ -42,17 +47,17 @@
 
   # highlight the optimum tile size range
   rank = sortperm(μs, rev=true)
-  best = ts[rank[1:min(5,length(ts))]]
+  best = ts[rank[1:min(5, length(ts))]]
   xmin, xmax = minimum(best), maximum(best)
 
   yref = minimum(μs - σs)
-  ymin = max(0., yref - .05)
-  ymax = ymin + .008
+  ymin = max(0.0, yref - 0.05)
+  ymax = ymin + 0.008
 
   @series begin
     seriestype --> :shape
     linewidth --> 0
-    fillalpha --> .5
+    fillalpha --> 0.5
     label --> "Optimum range: [$xmin, $xmax]"
 
     [xmin, xmax, xmax, xmin], [ymin, ymin, ymax, ymax]
@@ -61,7 +66,7 @@
   seriestype --> :path
   primary --> false
   ribbon --> σs
-  fillalpha --> .5
+  fillalpha --> 0.5
   xlims --> (0, tmax)
   ylims --> (ymin, Inf)
   xguide --> "Tile size"

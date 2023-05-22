@@ -43,13 +43,21 @@ reals, cuts, voxs = iqsim(..., debug=true)
 
 `cuts[i]` is the boundary cut for `reals[i]` and `voxs[i]` is the associated voxel reuse.
 """
-function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
-               simsize::Dims{N}=size(trainimg);
-               overlap::NTuple{N,<:Real}=ntuple(i->1/6,N),
-               soft::AbstractVector=[], hard::Dict=Dict(), tol::Real=.1,
-               path::Symbol=:raster, nreal::Integer=1,
-               threads::Integer=cpucores(), debug::Bool=false,
-               showprogress::Bool=false, rng=Random.GLOBAL_RNG) where {T,N}
+function iqsim(
+  trainimg::AbstractArray{T,N},
+  tilesize::Dims{N},
+  simsize::Dims{N}=size(trainimg);
+  overlap::NTuple{N,<:Real}=ntuple(i -> 1 / 6, N),
+  soft::AbstractVector=[],
+  hard::Dict=Dict(),
+  tol::Real=0.1,
+  path::Symbol=:raster,
+  nreal::Integer=1,
+  threads::Integer=cpucores(),
+  debug::Bool=false,
+  showprogress::Bool=false,
+  rng=Random.GLOBAL_RNG
+) where {T,N}
 
   # number of threads in FFTW
   set_num_threads(threads)
@@ -59,7 +67,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   @assert all(simsize .≥ tilesize) "invalid grid size"
   @assert all(0 .< overlap .< 1) "overlaps must be in range (0,1)"
   @assert 0 < tol ≤ 1 "tolerance must be in range (0,1]"
-  @assert path ∈ [:raster,:dilation,:random] "invalid simulation path"
+  @assert path ∈ [:raster, :dilation, :random] "invalid simulation path"
   @assert nreal > 0 "invalid number of realizations"
 
   # soft data checks
@@ -78,10 +86,10 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   end
 
   # calculate the overlap size from given percentage
-  ovlsize = @. ceil(Int, overlap*tilesize)
+  ovlsize = @. ceil(Int, overlap * tilesize)
 
   # warn in case of 1-voxel overlaps
-  if any((tilesize .>  1) .& (ovlsize .== 1))
+  if any((tilesize .> 1) .& (ovlsize .== 1))
     @warn "Overlaps with only 1 voxel, check tilesize/overlap configuration"
   end
 
@@ -92,7 +100,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   ntiles = @. ceil(Int, simsize / max(spacing, 1))
 
   # padded simulation grid size
-  padsize = @. ntiles*(tilesize - ovlsize) + ovlsize
+  padsize = @. ntiles * (tilesize - ovlsize) + ovlsize
 
   # training image dimensions
   TIsize = size(trainimg)
@@ -101,11 +109,19 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
   distsize = TIsize .- tilesize .+ 1
 
   # total overlap volume in simulation grid
-  ovlvol = prod(padsize) - prod(@. padsize - (ntiles - 1)*ovlsize)
+  ovlvol = prod(padsize) - prod(@. padsize - (ntiles - 1) * ovlsize)
 
   # geometric configuration
-  geoconfig = (ntiles=ntiles, tilesize=tilesize, ovlsize=ovlsize, spacing=spacing,
-               TIsize=TIsize, simsize=simsize, padsize=padsize, distsize=distsize)
+  geoconfig = (
+    ntiles=ntiles,
+    tilesize=tilesize,
+    ovlsize=ovlsize,
+    spacing=spacing,
+    TIsize=TIsize,
+    simsize=simsize,
+    padsize=padsize,
+    distsize=distsize
+  )
 
   # pad input images and knockout inactive voxels
   TI, SOFT = imagepreproc(trainimg, soft, geoconfig)
@@ -127,16 +143,16 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
   # for each realization we have:
   boundarycuts = Vector{Array{Float64,N}}()
-  voxelreuse   = Vector{Float64}()
+  voxelreuse = Vector{Float64}()
 
   # preallocate memory
-  ovlmask   = BitArray(undef, tilesize)
-  cutmask   = BitArray(undef, tilesize)
-  ovldist   = Array{Float64}(undef, distsize)
+  ovlmask = BitArray(undef, tilesize)
+  cutmask = BitArray(undef, tilesize)
+  ovldist = Array{Float64}(undef, distsize)
   softdists = [Array{Float64}(undef, distsize) for i in 1:length(soft)]
   if !isempty(hard)
     hardmask = BitArray(undef, tilesize)
-    harddev  = Array{Float64}(undef, tilesize)
+    harddev = Array{Float64}(undef, tilesize)
     harddist = Array{Float64}(undef, distsize)
   end
 
@@ -157,19 +173,19 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       tileind = lin2cart(ntiles, ind)
 
       # tile corners are given by start and finish
-      start  = @. (tileind.I - 1)*spacing + 1
+      start = @. (tileind.I - 1) * spacing + 1
       finish = @. start + tilesize - 1
-      tile   = CartesianIndex(start):CartesianIndex(finish)
+      tile = CartesianIndex(start):CartesianIndex(finish)
 
       # current simulation dataevent
       simdev = view(simgrid, tile)
 
       # overlap distance
       ovlmask .= false
-      for d=1:N
+      for d in 1:N
         # Cartesian index of previous and next tiles along dimension
-        prev = CartesianIndex(ntuple(i -> i == d ? (tileind[d]-1) : tileind[i], N))
-        next = CartesianIndex(ntuple(i -> i == d ? (tileind[d]+1) : tileind[i], N))
+        prev = CartesianIndex(ntuple(i -> i == d ? (tileind[d] - 1) : tileind[i], N))
+        next = CartesianIndex(ntuple(i -> i == d ? (tileind[d] + 1) : tileind[i], N))
 
         # overlap with previous tile
         if ovlsize[d] > 1 && prev ∈ pasted
@@ -179,7 +195,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
 
         # overlap with next tile
         if ovlsize[d] > 1 && next ∈ pasted
-          oslice = ntuple(i -> i == d ? (spacing[d]+1:tilesize[d]) : (1:tilesize[i]), N)
+          oslice = ntuple(i -> i == d ? ((spacing[d] + 1):tilesize[d]) : (1:tilesize[i]), N)
           ovlmask[CartesianIndices(oslice)] .= true
         end
       end
@@ -214,40 +230,42 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
       end
 
       # current pattern database
-      patterndb = isempty(Ds) ? findall(vec(D .≤ (1+tol)minimum(D))) : relaxation(D, Ds, tol)
+      patterndb = isempty(Ds) ? findall(vec(D .≤ (1 + tol)minimum(D))) : relaxation(D, Ds, tol)
 
       # pattern probability
       patternprobs = taumodel(patterndb, D, Ds)
 
       # pick a pattern at random from the database
-      rind   = sample(rng, patterndb, weights(patternprobs))
-      start  = lin2cart(distsize, rind)
+      rind = sample(rng, patterndb, weights(patternprobs))
+      start = lin2cart(distsize, rind)
       finish = @. start.I + tilesize - 1
-      rtile  = CartesianIndex(start):CartesianIndex(finish)
+      rtile = CartesianIndex(start):CartesianIndex(finish)
 
       # selected training image dataevent
       TIdev = view_kernel(TI, rtile)
 
       # boundary cut mask
       cutmask .= false
-      for d=1:N
+      for d in 1:N
         # Cartesian index of previous and next tiles along dimension
-        prev = CartesianIndex(ntuple(i -> i == d ? (tileind[d]-1) : tileind[i], N))
-        next = CartesianIndex(ntuple(i -> i == d ? (tileind[d]+1) : tileind[i], N))
+        prev = CartesianIndex(ntuple(i -> i == d ? (tileind[d] - 1) : tileind[i], N))
+        next = CartesianIndex(ntuple(i -> i == d ? (tileind[d] + 1) : tileind[i], N))
 
         # compute mask with previous tile
         if ovlsize[d] > 1 && prev ∈ pasted
           oslice = ntuple(i -> i == d ? (1:ovlsize[d]) : (1:tilesize[i]), N)
           inds = CartesianIndices(oslice)
-          A = view(simdev, inds); B = view(TIdev, inds)
+          A = view(simdev, inds)
+          B = view(TIdev, inds)
           cutmask[inds] .|= graphcut(A, B, d)
         end
 
         # compute mask with next tile
         if ovlsize[d] > 1 && next ∈ pasted
-          oslice = ntuple(i -> i == d ? (spacing[d]+1:tilesize[d]) : (1:tilesize[i]), N)
+          oslice = ntuple(i -> i == d ? ((spacing[d] + 1):tilesize[d]) : (1:tilesize[i]), N)
           inds = CartesianIndices(oslice)
-          A = view(simdev, inds); B = view(TIdev, inds)
+          A = view(simdev, inds)
+          B = view(TIdev, inds)
           cutmask[inds] .|= .!graphcut(A, B, d)
         end
       end
@@ -263,7 +281,7 @@ function iqsim(trainimg::AbstractArray{T,N}, tilesize::Dims{N},
     end
 
     # save voxel reuse
-    debug && push!(voxelreuse, sum(cutgrid)/ovlvol)
+    debug && push!(voxelreuse, sum(cutgrid) / ovlvol)
 
     # hard data and shape correction
     if !isempty(hard)

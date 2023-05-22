@@ -6,21 +6,22 @@ function graphcut(A, B, dim)
   @assert size(A) == size(B) "arrays must have the same size for cut"
 
   # size and number of voxels
-  N    = ndims(A)
-  sz   = size(A)
+  N = ndims(A)
+  sz = size(A)
   nvox = prod(sz)
 
   # source and sink terminals
-  s = nvox + 1; t = nvox + 2
+  s = nvox + 1
+  t = nvox + 2
 
   # lattice graph and capacity matrix
-  G = DiGraph(nvox+2)
-  C = spzeros(nvox+2, nvox+2)
+  G = DiGraph(nvox + 2)
+  C = spzeros(nvox + 2, nvox + 2)
 
   # fill lattice graph with original vertices
-  for d=1:N
+  for d in 1:N
     # loop over all indices except the borders using an increment direction
-    inds = CartesianIndices(ntuple(i -> i == d ? (1:sz[d]-1) : (1:sz[i]), N))
+    inds = CartesianIndices(ntuple(i -> i == d ? (1:(sz[d] - 1)) : (1:sz[i]), N))
     incr = CartesianIndex(ntuple(i -> i == d ? 1 : 0, N))
 
     for ind in inds
@@ -48,7 +49,7 @@ function graphcut(A, B, dim)
       add_edge!(G, u, v)
       add_edge!(G, v, u)
 
-      C[u,v] = C[v,u] = (Du + Dv) / (∇Au + ∇Av + ∇Bu + ∇Bv + eps())
+      C[u, v] = C[v, u] = (Du + Dv) / (∇Au + ∇Av + ∇Bu + ∇Bv + eps())
     end
   end
 
@@ -57,7 +58,7 @@ function graphcut(A, B, dim)
   for ind in linds
     u = cart2lin(sz, ind)
     add_edge!(G, s, u)
-    C[s,u] = Inf
+    C[s, u] = Inf
   end
 
   # fill edges from right slice to sink terminal
@@ -65,14 +66,14 @@ function graphcut(A, B, dim)
   for ind in rinds
     v = cart2lin(sz, ind)
     add_edge!(G, v, t)
-    C[v,t] = Inf
+    C[v, t] = Inf
   end
 
   # Boykov-Kolmogorov max-flow/min-cut
   _, __, labels = maximum_flow(G, s, t, C, algorithm=BoykovKolmogorovAlgorithm())
 
   # remove source and sink terminals
-  labels = labels[1:end-2]
+  labels = labels[1:(end - 2)]
 
   # cut mask
   M = falses(size(A))

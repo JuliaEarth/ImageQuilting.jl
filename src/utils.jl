@@ -3,9 +3,9 @@
 # ------------------------------------------------------------------
 
 function fastdistance(img, kern; weights=fill(1.0, size(kern)))
-  wkern = weights.*kern
+  wkern = weights .* kern
 
-  A² = imfilter_kernel(img.^2, weights)
+  A² = imfilter_kernel(img .^ 2, weights)
   AB = imfilter_kernel(img, wkern)
   B² = sum(wkern .* kern)
 
@@ -70,17 +70,17 @@ function imagepreproc(trainimg, soft, geoconfig)
   padsize = geoconfig.padsize
 
   TI = Float64.(trainimg)
-  replace!(TI, NaN => 0.)
+  replace!(TI, NaN => 0.0)
 
   SOFT = map(soft) do (aux, auxTI)
-    prepend = ntuple(i->0, ndims(TI))
-    append  = padsize .- min.(padsize, size(aux))
+    prepend = ntuple(i -> 0, ndims(TI))
+    append = padsize .- min.(padsize, size(aux))
     padding = Pad(:symmetric, prepend, append)
 
-    AUX   = Float64.(padarray(aux, padding))
+    AUX = Float64.(padarray(aux, padding))
     AUXTI = Float64.(auxTI)
-    replace!(AUX, NaN => 0.)
-    replace!(AUXTI, NaN => 0.)
+    replace!(AUX, NaN => 0.0)
+    replace!(AUXTI, NaN => 0.0)
 
     AUX, AUXTI
   end
@@ -95,15 +95,15 @@ function imagepreproc(trainimg, soft, geoconfig)
 end
 
 function finddisabled(trainimg, geoconfig)
-  TIsize   = geoconfig.TIsize
+  TIsize = geoconfig.TIsize
   tilesize = geoconfig.tilesize
   distsize = geoconfig.distsize
 
   disabled = falses(distsize)
   for ind in findall(isnan, trainimg)
-    start  = @. max(ind.I - tilesize + 1, 1)
+    start = @. max(ind.I - tilesize + 1, 1)
     finish = @. min(ind.I, distsize)
-    tile   = CartesianIndex(start):CartesianIndex(finish)
+    tile = CartesianIndex(start):CartesianIndex(finish)
     disabled[tile] .= true
   end
 
@@ -111,18 +111,18 @@ function finddisabled(trainimg, geoconfig)
 end
 
 function findskipped(hard, geoconfig)
-  ntiles   = geoconfig.ntiles
+  ntiles = geoconfig.ntiles
   tilesize = geoconfig.tilesize
-  spacing  = geoconfig.spacing
-  simsize  = geoconfig.simsize
+  spacing = geoconfig.spacing
+  simsize = geoconfig.simsize
 
   skipped = Set{Int}()
   datainds = Vector{Int}()
   for tileind in CartesianIndices(ntiles)
     # tile corners are given by start and finish
-    start  = @. (tileind.I - 1)*spacing + 1
+    start = @. (tileind.I - 1) * spacing + 1
     finish = @. start + tilesize - 1
-    tile   = CartesianIndex(start):CartesianIndex(finish)
+    tile = CartesianIndex(start):CartesianIndex(finish)
 
     # skip tile if either
     #   1) tile is beyond true simulation size
