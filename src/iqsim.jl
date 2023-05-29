@@ -9,7 +9,7 @@
           soft::AbstractVector=[], hard::Dict=Dict(), tol::Real=.1,
           path::Symbol=:raster, nreal::Integer=1,
           threads::Integer=cpucores(), debug::Bool=false,
-          showprogress::Bool=false, rng::AbstractRNG=Random.GLOBAL_RNG)
+          progress::Bool=true, rng::AbstractRNG=Random.GLOBAL_RNG)
 
 Performs image quilting simulation as described in Hoffimann et al. 2017.
 
@@ -31,7 +31,7 @@ Performs image quilting simulation as described in Hoffimann et al. 2017.
 * `nreal` is the number of realizations (default to 1)
 * `threads` is the number of threads for the FFT (default to all CPU cores)
 * `debug` informs whether to export or not the boundary cuts and voxel reuse
-* `showprogress` informs whether to show or not estimated time duration
+* `progress` informs whether to show or not estimated time duration
 * `rng` is the random number generator (default to `Random.GLOBAL_RNG`)
 
 The main output `reals` consists of a list of realizations that can be indexed with
@@ -55,7 +55,7 @@ function iqsim(
   nreal::Integer=1,
   threads::Integer=cpucores(),
   debug::Bool=false,
-  showprogress::Bool=false,
+  progress::Bool=true,
   rng=Random.GLOBAL_RNG
 ) where {T,N}
 
@@ -136,7 +136,7 @@ function iqsim(
   simpath = genpath(rng, ntiles, path, datainds)
 
   # show progress and estimated time duration
-  showprogress && (progress = Progress(nreal))
+  progress && (progbar = Progress(nreal))
 
   # main output is a vector of grids
   realizations = Vector{Array{Float64,N}}()
@@ -304,7 +304,7 @@ function iqsim(
     debug && push!(boundarycuts, cutgrid)
 
     # update progress bar
-    showprogress && next!(progress)
+    progress && next!(progbar)
   end
 
   debug ? (realizations, boundarycuts, voxelreuse) : realizations

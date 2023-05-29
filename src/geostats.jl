@@ -27,8 +27,8 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
 
 ### Optional
 
+* `progress`     - Whether to show or not the estimated time duration (default to `true`)
 * `threads`      - Number of threads in FFT (default to number of physical CPU cores)
-* `showprogress` - Whether to show or not the estimated time duration (default to false)
 * `rng`          - Random number generator (default to `Random.GLOBAL_RNG`)
 
 ## References
@@ -46,7 +46,6 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
   @param soft = nothing
   @param tol = 0.1
   @global threads = cpucores()
-  @global showprogress = false
   @global rng = Random.GLOBAL_RNG
 end
 
@@ -135,8 +134,8 @@ function solvesingle(::SimulationProblem, covars::NamedTuple, solver::IQ, prepro
       soft=soft,
       hard=hard,
       tol=par.tol,
+      progress=solver.progress,
       threads=solver.threads,
-      showprogress=solver.showprogress,
       rng=rng
     )
 
