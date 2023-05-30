@@ -134,7 +134,6 @@ function solvesingle(::SimulationProblem, covars::NamedTuple, solver::IQ, prepro
       soft=soft,
       hard=hard,
       tol=par.tol,
-      progress=solver.progress,
       threads=solver.threads,
       rng=rng
     )
