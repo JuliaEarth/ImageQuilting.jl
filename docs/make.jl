@@ -13,7 +13,6 @@ makedocs(
     "Home" => "index.md",
     "Examples" => "examples.md",
     "Voxel reuse" => "voxel-reuse.md",
-    "GPU support" => "gpu-support.md",
     "About" => ["Author" => "about/author.md", "License" => "about/license.md", "Citation" => "about/citation.md"]
   ]
 )

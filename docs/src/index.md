@@ -28,8 +28,6 @@ Get the latest stable release with Julia's package manager:
 ] add ImageQuilting
 ```
 
-For even faster computation with GPUs, please follow the instructions in [GPU support](gpu-support.md).
-
 ## Talks
 
 Below is a list of talks related to this project. For more material, please subscribe to the
@@ -46,8 +44,8 @@ Below is a list of talks related to this project. For more material, please subs
 
 ## Usage
 
-This package is part of the [GeoStats.jl](https://github.com/JuliaEarth/GeoStats.jl) framework. Solver
-options are displayed below:
+This package is part of the [GeoStats.jl](https://github.com/JuliaEarth/GeoStats.jl) framework.
+Solver options are displayed below:
 
 ```@docs
 IQ
@@ -62,8 +60,8 @@ iqsim
 ```
 
 The major difference compared to the high-level API is that the `iqsim` function has
-no notion of coordinate system, and you will have to pre-process the data manually to
-match it with the cells in the simulation grid.
+no notion of coordinate system, and you will have to pre/post-process the data manually
+to match it with the cells in the simulation grid.
 
 GeoStats.jl takes the coordinate system into account and also enables parallel simulation
-on HPC clusters.
+on clusters of computers with distributed memory.

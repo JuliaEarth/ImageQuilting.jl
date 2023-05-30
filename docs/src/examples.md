@@ -6,6 +6,7 @@ few additional options.
 
 ```@example basics
 using GeoStats
+using GeoStatsPlots
 using ImageQuilting
 using GeoStatsImages
 using Plots
@@ -20,9 +21,9 @@ solver = IQ(
     )
 )
 
-solution = solve(problem, solver)
+ensemble = solve(problem, solver)
 
-plot(solution)
+plot(ensemble)
 ```
 
 ```@example basics
@@ -35,9 +36,9 @@ solver = IQ(
     )
 )
 
-solution = solve(problem, solver)
+ensemble = solve(problem, solver)
 
-plot(solution)
+plot(ensemble)
 ```
 
 ## Hard data
@@ -57,9 +58,9 @@ solver = IQ(
     )
 )
 
-solution = solve(problem, solver)
+ensemble = solve(problem, solver)
 
-plot(solution)
+plot(ensemble)
 ```
 
 ## Masked grids
@@ -91,9 +92,9 @@ solver = IQ(
     )
 )
 
-solution = solve(problem, solver)
+ensemble = solve(problem, solver)
 
-plot(solution)
+plot(ensemble)
 ```
 
 ## Soft data
@@ -141,7 +142,7 @@ solver = IQ(
     )
 )
 
-solution = solve(problem, solver)
+ensemble = solve(problem, solver)
 
-plot(solution)
+plot(ensemble)
 ```
