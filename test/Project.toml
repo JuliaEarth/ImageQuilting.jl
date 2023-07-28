@@ -1,20 +1,13 @@
 [deps]
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
-GR = "28b8d3ca-fb5f-59d9-8090-bfdbd6d07a71"
 GeoStatsBase = "323cb8eb-fbf6-51c0-afd0-f8fba70507b2"
 GeoStatsImages = "7cd16168-b42c-5e7d-a585-4f59d326662d"
-GeoStatsPlots = "cf22561b-6452-4701-9483-6c69015d00e1"
 ImageFiltering = "6a3955dd-da59-5b1f-98d4-e7296123deb5"
-ImageIO = "82e4d734-157c-48bb-816b-45c225c6df19"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Meshes = "eacbb407-ea5a-433e-ab97-5258b1ca43fa"
-Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-ReferenceTests = "324d217c-45ce-50fc-942e-d289b448e8cf"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 CUDA = "3.11, 4"
-GR = "=0.72.7"
-Plots = "=1.38.16"

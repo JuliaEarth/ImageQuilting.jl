@@ -125,24 +125,6 @@ end
   @test 0 ≤ μ ≤ 1
 end
 
-if visualtests
-  for (TIname, var) in [("Strebelle", :facies), ("StoneWall", :Z)]
-    rng = MersenneTwister(2017)
-    img = geostatsimage(TIname)
-    TI = asarray(img, var)[1:50, 1:50, :]
-    reals = iqsim(TI, (30, 30, 1), size(TI), nreal=4, rng=rng)
-    ps = [heatmap(real[:, :, 1]) for real in reals]
-    @test_reference "data/Reals$(TIname).png" plot(ps...)
-  end
-
-  for TIname in ["StoneWall", "WalkerLake"]
-    rng = MersenneTwister(2017)
-    img = geostatsimage(TIname)
-    TI = asarray(img, :Z)[1:20, 1:20, :]
-    @test_reference "data/Voxel$(TIname).png" voxelreuseplot(TI, rng=rng)
-  end
-end
-
 if CUDA.functional()
   @testset "CPU vs GPU" begin
     # 2D imfilter

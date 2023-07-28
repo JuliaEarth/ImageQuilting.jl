@@ -11,10 +11,6 @@
   solution = solve(problem, solver)
   @test length(solution) == 3
   @test size(domain(solution[1])) == (100, 100)
-
-  if visualtests
-    @test_reference "data/GeoStatsAPI-1.png" plot(solution, size=(900, 300))
-  end
 end
 
 @testset "Forward model" begin
@@ -39,8 +35,4 @@ end
   solver = IQ(:Z => (trainimg=trainimg, tilesize=(27, 27), soft=(data, dataTI)), rng=rng)
 
   solution = solve(problem, solver)
-
-  if visualtests
-    @test_reference "data/GeoStatsAPI-2.png" plot(solution, size=(900, 300))
-  end
 end
