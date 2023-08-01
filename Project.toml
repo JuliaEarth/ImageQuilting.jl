@@ -1,7 +1,7 @@
 name = "ImageQuilting"
 uuid = "e8712464-036d-575c-85ac-952ae31322ab"
 author = "Júlio Hoffimann <julio.hoffimann@gmail.com>"
-version = "0.20.0"
+version = "0.20.1"
 
 [deps]
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
@@ -30,7 +30,7 @@ Graphs = "1.4"
 GraphsFlows = "0.1"
 ImageFiltering = "0.7"
 ImageMorphology = "0.4"
-Meshes = "0.33"
+Meshes = "0.33, 0.34"
 ProgressMeter = "1.1"
 RecipesBase = "1.0"
 StatsBase = "0.33, 0.34"
