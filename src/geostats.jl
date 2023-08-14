@@ -18,7 +18,6 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
 
 * `overlap`  - Overlap size (default to (1/6, 1/6, ..., 1/6))
 * `path`     - Simulation path (`:raster` (default), `:dilation`, or `:random`)
-* `mapping`  - Data mapping method (default to `NearestMapping()`)
 * `inactive` - Vector of inactive voxels (i.e. `CartesianIndex`) in the grid
 * `soft`     - A pair `(data,dataTI)` of geospatial data objects (default to `nothing`)
 * `tol`      - Initial relaxation tolerance in (0,1] (default to `0.1`)
@@ -27,9 +26,9 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
 
 ### Optional
 
-* `progress`     - Whether to show or not the estimated time duration (default to `true`)
-* `threads`      - Number of threads in FFT (default to number of physical CPU cores)
-* `rng`          - Random number generator (default to `Random.GLOBAL_RNG`)
+* `threads` - Number of threads in FFT (default to number of physical CPU cores)
+* `init`    - Data initialization method (default to `NearestInit()`)
+* `rng`     - Random number generator (default to `Random.GLOBAL_RNG`)
 
 ## References
 
@@ -41,11 +40,11 @@ Image quilting simulation solver as described in Hoffimann et al. 2017.
   @param tilesize
   @param overlap = nothing
   @param path = :raster
-  @param mapping = NearestMapping()
   @param inactive = nothing
   @param soft = nothing
   @param tol = 0.1
   @global threads = cpucores()
+  @global init = NearestInit()
   @global rng = Random.GLOBAL_RNG
 end
 
@@ -53,8 +52,15 @@ function preprocess(problem::SimulationProblem, solver::IQ)
   # retrieve problem info
   pdata = data(problem)
   pdomain = domain(problem)
+  pvars = variables(problem)
   simsize = size(pdomain)
   Dim = embeddim(pdomain)
+
+  # retrieve global paramaters
+  init = solver.init
+
+  # initialize buffers for realization and simulation mask
+  buff, mask = initbuff(pdomain, pvars, init, data=pdata)
 
   # result of preprocessing
   preproc = Dict{Symbol,Tuple}()
@@ -62,7 +68,7 @@ function preprocess(problem::SimulationProblem, solver::IQ)
   for covars in covariables(problem, solver)
     for var in covars.names
       # get user parameters
-      varparams = covars.params[(var,)]
+      varparams = covars.params[Set([var])]
 
       # training image as simple array
       TI = varparams.trainimg
@@ -70,13 +76,6 @@ function preprocess(problem::SimulationProblem, solver::IQ)
 
       # default overlap
       overlap = isnothing(varparams.overlap) ? ntuple(i -> 1 / 6, Dim) : varparams.overlap
-
-      # determine data mappings
-      vmapping = if hasdata(problem)
-        map(pdata, pdomain, (var,), varparams.mapping)[var]
-      else
-        Dict()
-      end
 
       # create soft data object
       soft = if !isnothing(varparams.soft)
@@ -94,9 +93,12 @@ function preprocess(problem::SimulationProblem, solver::IQ)
       end
 
       # create hard data object
+      linds = findall(mask[var])
+      cinds = [lin2cart(simsize, ind) for ind in linds]
+      hvals = view(buff[var], linds)
       hdata = Dict{CartesianIndex{Dim},Real}()
-      for (loc, datloc) in vmapping
-        push!(hdata, lin2cart(simsize, loc) => pdata[datloc, var])
+      for (ind, val) in zip(cinds, hvals)
+        push!(hdata, ind => val)
       end
 
       # disable inactive voxels
@@ -120,7 +122,7 @@ function solvesingle(::SimulationProblem, covars::NamedTuple, solver::IQ, prepro
   # random number generator
   rng = solver.rng
 
-  varreal = map(covars.names) do var
+  varreal = map(collect(covars.names)) do var
     # unpack preprocessed parameters
     par, trainimg, simsize, overlap, soft, hard = preproc[var]
 
