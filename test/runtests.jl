@@ -1,5 +1,6 @@
 using ImageQuilting
 using Meshes
+using GeoTables
 using GeoStatsBase
 using GeoStatsImages
 using ImageFiltering
