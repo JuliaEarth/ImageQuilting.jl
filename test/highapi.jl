@@ -22,7 +22,7 @@ end
     img = asarray(data, :Z)
     krn = KernelFactors.IIRGaussian([10, 10])
     fwd = imfilter(img, krn)
-    georef((fwd=fwd,), domain(data))
+    georef((fwd=vec(fwd),), domain(data))
   end
 
   # apply forward model to both images
