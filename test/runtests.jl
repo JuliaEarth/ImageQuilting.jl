@@ -1,7 +1,4 @@
 using ImageQuilting
-using Meshes
-using GeoTables
-using GeoStatsImages
 using ImageFiltering
 using LinearAlgebra
 using Statistics

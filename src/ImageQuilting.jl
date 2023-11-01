@@ -4,10 +4,6 @@
 
 module ImageQuilting
 
-using Meshes
-using GeoTables
-
-using Tables
 using Graphs
 using GraphsFlows
 using ImageFiltering
