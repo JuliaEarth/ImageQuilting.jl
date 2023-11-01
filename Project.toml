@@ -1,7 +1,7 @@
 name = "ImageQuilting"
 uuid = "e8712464-036d-575c-85ac-952ae31322ab"
 author = "Júlio Hoffimann <julio.hoffimann@gmail.com>"
-version = "0.22.5"
+version = "0.23.0"
 
 [deps]
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
