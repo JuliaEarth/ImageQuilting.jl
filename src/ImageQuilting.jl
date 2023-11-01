@@ -4,11 +4,6 @@
 
 module ImageQuilting
 
-using Meshes
-using GeoTables
-using GeoStatsBase
-
-using Tables
 using Graphs
 using GraphsFlows
 using ImageFiltering
@@ -25,8 +20,6 @@ using SparseArrays: spzeros
 using Statistics: mean, std
 using Random
 
-import GeoStatsBase: preprocess, solvesingle
-
 include("utils.jl")
 include("plotrecipes.jl")
 include("imfilter.jl")
@@ -35,14 +28,7 @@ include("taumodel.jl")
 include("graphcut.jl")
 include("iqsim.jl")
 include("voxelreuse.jl")
-include("geostats.jl")
 
-export
-  # functions
-  iqsim,
-  voxelreuse,
-
-  # geostats solver
-  IQ
+export iqsim, voxelreuse
 
 end

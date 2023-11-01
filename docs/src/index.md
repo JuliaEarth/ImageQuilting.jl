@@ -45,11 +45,7 @@ Below is a list of talks related to this project. For more material, please subs
 ## Usage
 
 This package is part of the [GeoStats.jl](https://github.com/JuliaEarth/GeoStats.jl) framework.
-Solver options are displayed below:
-
-```@docs
-IQ
-```
+See its documentation for examples of practical use.
 
 ### Low-level API
 

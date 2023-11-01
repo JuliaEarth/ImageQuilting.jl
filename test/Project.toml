@@ -1,11 +1,7 @@
 [deps]
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
-GeoStatsBase = "323cb8eb-fbf6-51c0-afd0-f8fba70507b2"
-GeoStatsImages = "7cd16168-b42c-5e7d-a585-4f59d326662d"
-GeoTables = "e502b557-6362-48c1-8219-d30d308dcdb0"
 ImageFiltering = "6a3955dd-da59-5b1f-98d4-e7296123deb5"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-Meshes = "eacbb407-ea5a-433e-ab97-5258b1ca43fa"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
