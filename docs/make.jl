@@ -1,6 +1,3 @@
-# Workaround for GR warnings
-ENV["GKSwstype"] = "100"
-
 using Documenter, ImageQuilting
 
 isCI = "CI" ∈ keys(ENV)
@@ -11,7 +8,6 @@ makedocs(
   authors="Júlio Hoffimann",
   pages=[
     "Home" => "index.md",
-    "Examples" => "examples.md",
     "Voxel reuse" => "voxel-reuse.md",
     "About" => ["Author" => "about/author.md", "License" => "about/license.md", "Citation" => "about/citation.md"]
   ]
