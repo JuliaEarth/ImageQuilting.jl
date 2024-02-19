@@ -10,7 +10,7 @@
   tmax=nothing,
   overlap=(1 / 6, 1 / 6, 1 / 6),
   nreal=10,
-  rng=Random.GLOBAL_RNG
+  rng=Random.default_rng()
 )
   # get input image
   img = vr.args[1]

@@ -9,7 +9,7 @@
           soft::AbstractVector=[], hard::Dict=Dict(), tol::Real=.1,
           path::Symbol=:raster, nreal::Integer=1,
           threads::Integer=cpucores(), debug::Bool=false,
-          progress::Bool=true, rng::AbstractRNG=Random.GLOBAL_RNG)
+          progress::Bool=true, rng::AbstractRNG=Random.default_rng())
 
 Performs image quilting simulation as described in Hoffimann et al. 2017.
 
@@ -32,7 +32,7 @@ Performs image quilting simulation as described in Hoffimann et al. 2017.
 * `threads` is the number of threads for the FFT (default to all CPU cores)
 * `debug` informs whether to export or not the boundary cuts and voxel reuse
 * `progress` informs whether to show or not estimated time duration
-* `rng` is the random number generator (default to `Random.GLOBAL_RNG`)
+* `rng` is the random number generator (default to `Random.default_rng()`)
 
 The main output `reals` consists of a list of realizations that can be indexed with
 `reals[1], reals[2], ..., reals[nreal]`. If `debug=true`, additional output is generated:
@@ -56,7 +56,7 @@ function iqsim(
   threads::Integer=cpucores(),
   debug::Bool=false,
   progress::Bool=true,
-  rng=Random.GLOBAL_RNG
+  rng=Random.default_rng()
 ) where {T,N}
 
   # number of threads in FFTW
