@@ -9,10 +9,8 @@ ImageQuilting.jl
 
 ## Latest News
 - ImageQuilting.jl won the [Syvitski Modeler Award 2018](https://csdms.colorado.edu/wiki/Student_Modeler_Award_2018).
-- ImageQuilting.jl can now be used as one of the many solvers in the
+- ImageQuilting.jl can now be used as one of the many processes in the
 [GeoStats.jl](https://github.com/JuliaEarth/GeoStats.jl) framework.
-For more information, please type `?IQ` in the Julia prompt after
-loading the package.
 
 Installation
 ------------
