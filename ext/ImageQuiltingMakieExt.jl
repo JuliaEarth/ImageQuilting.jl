@@ -11,13 +11,7 @@ import Makie
 import ImageQuilting: voxelreuseplot, voxelreuseplot!
 
 Makie.@recipe(VoxelReusePlot, trainimg) do scene
-  Makie.Attributes(
-    tmin=nothing,
-    tmax=nothing,
-    overlap=(1 / 6, 1 / 6, 1 / 6),
-    nreal=10,
-    rng=Random.default_rng()
-  )
+  Makie.Attributes(tmin=nothing, tmax=nothing, overlap=(1 / 6, 1 / 6, 1 / 6), nreal=10, rng=Random.default_rng())
 end
 
 Makie.preferred_axis_type(::VoxelReusePlot) = Makie.Axis
