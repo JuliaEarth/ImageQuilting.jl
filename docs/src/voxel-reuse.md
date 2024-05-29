@@ -8,8 +8,14 @@ voxelreuse
 
 ## Plot recipe
 
-A plot recipe is provided for tile design in image quilting. In order to plot the voxel
-reuse of a training image, install any of the [Makie.jl](https://docs.makie.org) backends.
+A plot recipe is provided for tile design in image quilting:
+
+```@docs
+voxelreuseplot
+```
+
+In order to plot the voxel reuse of a training image, install any of the
+[Makie.jl](https://docs.makie.org) backends.
 
 ```julia
 ] add CairoMakie
