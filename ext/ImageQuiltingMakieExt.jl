@@ -11,7 +11,7 @@ import Makie
 import ImageQuilting: voxelreuseplot, voxelreuseplot!
 
 Makie.@recipe(VoxelReusePlot, trainimg) do scene
-  Makie.Attributes(;
+  Makie.Attributes(
     tmin=nothing,
     tmax=nothing,
     overlap=(1 / 6, 1 / 6, 1 / 6),
@@ -50,9 +50,9 @@ function Makie.plot!(plot::VoxelReusePlot)
   best = ts[rank[1:min(5, length(ts))]]
   t₋, t₊ = minimum(best), maximum(best)
 
-  Makie.vspan!(plot, [t₋], [t₊], alpha = 0.5, color = :slategray3)
-  Makie.band!(plot, ts, μs - σs, μs + σs, alpha = 0.5, color = :slategray3)
-  Makie.lines!(plot, ts, μs, color = :slategray3)
+  Makie.vspan!(plot, [t₋], [t₊], alpha=0.5, color=:slategray3)
+  Makie.band!(plot, ts, μs - σs, μs + σs, alpha=0.5, color=:slategray3)
+  Makie.lines!(plot, ts, μs, color=:slategray3)
 end
 
 function Makie.data_limits(plot::VoxelReusePlot)
