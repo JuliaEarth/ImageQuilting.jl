@@ -9,11 +9,10 @@ voxelreuse
 ## Plot recipe
 
 A plot recipe is provided for tile design in image quilting. In order to plot the voxel
-reuse of a training image, install [Plots.jl](https://github.com/JuliaPlots/Plots.jl) and
-any of its supported backends (e.g. [GR.jl](https://github.com/jheinen/GR.jl)):
+reuse of a training image, install any of the [Makie.jl](https://docs.makie.org) backends.
 
 ```julia
-] add Plots
+] add CairoMakie
 ```
 
 The example below uses training images from the
@@ -22,12 +21,15 @@ The example below uses training images from the
 ```julia
 using ImageQuilting
 using GeoStatsImages
-using Plots
+using CairoMakie
 
 TI₁ = geostatsimage("Strebelle")
 TI₂ = geostatsimage("StoneWall")
 
-voxelreuseplot(TI₁, label="Strebelle")
-voxelreuseplot!(TI₂, label="StoneWall")
+timg₁ = asarray(TI₁, :facies)
+timg₂ = asarray(TI₂, :Z)
+
+voxelreuseplot(timg₁)
+voxelreuseplot!(timg₂)
 ```
 ![Voxel reuse plot](images/voxelreuse.png)

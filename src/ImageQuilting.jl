@@ -12,7 +12,6 @@ using StatsBase: sample, weights
 using ProgressMeter: Progress, next!
 using FFTW: set_num_threads
 using CpuId: cpucores
-using RecipesBase
 using CUDA
 
 using Base: @nexprs, @nloops, @nref
@@ -21,7 +20,6 @@ using Statistics: mean, std
 using Random
 
 include("utils.jl")
-include("plotrecipes.jl")
 include("imfilter.jl")
 include("relaxation.jl")
 include("taumodel.jl")
@@ -29,6 +27,13 @@ include("graphcut.jl")
 include("iqsim.jl")
 include("voxelreuse.jl")
 
-export iqsim, voxelreuse
+export
+  # simulation
+  iqsim,
+
+  # voxel reuse
+  voxelreuse,
+  voxelreuseplot,
+  voxelreuseplot!
 
 end
