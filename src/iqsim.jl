@@ -8,8 +8,8 @@
           overlap::NTuple{N,<:Real}=ntuple(i->1/6,N),
           soft::AbstractVector=[], hard::Dict=Dict(), tol::Real=.1,
           path::Symbol=:raster, nreal::Integer=1,
-          threads::Integer=cpucores(), debug::Bool=false,
-          progress::Bool=true, rng::AbstractRNG=Random.default_rng())
+          debug::Bool=false, showprogress::Bool=true,
+          rng::AbstractRNG=Random.default_rng())
 
 Performs image quilting simulation as described in Hoffimann et al. 2017.
 
@@ -29,9 +29,8 @@ Performs image quilting simulation as described in Hoffimann et al. 2017.
 * `tol` is the initial relaxation tolerance in (0,1] (default to .1)
 * `path` is the simulation path (`:raster`, `:dilation` or `:random`)
 * `nreal` is the number of realizations (default to 1)
-* `threads` is the number of threads for the FFT (default to all CPU cores)
 * `debug` informs whether to export or not the boundary cuts and voxel reuse
-* `progress` informs whether to show or not estimated time duration
+* `showprogress` informs whether to show or not estimated time duration
 * `rng` is the random number generator (default to `Random.default_rng()`)
 
 The main output `reals` consists of a list of realizations that can be indexed with
@@ -53,14 +52,13 @@ function iqsim(
   tol::Real=0.1,
   path::Symbol=:raster,
   nreal::Integer=1,
-  threads::Integer=cpucores(),
   debug::Bool=false,
-  progress::Bool=true,
+  showprogress::Bool=true,
   rng=Random.default_rng()
 ) where {T,N}
 
   # number of threads in FFTW
-  set_num_threads(threads)
+  set_num_threads(cpucores())
 
   # sanity checks
   @assert all(0 .< tilesize .≤ size(trainimg)) "invalid tile size"
@@ -136,7 +134,7 @@ function iqsim(
   simpath = genpath(rng, ntiles, path, datainds)
 
   # show progress and estimated time duration
-  progress && (progbar = Progress(nreal))
+  showprogress && (progress = Progress(nreal))
 
   # main output is a vector of grids
   realizations = Vector{Array{Float64,N}}()
@@ -304,7 +302,7 @@ function iqsim(
     debug && push!(boundarycuts, cutgrid)
 
     # update progress bar
-    progress && next!(progbar)
+    showprogress && next!(progress)
   end
 
   debug ? (realizations, boundarycuts, voxelreuse) : realizations
