@@ -115,13 +115,13 @@ using Test, Random
   @testset "Simulation paths" begin
     # different simulation paths
     for kind in [:raster, :dilation, :random]
-      rng = MersenneTwister(123)
+      rng = Xoshiro(123)
       path = ImageQuilting.genpath(rng, (10, 10, 10), kind, Int[])
       @test length(path) == 1000
     end
 
     # data is visited first if present
-    rng = MersenneTwister(123)
+    rng = Xoshiro(123)
     path = ImageQuilting.genpath(rng, (10, 10, 10), :data, [1, 1000])
     @test path[1:2] == [1, 1000] || path[1:2] == [1000, 1]
   end
