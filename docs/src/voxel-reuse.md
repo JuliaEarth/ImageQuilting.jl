@@ -32,8 +32,8 @@ using CairoMakie
 TI₁ = geostatsimage("Strebelle")
 TI₂ = geostatsimage("StoneWall")
 
-timg₁ = asarray(TI₁, :facies)
-timg₂ = asarray(TI₂, :Z)
+timg₁ = reshape(TI₁.facies, size(domain(TI₁)))
+timg₂ = reshape(TI₂.Z, size(domain(TI₂)))
 
 voxelreuseplot(timg₁)
 voxelreuseplot!(timg₂)
