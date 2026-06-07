@@ -8,7 +8,7 @@ makedocs(
   authors="Júlio Hoffimann",
   pages=[
     "Home" => "index.md",
-    "Voxel reuse" => "voxel-reuse.md",
+    "Voxel reuse" => "voxelreuse.md",
     "About" => ["Author" => "about/author.md", "License" => "about/license.md", "Citation" => "about/citation.md"]
   ]
 )

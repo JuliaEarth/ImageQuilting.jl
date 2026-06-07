@@ -32,8 +32,11 @@ import GLMakie as Mke
 img1 = geostatsimage("Strebelle")
 img2 = geostatsimage("StoneWall")
 
-trainimg1 = reshape(img1.facies, (size(domain(img1))..., 1))
-trainimg2 = reshape(img2.Z, (size(domain(img2))..., 1))
+dim1 = (size(domain(img1))..., 1)
+dim2 = (size(domain(img2))..., 1)
+
+trainimg1 = reshape(img1.facies, dim1)
+trainimg2 = reshape(img2.Z, dim2)
 
 voxelreuseplot(trainimg1)
 voxelreuseplot!(trainimg2, color=:salmon)
