@@ -52,6 +52,7 @@ Mean voxel reuse plot of `trainimg`.
 * `overlap` - the percentage of overlap (default to 1/6 of tile size)
 * `nreal`   - number of realizations (default to 10)
 * `rng`     - random number generator (default to `Random.default_rng()`)
+* `color`   - color of the plot (default to `:slategray3`)
 """
 function voxelreuseplot end
 function voxelreuseplot! end
