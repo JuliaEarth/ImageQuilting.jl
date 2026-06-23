@@ -1,9 +1,8 @@
-ImageQuilting.jl
-================
+# ImageQuilting.jl
 
 *A Julia package for fast 3D image quilting simulation.*
 
-[![][build-img]][build-url] [![][codecov-img]][codecov-url] [![][docs-stable-img]][docs-stable-url] [![][docs-latest-img]][docs-latest-url]
+[![][build-img]][build-url] [![][codecov-img]][codecov-url] [![][docs-stable-img]][docs-stable-url]
 
 ![3D Quilting Animation](docs/src/images/quilting.gif)
 
@@ -12,8 +11,7 @@ ImageQuilting.jl
 - ImageQuilting.jl can now be used as one of the many processes in the
 [GeoStats.jl](https://github.com/JuliaEarth/GeoStats.jl) framework.
 
-Installation
-------------
+## Installation
 
 Get the latest stable release with Julia's package manager:
 
@@ -21,14 +19,11 @@ Get the latest stable release with Julia's package manager:
 ] add ImageQuilting
 ```
 
-Documentation
--------------
+## Documentation
 
-- [**STABLE**][docs-stable-url] &mdash; **most recently tagged version of the documentation.**
-- [**LATEST**][docs-latest-url] &mdash; *in-development version of the documentation.*
+Check out the [latest documentation][docs-stable-url] to learn more.
 
-Citation
---------
+## Citation
 
 If you find ImageQuilting.jl useful in your work, please consider citing our paper:
 
@@ -48,8 +43,7 @@ If you find ImageQuilting.jl useful in your work, please consider citing our pap
 }
 ```
 
-Publications
-------------
+## Publications
 
 - Barfod et al. 2017. *Hydrostratigraphic modelling using multiple-point statistics and airborne transient electromagnetic methods* [DOWNLOAD](https://www.researchgate.net/publication/319235285_Hydrostratigraphic_modelling_using_multiple-point_statistics_and_airborne_transient_electromagnetic_methods)
 
@@ -59,8 +53,7 @@ Publications
 - Hoffimann et al. 2015. *Geostatistical Modeling of Evolving Landscapes by Means of Image Quilting*
 [DOWNLOAD](https://www.researchgate.net/publication/295902985_Geostatistical_Modeling_of_Evolving_Landscapes_by_Means_of_Image_Quilting)
 
-Talks
------
+## Talks
 
 #### CSDMS 2018
 [![CSDMS2018](https://img.youtube.com/vi/Y5KhQCapuPw/0.jpg)](https://www.youtube.com/watch?v=Y5KhQCapuPw)
@@ -68,8 +61,7 @@ Talks
 #### JuliaCon 2017
 [![JuliaCon2017](https://img.youtube.com/vi/YJs7jl_Y9yM/0.jpg)](https://www.youtube.com/watch?v=YJs7jl_Y9yM)
 
-Contributing
-------------
+## Contributing
 
 Contributions are very welcome, as are feature requests and suggestions.
 
@@ -78,11 +70,8 @@ Please [open an issue](https://github.com/JuliaEarth/ImageQuilting.jl/issues) if
 [build-img]: https://img.shields.io/github/actions/workflow/status/JuliaEarth/ImageQuilting.jl/CI.yml?branch=master&style=flat-square
 [build-url]: https://github.com/JuliaEarth/ImageQuilting.jl/actions
 
-[codecov-img]: https://img.shields.io/codecov/c/github/JuliaEarth/ImageQuilting.jl
+[codecov-img]: https://img.shields.io/codecov/c/github/JuliaEarth/ImageQuilting.jl?style=flat-square
 [codecov-url]: https://codecov.io/gh/JuliaEarth/ImageQuilting.jl
 
-[docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
+[docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg?style=flat-square
 [docs-stable-url]: https://JuliaEarth.github.io/ImageQuilting.jl/stable
-
-[docs-latest-img]: https://img.shields.io/badge/docs-latest-blue.svg
-[docs-latest-url]: https://JuliaEarth.github.io/ImageQuilting.jl/dev
