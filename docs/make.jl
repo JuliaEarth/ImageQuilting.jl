@@ -1,9 +1,7 @@
 using Documenter, ImageQuilting
 
-isCI = "CI" ∈ keys(ENV)
-
 makedocs(
-  format=Documenter.HTML(prettyurls=isCI),
+  format=Documenter.HTML(prettyurls=get(ENV, "CI", "false") == "true"),
   sitename="ImageQuilting.jl",
   authors="Júlio Hoffimann",
   pages=[
