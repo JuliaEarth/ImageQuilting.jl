@@ -11,4 +11,7 @@ makedocs(
   ]
 )
 
-deploydocs(repo="github.com/JuliaEarth/ImageQuilting.jl.git")
+deploydocs(;
+  repo="github.com/JuliaEarth/ImageQuilting.jl.git",
+  versions=["stable" => "v^", "dev" => "dev"]
+)
