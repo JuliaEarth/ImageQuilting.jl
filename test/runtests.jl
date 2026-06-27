@@ -10,13 +10,20 @@ using Test, Random
     # the output of a homogeneous image is also homogeneous
     TI = ones(20, 20, 20)
     reals = iqsim(TI, (10, 10, 10), size(TI))
+    @test eltype(reals[1]) == Float64
     @test reals[1] == TI
 
-    # categories are obtained from training image only
+    # floating-point type is preserved
+    TI = rand(Float32, 20, 20, 20)
+    reals = iqsim(TI, (10, 10, 10), size(TI))
+    @test eltype(reals[1]) == Float32
+
+    # categories are obtained from training image
+    # and result type is Union{Missing,Int}
     TI = rand(1:3, 20, 20, 20)
     reals = iqsim(TI, (10, 10, 10), size(TI))
-    @test eltype(reals[1]) == Union{Missing,Int}
     @test Set(reals[1]) ⊆ Set(TI)
+    @test eltype(reals[1]) == Union{Missing,Int}
   end
 
   @testset "Soft data" begin
