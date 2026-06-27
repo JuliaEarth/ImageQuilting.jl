@@ -142,7 +142,7 @@ function iqsim(
   showprogress && (progress = Progress(nreal))
 
   # main output is a vector of grids
-  R = Union{Missing, nonmissingtype(T)}
+  R = Union{Missing,nonmissingtype(T)}
   realizations = Vector{Array{R,N}}()
 
   # for each realization we have:

@@ -15,7 +15,7 @@ using Test, Random
     # categories are obtained from training image only
     TI = rand(1:3, 20, 20, 20)
     reals = iqsim(TI, (10, 10, 10), size(TI))
-    @test eltype(reals[1]) == Union{Missing, Int}
+    @test eltype(reals[1]) == Union{Missing,Int}
     @test Set(reals[1]) ⊆ Set(TI)
   end
 
