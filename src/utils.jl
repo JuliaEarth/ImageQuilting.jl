@@ -30,7 +30,7 @@ end
 
 function indicator!(buff, hard, tile)
   @inbounds for (i, coord) in enumerate(tile)
-    cond = coord ∉ keys(hard) || isnan(hard[coord]) || ismissing(hard[coord])
+    cond = isnan(get(hard, coord, NaN))
     buff[i] = ifelse(cond, false, true)
   end
 end
@@ -43,7 +43,7 @@ end
 
 function activation!(buff, hard, tile)
   @inbounds for (i, coord) in enumerate(tile)
-    cond = coord ∈ keys(hard) && (isnan(hard[coord]) || ismissing(hard[coord]))
+    cond = coord ∈ keys(hard) && isnan(hard[coord])
     buff[i] = ifelse(cond, false, true)
   end
 end
@@ -102,11 +102,11 @@ function prepare(img)
 end
 
 function unprepare(R, fimg)
-  T = nonmissingtype(R)
-  if T <: AbstractFloat
+  if R <: AbstractFloat
     fimg
   else
     F = eltype(fimg)
+    T = nonmissingtype(R)
     img = replace(fimg, F(NaN) => missing)
     convert(Array{Union{Missing,T}}, img)
   end
@@ -144,7 +144,7 @@ function findskipped(hard, geoconfig)
 
     # skip tile if either
     #   1) tile is beyond true simulation size
-    #   2) all values in the tile are NaN or missing
+    #   2) all values in the tile are NaN
     if any(start .> simsize) || !any(activation(hard, tile))
       push!(skipped, cart2lin(ntiles, tileind))
     elseif any(indicator(hard, tile))
