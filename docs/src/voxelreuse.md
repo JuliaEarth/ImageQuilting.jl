@@ -27,18 +27,15 @@ The example below uses training images from the
 ```julia
 using ImageQuilting
 using GeoStatsImages
-import GLMakie as Mke
+import GLMakie
 
 img1 = geostatsimage("Strebelle")
 img2 = geostatsimage("StoneWall")
 
-dim1 = (size(domain(img1))..., 1)
-dim2 = (size(domain(img2))..., 1)
+rawimg1 = reshape(img1.code, size(img1.geometry))
+rawimg2 = reshape(img2.value, size(img2.geometry))
 
-trainimg1 = reshape(img1.code, dim1)
-trainimg2 = reshape(img2.value, dim2)
-
-voxelreuseplot(trainimg1)
-voxelreuseplot!(trainimg2, color=:salmon)
+voxelreuseplot(rawimg1)
+voxelreuseplot!(rawimg2, color="salmon")
 ```
 ![Voxel reuse plot](images/voxelreuse.png)

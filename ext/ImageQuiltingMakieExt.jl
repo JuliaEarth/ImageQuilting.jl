@@ -31,7 +31,8 @@ function Makie.plot!(plot::VoxelReusePlot)
   rng = plot.rng[]
   color = plot.color[]
 
-  ndims(trainimg) == 3 || throw(ArgumentError("image is not 3D (add ghost dimension in 2D)"))
+  # number of dimensions
+  N = ndims(trainimg)
 
   # choose tile size range
   tmin, tmax, idx = tminmax(plot)
@@ -41,8 +42,9 @@ function Makie.plot!(plot::VoxelReusePlot)
 
   # compute voxel reuse for each tile size
   μσ = map(ts) do t
-    tilesize = ntuple(i -> idx[i] ? t : 1, 3)
-    voxelreuse(trainimg, tilesize; overlap=overlap, nreal=nreal, rng=rng, showprogress=false)
+    tilesize = ntuple(i -> idx[i] ? t : 1, N)
+    overlap = ntuple(i -> 1 / 6, N)
+    voxelreuse(trainimg, tilesize; overlap, nreal, rng, showprogress=false)
   end
   μs = first.(μσ)
   σs = last.(μσ)
@@ -55,13 +57,6 @@ function Makie.plot!(plot::VoxelReusePlot)
   Makie.vlines!(plot, [t₋, t₊], linestyle=:dash, color=color)
   Makie.band!(plot, ts, μs - σs, μs + σs, alpha=0.5, color=color)
   Makie.lines!(plot, ts, μs, color=color)
-end
-
-function Makie.data_limits(plot::VoxelReusePlot)
-  tmin, tmax, idx = tminmax(plot)
-  pmin = Makie.Point3f(0, 0, 0)
-  pmax = Makie.Point3f(tmax, 1, 0)
-  Makie.Rect3f([pmin, pmax])
 end
 
 function tminmax(plot::VoxelReusePlot)

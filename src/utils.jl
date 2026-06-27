@@ -69,18 +69,15 @@ const view_kernel = CUDA.functional() ? view_gpu : view_cpu
 function imagepreproc(trainimg, soft, geoconfig)
   padsize = geoconfig.padsize
 
-  TI = Float64.(trainimg)
-  replace!(TI, NaN => 0.0)
+  TI = prepare(trainimg)
 
   SOFT = map(soft) do (aux, auxTI)
     prepend = ntuple(i -> 0, ndims(TI))
     append = padsize .- min.(padsize, size(aux))
     padding = Pad(:symmetric, prepend, append)
 
-    AUX = Float64.(padarray(aux, padding))
-    AUXTI = Float64.(auxTI)
-    replace!(AUX, NaN => 0.0)
-    replace!(AUXTI, NaN => 0.0)
+    AUX = prepare(padarray(aux, padding))
+    AUXTI = prepare(auxTI)
 
     AUX, AUXTI
   end
@@ -92,6 +89,14 @@ function imagepreproc(trainimg, soft, geoconfig)
   end
 
   TI_kernel, SOFT_kernel
+end
+
+function prepare(img)
+  T = nonmissingtype(eltype(img))
+  F = T <: AbstractFloat ? T : Float64
+  fimg = replace(img, missing => F(NaN))
+  replace!(fimg, F(NaN) => F(0))
+  fimg
 end
 
 function finddisabled(trainimg, geoconfig)
