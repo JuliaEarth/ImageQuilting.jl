@@ -35,8 +35,8 @@ img2 = geostatsimage("StoneWall")
 dim1 = (size(domain(img1))..., 1)
 dim2 = (size(domain(img2))..., 1)
 
-trainimg1 = reshape(img1.facies, dim1)
-trainimg2 = reshape(img2.Z, dim2)
+trainimg1 = reshape(img1.code, dim1)
+trainimg2 = reshape(img2.value, dim2)
 
 voxelreuseplot(trainimg1)
 voxelreuseplot!(trainimg2, color=:salmon)
