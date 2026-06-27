@@ -13,9 +13,9 @@ using Test, Random
     @test reals[1] == TI
 
     # categories are obtained from training image only
-    ncateg = 3
-    TI = rand(0:ncateg, 20, 20, 20)
+    TI = rand(1:3, 20, 20, 20)
     reals = iqsim(TI, (10, 10, 10), size(TI))
+    @test eltype(reals[1]) == Union{Missing, Int}
     @test Set(reals[1]) ⊆ Set(TI)
   end
 
@@ -43,7 +43,7 @@ using Test, Random
   @testset "Hard data" begin
     # hard data is honored everywhere
     TI = ones(20, 20, 20)
-    obs = rand(size(TI)...)
+    obs = zeros(size(TI)...)
     data = Dict(CartesianIndex(i, j, k) => obs[i, j, k] for i in 1:20, j in 1:20, k in 1:20)
     reals = iqsim(TI, (10, 10, 10), size(TI), hard=data)
     @test reals[1] == obs

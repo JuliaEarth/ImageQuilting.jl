@@ -41,6 +41,11 @@ reals, cuts, voxs = iqsim(..., debug=true)
 ```
 
 `cuts[i]` is the boundary cut for `reals[i]` and `voxs[i]` is the associated voxel reuse.
+
+Voxels can be marked as inactive in the training image by setting them to `NaN` or `missing`.
+Inactive voxels are ignored during the simulation and are not allowed to be part of the
+quilted patterns. Inactive voxels can also be specified in the simulation grid by setting
+their values to `NaN` in the `hard` dictionary.
 """
 function iqsim(
   trainimg::AbstractArray{T,N},
@@ -137,7 +142,8 @@ function iqsim(
   showprogress && (progress = Progress(nreal))
 
   # main output is a vector of grids
-  realizations = Vector{Array{Float64,N}}()
+  R = Union{Missing, nonmissingtype(T)}
+  realizations = Vector{Array{R,N}}()
 
   # for each realization we have:
   boundarycuts = Vector{Array{Float64,N}}()
@@ -156,7 +162,7 @@ function iqsim(
 
   for real in 1:nreal
     # allocate memory for current simulation
-    simgrid = zeros(padsize)
+    simgrid = zeros(eltype(TI), padsize)
     debug && (cutgrid = zeros(padsize))
 
     # keep track of pasted tiles
@@ -298,7 +304,7 @@ function iqsim(
     debug && (cutgrid = view(cutgrid, CartesianIndices(simsize)))
 
     # save and continue
-    push!(realizations, simgrid)
+    push!(realizations, imagepostproc(R, simgrid))
     debug && push!(boundarycuts, cutgrid)
 
     # update progress bar
